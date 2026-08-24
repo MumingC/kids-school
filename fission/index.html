@@ -1,0 +1,1762 @@
+<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>核分裂實驗室</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap">
+
+<style>
+/* ============ tokens : light is the base ============ */
+:root{
+  --bg:#E5EAEE;
+  --grid:#D3DBE2;
+  --panel:#F4F7F9;
+  --panel-2:#DDE4EA;
+  --line:#C2CDD6;
+  --ink:#101820;
+  --ink-2:#33424E;
+  --muted:#69777F;
+  --neutron:#0E8E88;
+  --nucleus:#B07C1E;
+  --energy:#C93E22;
+  --ok:#3F7D3A;
+  --shadow:0 1px 0 rgba(16,24,32,.06), 0 12px 28px -20px rgba(16,24,32,.5);
+  --void:#C8D2DA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1116;
+    --grid:#141D24;
+    --panel:#111A21;
+    --panel-2:#18242C;
+    --line:#26333D;
+    --ink:#E2EAEE;
+    --ink-2:#B3C2CB;
+    --muted:#7B8B95;
+    --neutron:#3FD3C6;
+    --nucleus:#E8B44C;
+    --energy:#FF6A45;
+    --ok:#6FCB63;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 16px 34px -22px #000;
+    --void:#0F171D;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1116;
+  --grid:#141D24;
+  --panel:#111A21;
+  --panel-2:#18242C;
+  --line:#26333D;
+  --ink:#E2EAEE;
+  --ink-2:#B3C2CB;
+  --muted:#7B8B95;
+  --neutron:#3FD3C6;
+  --nucleus:#E8B44C;
+  --energy:#FF6A45;
+  --ok:#6FCB63;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 16px 34px -22px #000;
+  --void:#0F171D;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:26px 26px, 26px 26px;
+  color:var(--ink);
+  font-family:"IBM Plex Sans","Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  font-size:16px;
+  line-height:1.75;
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3{font-family:"Newsreader","Noto Serif TC",Georgia,serif;font-weight:600;line-height:1.25;text-wrap:balance;margin:0}
+p{margin:0}
+
+/* ============ shell ============ */
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);gap:0;min-height:100vh;max-width:1240px;margin:0 auto}
+
+/* ---- rail : the chain ---- */
+.rail{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  padding:30px 18px 30px 22px;border-right:1px solid var(--line);
+  background:color-mix(in srgb, var(--panel) 82%, transparent);
+  backdrop-filter:blur(6px);
+}
+.brand{display:flex;flex-direction:column;gap:2px;margin-bottom:26px}
+.brand .zh{font-family:"Noto Serif TC",serif;font-weight:700;font-size:20px;letter-spacing:.02em;line-height:1.3}
+.brand .en{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--neutron)}
+.chain{list-style:none;margin:0;padding:0;position:relative}
+.chain::before{content:"";position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:var(--line)}
+.chain-fill{position:absolute;left:11px;top:14px;width:2px;background:var(--neutron);transition:height .5s cubic-bezier(.4,0,.2,1);height:0}
+.node{position:relative;padding:0 0 4px 0}
+.node button{
+  width:100%;display:grid;grid-template-columns:24px minmax(0,1fr);gap:11px;align-items:start;
+  background:none;border:0;padding:7px 6px 7px 0;text-align:left;cursor:pointer;color:inherit;
+  font:inherit;border-radius:7px;
+}
+.node button:hover:not(:disabled){background:var(--panel-2)}
+.node button:disabled{cursor:not-allowed;opacity:.45}
+.node button:focus-visible{outline:2px solid var(--neutron);outline-offset:1px}
+.dot{
+  width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:var(--bg);
+  display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;
+  color:var(--muted);position:relative;z-index:1;transition:.25s;
+}
+.node[data-state="done"] .dot{border-color:var(--neutron);background:var(--neutron);color:var(--panel)}
+.node[data-state="active"] .dot{border-color:var(--neutron);color:var(--neutron);box-shadow:0 0 0 4px color-mix(in srgb,var(--neutron) 18%,transparent)}
+.node .zh{font-family:"Noto Sans TC",sans-serif;font-size:14px;font-weight:500;line-height:1.5}
+.node[data-state="active"] .zh{color:var(--neutron)}
+.node .en{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;display:block;line-height:1.5}
+.rail-foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.tiny{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.06em;color:var(--muted)}
+.ghost{
+  font:inherit;font-size:12px;background:none;border:1px solid var(--line);color:var(--ink-2);
+  border-radius:999px;padding:5px 12px;cursor:pointer;align-self:flex-start;
+}
+.ghost:hover{border-color:var(--neutron);color:var(--neutron)}
+.ghost:focus-visible{outline:2px solid var(--neutron);outline-offset:2px}
+
+/* ---- stage ---- */
+.stage{padding:34px 40px 90px;min-width:0}
+.station{display:none;animation:rise .45s cubic-bezier(.2,.7,.3,1)}
+.station.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--neutron);display:flex;align-items:center;gap:9px;margin-bottom:12px;
+}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line)}
+h1.title{font-size:clamp(28px,4.4vw,42px);font-family:"Noto Serif TC",serif;font-weight:700;letter-spacing:-.005em}
+.subtitle{font-family:"Newsreader",serif;font-size:19px;font-style:italic;color:var(--muted);margin-top:6px}
+.lede{margin-top:18px;max-width:60ch;font-size:16.5px;color:var(--ink-2)}
+
+.block{margin-top:30px}
+h2.sec{font-size:20px;font-family:"Noto Serif TC",serif;font-weight:700;margin-bottom:12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2.sec small{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:400}
+.prose{max-width:62ch}
+.prose p + p{margin-top:13px}
+.prose ul{max-width:62ch;padding-left:20px;margin:12px 0}
+.prose li{margin:6px 0}
+
+/* term chip: English scientific vocabulary as a specimen label */
+.t{
+  font-family:"IBM Plex Mono",monospace;font-size:.80em;letter-spacing:.03em;
+  color:var(--neutron);background:color-mix(in srgb,var(--neutron) 11%,transparent);
+  border-radius:4px;padding:1px 5px;white-space:nowrap;
+}
+b{font-weight:600;color:var(--ink)}
+.hl-n{color:var(--neutron);font-weight:600}
+.hl-u{color:var(--nucleus);font-weight:600}
+.hl-e{color:var(--energy);font-weight:600}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.panel-hd{
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:11px 16px;border-bottom:1px solid var(--line);background:var(--panel-2);
+}
+.panel-hd .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.panel-bd{padding:16px}
+.canvas-wrap{position:relative;background:var(--void);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+canvas{display:block;width:100%;touch-action:manipulation}
+
+.controls{display:flex;flex-wrap:wrap;gap:16px 22px;margin-top:14px;align-items:flex-end}
+.ctl{flex:1 1 190px;min-width:170px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.ctl label span.v{color:var(--ink);font-size:12.5px;font-variant-numeric:tabular-nums;letter-spacing:0}
+input[type=range]{width:100%;accent-color:var(--neutron);height:22px;cursor:pointer}
+input[type=range]:focus-visible{outline:2px solid var(--neutron);outline-offset:3px;border-radius:4px}
+
+.btn{
+  font:inherit;font-size:13.5px;font-weight:500;border-radius:999px;padding:8px 17px;cursor:pointer;
+  border:1px solid var(--neutron);background:var(--neutron);color:var(--panel);transition:.18s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.alt{background:none;color:var(--neutron)}
+.btn.warn{border-color:var(--energy);background:var(--energy);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+
+.readout{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.stat{
+  flex:1 1 118px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;
+}
+.stat .k{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);display:block}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.35}
+
+.verdict{
+  margin-top:14px;padding:11px 15px;border-radius:9px;border:1px solid var(--line);
+  background:var(--panel-2);font-size:14.5px;line-height:1.65;
+}
+.verdict[data-tone="sub"]{border-color:var(--neutron);background:color-mix(in srgb,var(--neutron) 10%,transparent)}
+.verdict[data-tone="crit"]{border-color:var(--nucleus);background:color-mix(in srgb,var(--nucleus) 13%,transparent)}
+.verdict[data-tone="super"]{border-color:var(--energy);background:color-mix(in srgb,var(--energy) 12%,transparent)}
+
+.note{
+  margin-top:22px;border-left:3px solid var(--nucleus);background:color-mix(in srgb,var(--nucleus) 8%,transparent);
+  padding:12px 16px;border-radius:0 9px 9px 0;font-size:14.5px;max-width:62ch;
+}
+.note .h{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--nucleus);display:block;margin-bottom:4px}
+.note.stop{border-left-color:var(--energy);background:color-mix(in srgb,var(--energy) 8%,transparent)}
+.note.stop .h{color:var(--energy)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-top:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h4{margin:0 0 5px;font-size:15px;font-family:"Noto Sans TC",sans-serif;font-weight:700}
+.card p{font-size:14px;color:var(--ink-2)}
+.card .en{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+
+.table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:6px}
+.table th,.table td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.table th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.table td:first-child{font-weight:600;white-space:nowrap}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* ---- quiz ---- */
+.quiz{margin-top:36px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden;box-shadow:var(--shadow)}
+.quiz-hd{padding:12px 18px;background:var(--panel-2);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.quiz-hd .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.quiz-bd{padding:18px}
+.q + .q{margin-top:22px;padding-top:22px;border-top:1px dashed var(--line)}
+.q .qt{font-weight:600;font-size:15.5px;margin-bottom:10px;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{
+  display:flex;gap:10px;align-items:flex-start;padding:9px 13px;border:1px solid var(--line);border-radius:9px;
+  background:var(--bg);cursor:pointer;font-size:14.5px;line-height:1.55;transition:.16s;text-align:left;font-family:inherit;color:inherit;
+}
+.opt:hover:not(:disabled){border-color:var(--neutron)}
+.opt:focus-visible{outline:2px solid var(--neutron);outline-offset:1px}
+.opt .mk{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);flex:none;margin-top:1px}
+.opt[data-r="right"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,transparent)}
+.opt[data-r="right"] .mk{color:var(--ok)}
+.opt[data-r="wrong"]{border-color:var(--energy);background:color-mix(in srgb,var(--energy) 11%,transparent)}
+.opt[data-r="wrong"] .mk{color:var(--energy)}
+.why{margin-top:9px;font-size:14px;color:var(--ink-2);padding-left:13px;border-left:2px solid var(--neutron);display:none}
+.why.on{display:block}
+.quiz-ft{padding:14px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.quiz-ft .msg{font-size:14px;color:var(--muted)}
+
+/* ---- isotope dot field ---- */
+.dotfield{display:grid;grid-template-columns:repeat(50,1fr);gap:2px;margin-top:4px}
+.dotfield i{aspect-ratio:1;border-radius:50%;background:var(--void);border:1px solid var(--line);transition:background .3s}
+.dotfield i.u5{background:var(--nucleus);border-color:var(--nucleus);box-shadow:0 0 5px color-mix(in srgb,var(--nucleus) 60%,transparent)}
+.dotfield i.alive{background:var(--neutron);border-color:var(--neutron)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--ink-2)}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:-1px}
+
+/* ---- schematics ---- */
+.schem{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:14px}
+.schem svg{width:100%;height:auto;display:block;background:var(--void);border-radius:10px;border:1px solid var(--line)}
+.stepbar{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap}
+.stepbar button{
+  font:inherit;font-family:"IBM Plex Mono",monospace;font-size:11px;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--bg);color:var(--muted);cursor:pointer;
+}
+.stepbar button[aria-pressed="true"]{border-color:var(--neutron);color:var(--neutron);background:color-mix(in srgb,var(--neutron) 12%,transparent)}
+.stepbar button:focus-visible{outline:2px solid var(--neutron);outline-offset:2px}
+.stepcap{margin-top:10px;font-size:14px;color:var(--ink-2);min-height:3.4em}
+
+/* ---- timeline ---- */
+.tl{list-style:none;margin:16px 0 0;padding:0;position:relative}
+.tl::before{content:"";position:absolute;left:60px;top:6px;bottom:6px;width:1px;background:var(--line)}
+.tl li{position:relative;padding:0 0 4px 82px;min-height:44px}
+.tl .yr{
+  position:absolute;left:0;top:9px;width:48px;text-align:right;
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;
+}
+.tl .pip{position:absolute;left:56px;top:15px;width:9px;height:9px;border-radius:50%;background:var(--line);border:2px solid var(--bg)}
+.tl li[data-w="1"] .pip{background:var(--energy)}
+.tl li[data-w="2"] .pip{background:var(--nucleus)}
+.tl li[data-w="3"] .pip{background:var(--neutron)}
+.tl summary{cursor:pointer;font-weight:600;font-size:15px;padding:7px 0;list-style:none;line-height:1.55}
+.tl summary::-webkit-details-marker{display:none}
+.tl summary::after{content:"＋";font-family:"IBM Plex Mono",monospace;color:var(--muted);margin-left:8px;font-size:12px}
+.tl details[open] summary::after{content:"−"}
+.tl summary:focus-visible{outline:2px solid var(--neutron);outline-offset:2px;border-radius:4px}
+.tl .body{font-size:14.5px;color:var(--ink-2);padding:0 0 12px;max-width:58ch}
+
+/* ---- finale ---- */
+.badge{
+  margin-top:30px;border:1px solid var(--neutron);border-radius:14px;padding:26px 24px;text-align:center;
+  background:color-mix(in srgb,var(--neutron) 9%,transparent);display:none;
+}
+.badge.on{display:block;animation:rise .5s}
+.badge .sig{font-family:"Newsreader",serif;font-size:13px;font-style:italic;color:var(--muted);margin-top:12px}
+
+.footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);max-width:70ch}
+.footer a{color:var(--neutron)}
+
+/* ---- responsive ---- */
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .rail{
+    position:sticky;top:0;height:auto;border-right:0;border-bottom:1px solid var(--line);
+    padding:10px 12px 8px;z-index:20;
+    display:grid;grid-template-areas:"brand foot" "chain chain";grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;row-gap:8px;column-gap:10px;
+  }
+  .brand{grid-area:brand;flex-direction:row;align-items:baseline;gap:8px;margin:0;min-width:0}
+  .brand .zh{font-size:16px}
+  .brand .en{display:none}
+  .chain{grid-area:chain;display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .chain::before,.chain-fill{display:none}
+  .node{flex:none;padding:0}
+  .node button{grid-template-columns:auto auto;gap:6px;align-items:center;width:auto;padding:5px 10px;border:1px solid var(--line);border-radius:999px}
+  .node .en{display:none}
+  .node .zh{font-size:12.5px;white-space:nowrap}
+  .node .dot{width:19px;height:19px;font-size:10px;border-width:1.5px}
+  .node[data-state="active"] button{border-color:var(--neutron);background:color-mix(in srgb,var(--neutron) 10%,transparent)}
+  .rail-foot{grid-area:foot;flex-direction:row;align-items:center;gap:9px;margin:0;padding:0;border-top:0}
+  .rail-foot .tiny{white-space:nowrap;font-size:10px}
+  .ghost{padding:4px 10px;font-size:11.5px}
+  .stage{padding:24px 18px 70px}
+  .dotfield{grid-template-columns:repeat(40,1fr);gap:1.5px}
+  .tl::before{left:38px}
+  .tl li{padding-left:56px}
+  .tl .yr{width:30px;font-size:11.5px}
+  .tl .pip{left:34px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+
+</head><body><div class="shell">
+  <!-- ============ RAIL ============ -->
+  <aside class="rail">
+    <div class="brand">
+      <span class="zh">核分裂實驗室</span>
+      <span class="en">Fission Lab · 8 Stations</span>
+    </div>
+    <ul class="chain" id="chain">
+      <div class="chain-fill" id="chainFill"></div>
+    </ul>
+    <div class="rail-foot">
+      <span class="tiny" id="progText">進度 0 / 8</span>
+      <button class="ghost" id="resetBtn">重新開始 Reset</button>
+    </div>
+  </aside>
+
+  <!-- ============ STAGE ============ -->
+  <main class="stage" id="stage">
+
+  <!-- ─────────── 1 ─────────── -->
+  <section class="station on" id="st1">
+    <div class="eyebrow">Station 01 · The Atom</div>
+    <h1 class="title">原子：世界的積木</h1>
+    <p class="subtitle">Everything is built from these.</p>
+    <p class="lede">你的手、這張桌子、外面的空氣，全部都是由<b>原子</b>組成的。原子小到什麼程度呢？一根頭髮的寬度，大約可以排上一百萬個原子。</p>
+
+    <div class="block">
+      <h2 class="sec">原子裡面有什麼？ <small>Inside an atom</small></h2>
+      <div class="prose">
+        <p>原子中間有一顆極小的<b class="hl-u">原子核</b><span class="t">nucleus</span>，原子核裡面裝著兩種東西：</p>
+        <ul>
+          <li><b>質子</b><span class="t">proton</span>　帶正電。<b>質子的數量決定它是哪一種元素</b>——6 個質子就是碳，92 個質子就是鈾。</li>
+          <li><b>中子</b><span class="t">neutron</span>　不帶電。它像原子核裡的「膠水」，幫忙把互相排斥的質子黏在一起。</li>
+        </ul>
+        <p>原子核外面，還有<b>電子</b><span class="t">electron</span>繞著跑，帶負電。電子負責化學反應（燃燒、生鏽、消化食物），但接下來我們要講的故事，全部發生在<b>原子核裡面</b>。</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 01 — 組裝一顆原子</span>
+          <span class="lbl" id="atomName">氫 Hydrogen</span>
+        </div>
+        <div class="panel-bd">
+          <div class="canvas-wrap"><canvas id="atomCv" height="300"></canvas></div>
+          <div class="controls">
+            <div class="ctl">
+              <label for="pSl">質子 Protons <span class="v" id="pVal">1</span></label>
+              <input type="range" id="pSl" min="1" max="92" value="1">
+            </div>
+            <div class="ctl">
+              <label for="nSl">中子 Neutrons <span class="v" id="nVal">0</span></label>
+              <input type="range" id="nSl" min="0" max="150" value="0">
+            </div>
+          </div>
+          <div class="btnrow">
+            <button class="btn alt" data-atom="1,0">氫 H</button>
+            <button class="btn alt" data-atom="2,2">氦 He</button>
+            <button class="btn alt" data-atom="6,6">碳 C</button>
+            <button class="btn alt" data-atom="26,30">鐵 Fe</button>
+            <button class="btn alt" data-atom="92,143">鈾-235 U</button>
+          </div>
+          <div class="verdict" id="atomVerdict">拖動滑桿，看看原子核怎麼變。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <span class="h">Scale · 尺度感</span>
+      如果把整顆原子放大成一座<b>棒球場</b>，那原子核大概只有場中央的一顆<b>彈珠</b>那麼大。可是這顆彈珠，卻裝了整座球場<b>99.9%</b> 以上的重量——而且藏著我們接下來要釋放的能量。
+    </div>
+
+    <div class="quiz" data-quiz="1"></div>
+  </section>
+
+  <!-- ─────────── 2 ─────────── -->
+  <section class="station" id="st2">
+    <div class="eyebrow">Station 02 · Isotopes</div>
+    <h1 class="title">同位素：同一家人，體重不同</h1>
+    <p class="subtitle">Same element, different weight.</p>
+    <p class="lede">質子數決定元素，但<b>中子數可以不一樣</b>。質子數相同、中子數不同的原子，叫做<b>同位素</b><span class="t">isotope</span>。它們化學性質幾乎一樣，可是在原子核的世界裡，差別非常大。</p>
+
+    <div class="block">
+      <h2 class="sec">先看一個你身上就有的例子：碳三兄弟 <small>The carbon trio</small></h2>
+      <div class="prose">
+        <p>碳都有 <b>6 個質子</b>。名字後面的數字是「質子＋中子」的總數，叫做<b>質量數</b><span class="t">mass number</span>。</p>
+      </div>
+      <div class="scroll-x">
+      <table class="table">
+        <tr><th>同位素</th><th>組成</th><th>在自然界的比例</th><th>穩定嗎？</th></tr>
+        <tr><td>碳-12</td><td>6 質子 + 6 中子</td><td>約 98.9%</td><td><b class="hl-n">穩定</b>，永遠不會變</td></tr>
+        <tr><td>碳-13</td><td>6 質子 + 7 中子</td><td>約 1.1%</td><td><b class="hl-n">穩定</b></td></tr>
+        <tr><td class="hl-u">碳-14</td><td>6 質子 + 8 中子</td><td>極微量</td><td><b class="hl-e">不穩定</b>，會自己衰變</td></tr>
+      </table>
+      </div>
+      <div class="prose" style="margin-top:12px">
+        <p>你現在體內就同時有這三種碳，而且它們的化學性質幾乎一模一樣——你的身體完全分不出來。差別只在<b>原子核穩不穩</b>。碳-14 會自己垮掉，下一站就是在講這件事。</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">再看鈾的兩兄弟 <small>U-235 vs U-238</small></h2>
+      <div class="prose">
+        <p>鈾<span class="t">uranium</span>都有 <b>92 個質子</b>。跟碳不一樣的是，<b>鈾沒有任何一種穩定的同位素</b>——它們全部都有放射性，只是有的垮得快、有的垮得慢。</p>
+      </div>
+      <div class="scroll-x">
+      <table class="table">
+        <tr><th>同位素</th><th>組成</th><th>在天然鈾中的比例</th><th>半衰期（垮掉一半要多久）</th></tr>
+        <tr><td class="hl-u">鈾-235</td><td>92 質子 + 143 中子</td><td><b>只有 0.7%</b></td><td>約 <b>7 億</b>年</td></tr>
+        <tr><td>鈾-238</td><td>92 質子 + 146 中子</td><td>約 99.3%</td><td>約 <b>45 億</b>年</td></tr>
+      </table>
+      </div>
+      <div class="prose" style="margin-top:12px">
+        <p>看得出來嗎？U-235 垮得比 U-238 快<b>六倍</b>。地球剛形成的時候，天然鈾裡的 U-235 大約有 <b>17%</b>；45 億年過去，它衰變掉的比較多，才變成今天的 0.7%。</p>
+        <p>至於為什麼全世界都盯著這少少的 0.7%——那要等到<b>第 4 站</b>才會揭曉。</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 02 — 1000 顆鈾原子裡，有幾顆能用？</span>
+          <span class="lbl" id="enrLbl">U-235：7 顆 / 1000</span>
+        </div>
+        <div class="panel-bd">
+          <div class="dotfield" id="dotfield" aria-hidden="true"></div>
+          <div class="legend">
+            <span><i style="background:var(--nucleus)"></i>鈾-235（稀有的那一種）</span>
+            <span><i style="background:var(--void);border:1px solid var(--line)"></i>鈾-238（絕大多數）</span>
+          </div>
+          <div class="controls">
+            <div class="ctl" style="flex:1 1 100%">
+              <label for="enrSl">濃縮度 Enrichment（U-235 的百分比） <span class="v" id="enrVal">0.7 %</span></label>
+              <input type="range" id="enrSl" min="7" max="900" value="7">
+            </div>
+          </div>
+          <div class="verdict" id="enrVerdict"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="prose">
+        <p>把 U-235 的比例提高，這件事叫做<b>濃縮</b><span class="t">enrichment</span>。這是全世界最困難、最耗電、也被監管得最嚴格的工業程序之一——因為 U-235 和 U-238 化學上幾乎一模一樣，只能靠<b>一點點的重量差</b>去分離，得重複幾千次。</p>
+      </div>
+      <div class="cards">
+        <div class="card"><span class="en">Natural</span><h4>天然鈾 0.7%</h4><p>從礦石挖出來的樣子。放著不會發生連鎖反應。</p></div>
+        <div class="card"><span class="en">Reactor grade</span><h4>核電廠 3–5%</h4><p>發電用的燃料。濃度太低，物理上不可能像核彈那樣爆炸。</p></div>
+        <div class="card"><span class="en">Weapons grade</span><h4>武器級 90%＋</h4><p>只有極少數國家有能力做到，也正是核不擴散條約盯得最緊的一條線。</p></div>
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="2"></div>
+  </section>
+
+  <!-- ─────────── 3 ─────────── -->
+  <section class="station" id="st3">
+    <div class="eyebrow">Station 03 · Decay &amp; Half-life</div>
+    <h1 class="title">不穩定的原子核，會自己垮掉</h1>
+    <p class="subtitle">Nobody pushed it. It just fell apart.</p>
+    <p class="lede">上一站你看到，有些同位素是<b>不穩定</b>的。不穩定的原子核不會永遠等下去——它會在某一個沒人能預測的瞬間，自己放出東西、變成另一種原子核。這件事叫做<b>放射性衰變</b><span class="t">radioactive decay</span>，而且<b>不需要任何人去撞它</b>。</p>
+
+    <div class="block">
+      <h2 class="sec">會放出三種東西 <small>Alpha, Beta, Gamma</small></h2>
+      <div class="cards">
+        <div class="card">
+          <span class="en">α · Alpha decay</span>
+          <h4>α 衰變：吐出一小塊</h4>
+          <p>噴出 2 個質子 ＋ 2 個中子（其實就是一顆氦原子核）。質子少了 2 個，<b>元素也跟著變了</b>。<br>鈾-238 → 釷-234 走的就是這條路。</p>
+        </div>
+        <div class="card">
+          <span class="en">β · Beta decay</span>
+          <h4>β 衰變：中子變成質子</h4>
+          <p>核裡一顆中子變身成質子，同時射出一顆高速電子。質子多了 1 個，<b>元素往前挪一格</b>。<br>碳-14 → 氮-14 走的是這條。</p>
+        </div>
+        <div class="card">
+          <span class="en">γ · Gamma ray</span>
+          <h4>γ 射線：純粹的能量</h4>
+          <p>不是粒子，是能量極高的光。原子核從「激動」回到「平靜」時放出來。元素不會改變，但<b>穿透力最強</b>。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 03 — 誰擋得住誰？</span>
+          <span class="lbl">Penetrating power</span>
+        </div>
+        <div class="panel-bd">
+          <div class="canvas-wrap"><canvas id="shieldCv" height="230"></canvas></div>
+          <div class="verdict" data-tone="crit">α 一張紙就擋下來、β 要一片鋁板、γ 要厚厚的鉛或水泥。這就是為什麼核電廠的圍阻體和醫院的 X 光室，牆都做得那麼厚。<br><b>但這裡有個陷阱：</b>α 穿透力最弱，可是萬一放射性物質被<b>吃進或吸進身體裡</b>，α 反而是傷害最大的一種——因為它所有的能量都留在身體內部，哪裡也去不了。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">半衰期：算不準一顆，卻算得準一群 <small>Half-life</small></h2>
+      <div class="prose">
+        <p>這裡有一件很奇妙的事：<b>你沒辦法預測某一顆原子什麼時候會衰變。</b>完全隨機，沒有徵兆，也沒有任何方法讓它快一點或慢一點——加熱、加壓、用化學方法，通通沒用。</p>
+        <p>可是只要原子夠多，整群的行為就規律到可以當時鐘用。<b>半衰期</b><span class="t">half-life</span>的意思是：<b>一半的原子衰變掉所需要的時間</b>。再等一個半衰期，剩下的又少一半——100% → 50% → 25% → 12.5%⋯⋯永遠除以二，但永遠除不完。</p>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-hd">
+          <span class="lbl">互動 04 — 半衰期模擬器</span>
+          <span class="lbl" id="hlIso">碳-14 · 半衰期 5,730 年</span>
+        </div>
+        <div class="panel-bd">
+          <div class="dotfield" id="hlField" aria-hidden="true"></div>
+          <div class="legend">
+            <span><i style="background:var(--neutron)"></i>還沒衰變</span>
+            <span><i style="background:var(--void);border:1px solid var(--line)"></i>已經衰變成別的元素</span>
+          </div>
+          <div class="controls">
+            <div class="ctl" style="flex:1 1 100%">
+              <label for="hlSl">經過幾個半衰期 <span class="v" id="hlN">0.0</span></label>
+              <input type="range" id="hlSl" min="0" max="100" value="0">
+            </div>
+          </div>
+          <div class="readout">
+            <div class="stat"><span class="k">還剩下</span><span class="v" id="hlPct">100 %</span></div>
+            <div class="stat"><span class="k">剩幾顆 / 1000</span><span class="v" id="hlCnt">1000</span></div>
+            <div class="stat"><span class="k">經過的時間</span><span class="v" id="hlTime">0</span></div>
+          </div>
+          <div class="canvas-wrap" style="margin-top:14px"><canvas id="hlCv" height="180"></canvas></div>
+          <p class="tiny" style="margin-top:10px">換一種同位素看看：半衰期從幾小時到幾十億年，中間差了十幾個零。</p>
+          <div class="btnrow" id="hlPicks">
+            <button class="btn alt" data-hl="0.25|鎝-99m|6 小時">鎝-99m</button>
+            <button class="btn alt" data-hl="8.02|碘-131|8 天">碘-131</button>
+            <button class="btn alt" data-hl="2092882|碳-14|5,730 年">碳-14</button>
+            <button class="btn alt" data-hl="8806178|鈽-239|24,110 年">鈽-239</button>
+            <button class="btn alt" data-hl="257136000000|鈾-235|7.04 億年">鈾-235</button>
+            <button class="btn alt" data-hl="1631937000000|鈾-238|44.7 億年">鈾-238</button>
+          </div>
+          <div class="verdict" id="hlVerdict"></div>
+        </div>
+      </div>
+      <div class="note">
+        <span class="h">Carbon dating · 碳-14 定年</span>
+        活著的生物體內，碳-14 會一直被空氣補充，比例維持固定。<b>一旦死掉，補充就停了</b>，剩下的碳-14 開始以 5,730 年的半衰期慢慢減少。所以測出一塊木頭、一根骨頭裡碳-14 還剩百分之幾，就能反推它死了多久——上面那個模擬器做的正是這件事。這是考古學判斷年代最重要的工具之一。
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">還有一種罕見的衰變：自發分裂 <small>Spontaneous fission</small></h2>
+      <div class="prose">
+        <p>絕大多數的衰變是「掉一小塊」（α）或「換個身分」（β）。但極少數很重的原子核，會選一種更劇烈的方式：<b>自己裂成兩半</b>，同時甩出幾顆中子。這叫做<b>自發分裂</b><span class="t">spontaneous fission</span>。</p>
+        <p>它有多罕見？鈾-238 大約每衰變 <b>200 萬次</b>，才有 <b>1 次</b>是自發分裂，其餘全部都是 α 衰變。</p>
+        <p>可是這 1 次非常關鍵。它代表：<b class="hl-n">任何一塊鈾裡面，隨時都有零星的中子在飛。</b>這些中子不需要有人發射，是燃料自己生出來的。它們就是下一站故事的第一顆種子——也是為什麼核彈設計者最害怕「太早被點燃」這件事。</p>
+      </div>
+      <div class="note">
+        <span class="h">True story · 這真的發生過</span>
+        20 億年前，在今天非洲加彭的<b>奧克洛</b><span class="t">Oklo</span>，地底下的鈾礦因為當時天然鈾的 U-235 比例還很高（約 3%），加上地下水剛好扮演了緩速劑的角色，竟然<b>自己形成了核反應爐</b>，斷斷續續運轉了幾十萬年。人類一直到 1972 年才發現它——比費米在芝加哥做出第一座人造反應爐，早了 20 億年。
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="3"></div>
+  </section>
+
+  <!-- ─────────── 4 ─────────── -->
+  <section class="station" id="st4">
+    <div class="eyebrow">Station 04 · Nuclear Fission</div>
+    <h1 class="title">核分裂：一顆中子的故事</h1>
+    <p class="subtitle">One neutron, and the nucleus breaks in two.</p>
+    <p class="lede">上一站的自發分裂，是原子核<b>自己</b>裂開的，非常罕見。這一站要講的是另一種：<b>被一顆中子撞開</b>。這種叫做<b>誘發分裂</b><span class="t">induced fission</span>，而它可以被我們大量地、刻意地製造出來。</p>
+    <p class="lede">1938 年冬天，德國化學家哈恩用中子去撞鈾，結果在殘渣裡找到了<b>鋇</b>——一個只有鈾一半重的元素。他完全無法解釋。直到物理學家<b>莉澤・邁特納</b>看懂了：原子核被<b>撞成了兩半</b>。</p>
+
+    <div class="block">
+      <h2 class="sec">為什麼偏偏是 U-235？ <small>Fissile vs fertile</small></h2>
+      <div class="prose">
+        <p>第 2 站留下的那個問題，答案在這裡。中子撞進去之後，鈾的兩兄弟反應完全不同：</p>
+      </div>
+      <div class="cards">
+        <div class="card" style="border-color:var(--nucleus)">
+          <span class="en">U-235 · fissile</span>
+          <h4>抓到中子 → 裂開</h4>
+          <p>U-235 的原子核本來就處在快撐不住的邊緣。連一顆<b>慢吞吞的中子</b>飛進來，帶進去的那一點點能量就足以讓它垮掉。這種「一撞就裂」的性質，英文叫 <b>fissile</b>。</p>
+        </div>
+        <div class="card">
+          <span class="en">U-238 · not fissile</span>
+          <h4>抓到中子 → 吞下去</h4>
+          <p>U-238 的核比較安穩。慢中子撞進去多半只是被吞掉，變成 U-239，然後走一般的衰變路線——<b>不會裂開</b>。要打裂它得用能量很高的快中子，機率也很低。</p>
+        </div>
+      </div>
+      <div class="prose" style="margin-top:12px">
+        <p>所以全世界搶的，就是天然鈾裡那 <b>0.7%</b> 的 U-235。這也是「濃縮」為什麼那麼重要、又被管制得那麼嚴的原因。</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">分裂的四個步驟 <small>How it happens</small></h2>
+      <div class="cards">
+        <div class="card"><span class="en">Step 1</span><h4>中子撞進來</h4><p>一顆<b class="hl-n">慢速中子</b>被 U-235 的原子核抓住。</p></div>
+        <div class="card"><span class="en">Step 2</span><h4>變得搖搖欲墜</h4><p>它變成 U-236，像一滴被戳到的水珠一樣劇烈扭動。</p></div>
+        <div class="card"><span class="en">Step 3</span><h4>裂成兩塊</h4><p>裂成兩個較小的原子核（例如鋇-141 和 氪-92），叫做<b>分裂碎片</b>。</p></div>
+        <div class="card"><span class="en">Step 4</span><h4>放出 2–3 顆中子</h4><p>同時噴出<b class="hl-n">新的中子</b>和大量<b class="hl-e">能量</b>。這一步是後面所有故事的關鍵。</p></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 03 — 發射一顆中子</span>
+          <span class="lbl" id="fisCount">分裂次數 0</span>
+        </div>
+        <div class="panel-bd">
+          <div class="canvas-wrap"><canvas id="fisCv" height="290"></canvas></div>
+          <div class="btnrow">
+            <button class="btn" id="fireBtn">發射中子 Fire</button>
+            <button class="btn alt" id="fisReset">重設</button>
+          </div>
+          <div class="verdict" id="fisVerdict">按下「發射中子」，看看鈾-235 的原子核發生什麼事。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">能量從哪裡來？ <small>E = mc²</small></h2>
+      <div class="prose">
+        <p>把分裂後所有碎片的重量加起來，會比原本的鈾原子核<b>輕一點點</b>——大約少了 0.1%。這一點點重量並沒有消失，它<b>變成了能量</b>。</p>
+        <p>愛因斯坦的公式告訴我們能換到多少：<b>E = mc²</b>。這裡的 c 是光速，每秒 30 萬公里。c 已經很大了，c² 更是大得離譜。所以<b class="hl-e">極小的質量，會變成極大的能量</b>。</p>
+      </div>
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-hd"><span class="lbl">互動 04 — 質量換算能量</span></div>
+        <div class="panel-bd">
+          <p style="font-size:14px;color:var(--ink-2);margin-bottom:12px;max-width:60ch">大約每分裂掉 <b>1 公斤</b>的鈾-235，就會有 <b>1 公克</b>的質量憑空消失、變成能量。拖拖看：</p>
+          <div class="ctl" style="flex:1 1 100%">
+            <label for="mcSl">消失的質量 <span class="v" id="mcVal">1 公克</span></label>
+            <input type="range" id="mcSl" min="1" max="1000" value="1">
+          </div>
+          <div class="readout">
+            <div class="stat"><span class="k">釋放能量</span><span class="v" id="mcJ">—</span></div>
+            <div class="stat"><span class="k">相當於煤炭</span><span class="v" id="mcCoal">—</span></div>
+            <div class="stat"><span class="k">可供一個家庭用電</span><span class="v" id="mcHome">—</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <span class="h">Number sense · 數字感</span>
+        一顆 U-235 分裂放出的能量，大約是燒掉一個煤分子的<b>一億倍</b>。這就是為什麼一小塊核燃料，可以讓一座城市亮好幾個月。
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="4"></div>
+  </section>
+
+  <!-- ─────────── 5 ─────────── -->
+  <section class="station" id="st5">
+    <div class="eyebrow">Station 05 · Chain Reaction</div>
+    <h1 class="title">連鎖反應與臨界質量</h1>
+    <p class="subtitle">Two neutrons out. Then four. Then eight.</p>
+    <p class="lede">一次分裂會放出 2–3 顆中子。如果這些中子又各自撞到別的 U-235⋯⋯ 分裂的次數就會 1 → 2 → 4 → 8 → 16 地翻倍下去。這叫做<b>連鎖反應</b><span class="t">chain reaction</span>。</p>
+    <p class="lede">下面的模擬器一次射入 <b>3 顆中子</b>——正好就是第 3 站講的<b>自發分裂</b>會甩出來的數量。換句話說，這些種子中子不必等人來點火，燃料自己就會生。真正決定結果的，是它們接下來遇得到什麼。</p>
+
+    <div class="block">
+      <h2 class="sec">關鍵數字 k <small>Multiplication factor</small></h2>
+      <div class="prose">
+        <p><b>k</b> 的意思是：這一代的每次分裂，平均會引發<b>下一代幾次分裂</b>。</p>
+      </div>
+      <div class="cards">
+        <div class="card" style="border-color:var(--neutron)"><span class="en">k &lt; 1 · Subcritical</span><h4>次臨界：會熄滅</h4><p>中子在撞到東西之前就跑掉了。反應自己慢慢停下來。</p></div>
+        <div class="card" style="border-color:var(--nucleus)"><span class="en">k = 1 · Critical</span><h4>臨界：剛剛好</h4><p>不多也不少，穩定地持續下去。<b>核電廠就跑在這裡。</b></p></div>
+        <div class="card" style="border-color:var(--energy)"><span class="en">k &gt; 1 · Supercritical</span><h4>超臨界：暴衝</h4><p>每一代都變多，功率飛快上升。核彈追求的就是這個。</p></div>
+      </div>
+      <div class="prose" style="margin-top:14px">
+        <p>那要怎麼讓 k 變大？兩個關鍵：<b>燃料濃度夠高</b>（中子容易撞到 U-235），和<b>燃料塊夠大</b>（中子還沒跑出去就先撞到東西）。剛好讓 k = 1 的燃料量，就叫做<b>臨界質量</b><span class="t">critical mass</span>。</p>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 05 — 連鎖反應模擬器</span>
+          <span class="lbl" id="chainStatus">待命 Ready</span>
+        </div>
+        <div class="panel-bd">
+          <div class="canvas-wrap"><canvas id="chainCv" height="330"></canvas></div>
+          <div class="controls">
+            <div class="ctl">
+              <label for="cEnr">濃縮度 Enrichment <span class="v" id="cEnrV">20 %</span></label>
+              <input type="range" id="cEnr" min="1" max="95" value="20">
+            </div>
+            <div class="ctl">
+              <label for="cSize">燃料球大小 Fuel size <span class="v" id="cSizeV">中</span></label>
+              <input type="range" id="cSize" min="40" max="150" value="90">
+            </div>
+          </div>
+          <div class="readout">
+            <div class="stat"><span class="k">分裂次數</span><span class="v" id="cFis">0</span></div>
+            <div class="stat"><span class="k">世代 Gen</span><span class="v" id="cGen">0</span></div>
+            <div class="stat"><span class="k">飛行中子</span><span class="v" id="cNeu">0</span></div>
+            <div class="stat"><span class="k">逃走的中子</span><span class="v" id="cEsc">0</span></div>
+          </div>
+          <div class="btnrow">
+            <button class="btn" id="cFire">射入 3 顆種子中子</button>
+            <button class="btn alt" id="cReset">重設燃料</button>
+          </div>
+          <div class="verdict" id="cVerdict">先調整兩個滑桿，再射入中子。試試看：什麼時候會熄滅？什麼時候會失控？</div>
+        </div>
+      </div>
+      <div class="note">
+        <span class="h">Try this · 動手試</span>
+        把濃縮度調到 <b>3%</b>（核電廠燃料的濃度），不管燃料球調到多大，看看連鎖反應能不能撐下去。這就是為什麼<b>核電廠的燃料不可能變成原子彈</b>。
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="5"></div>
+  </section>
+
+  <!-- ─────────── 6 ─────────── -->
+  <section class="station" id="st6">
+    <div class="eyebrow">Station 06 · Reactor vs Bomb</div>
+    <h1 class="title">同一個原理，兩種完全不同的機器</h1>
+    <p class="subtitle">One is a kettle. The other is a catastrophe.</p>
+    <p class="lede">核電廠和核彈都靠核分裂。差別不在原理，而在<b>要不要控制它</b>——以及控制得多好。</p>
+
+    <div class="block">
+      <div class="scroll-x">
+      <table class="table">
+        <tr><th></th><th>核反應爐 Reactor</th><th>核武器 Weapon</th></tr>
+        <tr><td>燃料濃縮度</td><td>3–5% U-235</td><td>非常高</td></tr>
+        <tr><td>目標 k 值</td><td><b>剛好 1.000</b>，穩定</td><td>遠大於 1</td></tr>
+        <tr><td>控制方式</td><td>控制棒 <span class="t">control rods</span> 隨時吸收多餘中子</td><td>沒有控制，也不想控制</td></tr>
+        <tr><td>中子速度</td><td>用<b>緩速劑</b><span class="t">moderator</span>（水或石墨）把中子減慢，讓它更容易被 U-235 抓住</td><td>用快中子，來不及減速</td></tr>
+        <tr><td>反應時間</td><td>幾年，慢慢燒</td><td>不到百萬分之一秒</td></tr>
+        <tr><td>產物</td><td>熱 → 燒水 → 蒸汽 → 推動渦輪 → <b>電</b></td><td>爆炸、熱輻射、衝擊波、放射性落塵</td></tr>
+      </table>
+      </div>
+      <div class="note">
+        <span class="h">Common myth · 常見誤解</span>
+        「核電廠會不會像原子彈一樣爆炸？」<b>不會。</b>燃料濃縮度只有 3–5%，物理上根本達不到核爆需要的條件。車諾比和福島的爆炸是<b>蒸汽和氫氣</b>造成的化學爆炸，很嚴重、也造成了嚴重的輻射污染，但那不是核爆。
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="panel">
+        <div class="panel-hd">
+          <span class="lbl">互動 06 — 你來當反應爐操作員</span>
+          <span class="lbl" id="rxState">停機中 Shutdown</span>
+        </div>
+        <div class="panel-bd">
+          <div class="canvas-wrap"><canvas id="rxCv" height="260"></canvas></div>
+          <div class="controls">
+            <div class="ctl" style="flex:1 1 100%">
+              <label for="rodSl">控制棒插入深度 Control rods <span class="v" id="rodV">100 %</span></label>
+              <input type="range" id="rodSl" min="0" max="100" value="100">
+            </div>
+          </div>
+          <div class="readout">
+            <div class="stat"><span class="k">k 值</span><span class="v" id="rxK">0.35</span></div>
+            <div class="stat"><span class="k">功率</span><span class="v" id="rxP">0 %</span></div>
+            <div class="stat"><span class="k">爐心溫度</span><span class="v" id="rxT">20 °C</span></div>
+          </div>
+          <div class="btnrow">
+            <button class="btn warn" id="scram">緊急停機 SCRAM</button>
+            <button class="btn alt" id="rxAuto">自動穩定在 100%</button>
+          </div>
+          <div class="verdict" id="rxVerdict">把控制棒慢慢往上拉（數值變小），讓功率停在 100% 而不要超過。這比你想的難。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="6"></div>
+  </section>
+
+  <!-- ─────────── 7 ─────────── -->
+  <section class="station" id="st7">
+    <div class="eyebrow">Station 07 · Two Designs</div>
+    <h1 class="title">核彈要解決的那一個難題</h1>
+    <p class="subtitle">Keep it safe until the moment it must not be.</p>
+    <p class="lede">要做出核彈，最難的不是「讓它爆炸」，而是這個矛盾：燃料在<b>組裝、運送、等待的時候必須是次臨界</b>（k &lt; 1，安全），卻要在<b>某一瞬間變成超臨界</b>（k ≫ 1）。而且要夠快——慢了的話，反應剛開始放出的能量就會把燃料自己炸散，反而變成一場「啞彈」。</p>
+
+    <div class="block">
+      <h2 class="sec">兩種基本作法 <small>Textbook schematics</small></h2>
+      <div class="schem">
+        <div>
+          <svg viewBox="0 0 300 170" role="img" aria-label="槍式設計示意圖">
+            <rect x="18" y="62" width="264" height="46" rx="8" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+            <rect id="gunPlug" x="46" y="72" width="34" height="26" rx="4" fill="var(--nucleus)" opacity=".9" style="transition:transform .8s cubic-bezier(.5,0,.4,1)"/>
+            <rect x="196" y="70" width="44" height="30" rx="4" fill="var(--nucleus)" opacity=".55"/>
+            <circle id="gunSpark" cx="218" cy="85" r="0" fill="var(--energy)" style="transition:r .5s"/>
+            <text x="150" y="35" text-anchor="middle" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace" font-size="11">GUN-TYPE 槍式</text>
+            <text id="gunLA" x="63" y="130" text-anchor="middle" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="9">次臨界 A</text>
+            <text id="gunLB" x="218" y="130" text-anchor="middle" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="9">次臨界 B</text>
+            <text id="gunLC" x="150" y="152" text-anchor="middle" fill="var(--energy)" font-family="IBM Plex Mono, monospace" font-size="10" opacity="0">合併 → 超臨界</text>
+          </svg>
+          <div class="stepbar" data-steps="gun">
+            <button aria-pressed="true" data-s="0">1 分開</button>
+            <button aria-pressed="false" data-s="1">2 推動</button>
+            <button aria-pressed="false" data-s="2">3 合併</button>
+            <button aria-pressed="false" data-s="3">4 連鎖反應</button>
+          </div>
+          <p class="stepcap" id="gunCap">兩塊燃料各自都太小、太分散，中子還沒撞到東西就跑掉了——所以都是安全的次臨界狀態。</p>
+        </div>
+        <div>
+          <svg viewBox="0 0 300 170" role="img" aria-label="內爆式設計示意圖">
+            <g id="impRing">
+              <circle cx="150" cy="85" r="58" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="5 5"/>
+            </g>
+            <circle id="impCore" cx="150" cy="85" r="30" fill="var(--nucleus)" opacity=".55" style="transition:r .8s cubic-bezier(.5,0,.4,1), opacity .8s"/>
+            <g id="impArrows" opacity="0" style="transition:opacity .4s">
+              <path d="M150 20 L150 40 M150 150 L150 130 M85 85 L105 85 M215 85 L195 85 M105 40 L119 54 M195 130 L181 116 M195 40 L181 54 M105 130 L119 116"
+                    stroke="var(--energy)" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <text x="150" y="163" text-anchor="middle" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace" font-size="11">IMPLOSION 內爆式</text>
+          </svg>
+          <div class="stepbar" data-steps="imp">
+            <button aria-pressed="true" data-s="0">1 常態</button>
+            <button aria-pressed="false" data-s="1">2 同時擠壓</button>
+            <button aria-pressed="false" data-s="2">3 密度變高</button>
+            <button aria-pressed="false" data-s="3">4 連鎖反應</button>
+          </div>
+          <p class="stepcap" id="impCap">一顆燃料球，密度正常。此時它的體積夠大、密度夠低，中子容易從表面逃走，所以是次臨界。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="prose">
+        <p><b>槍式</b>比較單純，但只能用鈾-235。1945 年落在廣島的「小男孩」就是這一型——它甚至沒有經過試爆，因為原理簡單到大家有把握它會成功。</p>
+        <p><b>內爆式</b>困難得多，需要從四面八方<b>同時</b>、<b>完全均勻</b>地擠壓，差一點點就會失敗。但它可以用鈽-239<span class="t">plutonium-239</span>，而鈽比濃縮鈾容易大量取得。1945 年的第一次核試「三位一體」和落在長崎的「胖子」都是這一型。</p>
+      </div>
+      <div class="note stop">
+        <span class="h">為什麼只講到這裡</span>
+        上面畫的是全世界教科書和百科都會講的<b>基本概念</b>——就像知道「引擎靠汽油爆炸推動活塞」不等於會造引擎一樣。真正的工程細節（尺寸、材料、精確的時序）是各國保密等級最高的資訊，也受國際條約管制。這一站的重點不是「怎麼做」，而是<b>理解人類為什麼會如此嚴肅地看待這件事</b>。
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="7"></div>
+  </section>
+
+  <!-- ─────────── 8 ─────────── -->
+  <section class="station" id="st8">
+    <div class="eyebrow">Station 08 · History</div>
+    <h1 class="title">從實驗桌到世界的分岔口</h1>
+    <p class="subtitle">Seven years from discovery to Hiroshima.</p>
+    <p class="lede">核分裂在 1938 年底才被發現。不到七年之後，兩座城市被夷平。這是科學史上從「發現」到「改變世界」最短的一段距離之一。</p>
+
+    <div class="block">
+      <ul class="tl">
+        <li data-w="3"><span class="yr">1938</span><span class="pip"></span><details><summary>發現核分裂 — 哈恩、史特拉斯曼、邁特納</summary><p class="body">在柏林，哈恩與史特拉斯曼用中子撞擊鈾，在產物中發現了鋇。因為是猶太人而流亡瑞典的莉澤・邁特納，與姪子弗里施在耶誕假期的雪地散步中算出了答案：原子核裂開了。也是他們替這個現象取名為 <span class="t">fission</span>。</p></details></li>
+        <li data-w="3"><span class="yr">1939</span><span class="pip"></span><details><summary>愛因斯坦的一封信</summary><p class="body">物理學家西拉德意識到連鎖反應可以做成炸彈，並擔心納粹德國會先做出來。他請愛因斯坦署名，寫信給美國羅斯福總統。愛因斯坦後來說，簽這封信是他一生「最大的錯誤」。</p></details></li>
+        <li data-w="3"><span class="yr">1942</span><span class="pip"></span><details><summary>人類第一次自持連鎖反應 — 芝加哥一號堆</summary><p class="body">費米的團隊在芝加哥大學一座壁球場地下，用石墨磚和鈾堆成 CP-1。12 月 2 日，他們把控制棒一點一點抽出來，k 第一次穩定地達到 1。這就是你在第 5 站操作的那件事，只是他們是第一次做。</p></details></li>
+        <li data-w="2"><span class="yr">1942</span><span class="pip"></span><details><summary>曼哈頓計畫 <span class="t">Manhattan Project</span></summary><p class="body">美國投入約 13 萬人、當時幣值 20 億美元的秘密計畫。多數參與者到最後都不知道自己在做什麼。歐本海默領導洛斯阿拉莫斯的武器設計工作。</p></details></li>
+        <li data-w="1"><span class="yr">1945</span><span class="pip"></span><details><summary>7 月 16 日 — 三位一體試爆 <span class="t">Trinity</span></summary><p class="body">在新墨西哥州的沙漠，人類第一顆核彈引爆。目睹的科學家陷入沉默。歐本海默後來說，他當時想起了印度經典《薄伽梵歌》裡的一句話：「現在我成了死神，世界的毀滅者。」</p></details></li>
+        <li data-w="1"><span class="yr">1945</span><span class="pip"></span><details><summary>8 月 6 日 廣島、8 月 9 日 長崎</summary><p class="body">兩顆核彈分別投在廣島與長崎。到 1945 年底，估計約有 15 萬至 24 萬人死亡，其中絕大多數是平民。許多倖存者（日語稱「被爆者」）此後數十年持續受到輻射傷害。8 月 15 日，日本宣布投降。這兩次至今仍是人類史上僅有的兩次在戰爭中使用核武器。</p></details></li>
+        <li data-w="2"><span class="yr">1949</span><span class="pip"></span><details><summary>蘇聯試爆成功 — 核軍備競賽開始</summary><p class="body">美國的核壟斷結束。接下來四十年，兩大陣營不斷製造更多、更大的核彈。全球核彈頭數量在 1986 年達到高峰，約 <b>70,300</b> 枚。</p></details></li>
+        <li data-w="3"><span class="yr">1954</span><span class="pip"></span><details><summary>第一座商轉核電廠</summary><p class="body">蘇聯的奧布寧斯克電廠開始供電。同一個物理原理，這一次被接上了電網。今天核能約占全球發電量的十分之一。</p></details></li>
+        <li data-w="1"><span class="yr">1962</span><span class="pip"></span><details><summary>古巴飛彈危機 — 最接近的一次</summary><p class="body">美蘇對峙十三天，全世界離核戰爭只有一步。這場危機之後，兩國裝設了直通熱線，並開始認真談軍備控制。</p></details></li>
+        <li data-w="3"><span class="yr">1968</span><span class="pip"></span><details><summary>核不擴散條約 <span class="t">NPT</span></summary><p class="body">絕大多數國家簽署，承諾不發展核武，換取和平使用核能的技術與監督。這是今天國際核秩序的基礎，也是你在第 2 站看到的「濃縮度」為何受到嚴格監控的原因。</p></details></li>
+        <li data-w="2"><span class="yr">1986</span><span class="pip"></span><details><summary>車諾比事故</summary><p class="body">一次安全測試在設計缺陷與人為疏失下失控，反應爐爆炸（蒸汽爆炸，不是核爆），輻射塵飄散全歐洲。2011 年日本福島則是海嘯導致冷卻系統失效。兩起事故徹底改變了全世界對核能安全的要求。</p></details></li>
+        <li data-w="1"><span class="yr">2026</span><span class="pip"></span><details><summary>今天 — 九個國家，約 12,000 枚</summary><p class="body">目前有九個國家擁有核武器：俄羅斯、美國、中國、法國、英國、印度、巴基斯坦、以色列、北韓。全球核彈頭總數估計約 <b>12,187</b> 枚（2026 年初估計值）。比冷戰高峰少了很多，但近年減少的速度慢了下來，可用的軍事庫存甚至再度增加。</p></details></li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h2 class="sec">最後一件事 <small>The part that isn't physics</small></h2>
+      <div class="prose">
+        <p>你這一路學到的，是<b>同一組物理定律</b>。中子撞進 U-235、原子核裂開、放出更多中子——這件事本身沒有善惡，它只是自然界的規則。</p>
+        <p>可是同一組規則，做出來的東西可以是一座城市的電，也可以是一座城市的消失。決定的從來不是物理，而是<b>人</b>：做研究的人、下決定的人、投票的人、以及知道這件事後選擇怎麼想的人。</p>
+        <p>所以，懂科學不只是為了考試——而是為了讓你在長大之後，有資格對這些事情<b>有自己的判斷</b>。</p>
+      </div>
+    </div>
+
+    <div class="quiz" data-quiz="8"></div>
+    <div class="badge" id="badge">
+      <div class="eyebrow" style="justify-content:center">Certificate of Completion</div>
+      <h2 style="font-family:'Noto Serif TC',serif;font-size:26px;margin-top:8px">八站全部完成 🎓</h2>
+      <p style="margin-top:10px;max-width:46ch;margin-inline:auto;color:var(--ink-2)">你已經走完從一顆原子到一段人類歷史的完整路徑。現在，去找個大人，把核分裂講給他聽——真正學會一件事的方法，就是能把它說明白。</p>
+      <p class="sig">Fission Lab · 為小學六年級設計</p>
+    </div>
+
+    <div class="footer">
+      資料來源：全球核彈頭估計數字取自 <a href="https://fas.org/initiative/status-world-nuclear-forces/" target="_blank" rel="noopener">Federation of American Scientists, Status of World Nuclear Forces</a>（2026 年初估計）與 <a href="https://www.sipri.org/yearbook/2026/08" target="_blank" rel="noopener">SIPRI Yearbook 2026</a>。傷亡數字為歷史研究常見的估計區間，不同研究方法會得到不同結果。所有模擬皆為教學用的簡化模型，用來呈現趨勢與概念，不是精確的物理計算。
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============================================================
+   STATIONS + PROGRESS
+   ============================================================ */
+const STATIONS = [
+  {zh:'原子',        en:'The Atom'},
+  {zh:'同位素',      en:'Isotopes'},
+  {zh:'衰變與半衰期',en:'Decay & Half-life'},
+  {zh:'核分裂',      en:'Fission'},
+  {zh:'連鎖反應',    en:'Chain Reaction'},
+  {zh:'反應爐與核彈',en:'Reactor vs Bomb'},
+  {zh:'兩種設計',    en:'Two Designs'},
+  {zh:'歷史',        en:'History'}
+];
+const KEY='fissionLab.v2';
+let done = new Set();
+let current = 1;
+
+function load(){
+  try{ const r = localStorage.getItem(KEY); if(r) done = new Set(JSON.parse(r)); }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(Array.from(done))); }catch(e){}
+}
+const unlocked = n => n===1 || done.has(n-1);
+
+const chain = $('#chain');
+STATIONS.forEach((s,i)=>{
+  const n=i+1;
+  const li=document.createElement('li');
+  li.className='node'; li.dataset.n=n;
+  li.innerHTML='<button type="button"><span class="dot">'+n+'</span><span><span class="zh">'+s.zh+'</span><span class="en">'+s.en+'</span></span></button>';
+  li.querySelector('button').addEventListener('click',()=>go(n));
+  chain.appendChild(li);
+});
+
+function paint(){
+  $$('.node').forEach(li=>{
+    const n=+li.dataset.n;
+    li.dataset.state = done.has(n) ? 'done' : (n===current ? 'active':'locked');
+    if(n===current) li.dataset.state='active';
+    const b=li.querySelector('button');
+    b.disabled = !unlocked(n);
+    b.querySelector('.dot').textContent = done.has(n) ? '✓' : n;
+  });
+  const fill=$('#chainFill');
+  const nodes=$$('.node');
+  if(nodes.length && fill){
+    let last=0;
+    nodes.forEach((li,i)=>{ if(done.has(i+1)) last=i+1; });
+    const step = nodes[0] ? nodes[0].offsetHeight : 0;
+    fill.style.height = (last>0 ? (last-0.5)*step : 0)+'px';
+  }
+  $('#progText').textContent='進度 '+done.size+' / 8';
+  $('#badge').classList.toggle('on', done.size===8);
+}
+
+function go(n){
+  if(!unlocked(n)) return;
+  current=n;
+  $$('.station').forEach(s=>s.classList.remove('on'));
+  $('#st'+n).classList.add('on');
+  paint();
+  refitOne(n);
+  window.scrollTo({top:0,behavior:REDUCED?'auto':'smooth'});
+  if(n===6) reactor.start();
+}
+
+$('#resetBtn').addEventListener('click',()=>{
+  if(!confirm('確定要清除所有進度，從第 1 站重新開始嗎？')) return;
+  done=new Set(); save(); go(1);
+});
+
+/* ============================================================
+   QUIZ ENGINE
+   ============================================================ */
+const QUIZ = {
+1:[{q:'決定一個原子「是哪一種元素」的，是什麼？',
+    o:['原子核裡質子的數量','原子核裡中子的數量','外面電子的數量','原子的總重量'],a:0,
+    w:'質子數就是元素的身分證。6 個質子永遠是碳，92 個永遠是鈾——中子可以變，元素不會變。'},
+   {q:'原子的質量，幾乎全部集中在哪裡？',
+    o:['電子上','原子核裡','原子核和電子之間的空間','平均分布在整顆原子'],a:1,
+    w:'原子核只占原子體積極小的一部分，卻裝了 99.9% 以上的質量。原子的其他地方幾乎是空的。'}],
+2:[{q:'鈾-235 和鈾-238 的差別是什麼？',
+    o:['質子數不同','中子數不同','電子數不同','它們是完全不同的元素'],a:1,
+    w:'兩者都有 92 個質子（所以都是鈾），但 U-235 有 143 個中子，U-238 有 146 個。這叫做同位素。'},
+   {q:'天然鈾裡面，U-235 大約佔多少？',
+    o:['約 0.7%','約 7%','約 50%','約 99%'],a:0,
+    w:'只有大約 0.7%，1000 顆裡面才 7 顆。所以幾乎所有的用途都得先做「濃縮」，把這個比例提高。'}],
+3:[{q:'半衰期的意思是什麼？',
+    o:['一半的原子衰變掉所需要的時間','所有原子完全消失所需要的時間','原子核裂成兩半所需要的時間','一顆原子從生到死的壽命'],a:0,
+    w:'注意它講的是「一群」原子的統計行為。你永遠猜不到某一顆什麼時候垮，但一大群原子準時到可以拿來當時鐘。'},
+   {q:'α、β、γ 三種射線，哪一種穿透力最強？',
+    o:['α','β','γ','三種一樣'],a:2,
+    w:'α 一張紙就擋住、β 要一片鋁板、γ 要厚厚的鉛或水泥。不過穿透力弱不等於安全——α 若被吃進體內反而傷害最大。'},
+   {q:'「自發分裂」和「被中子撞開的分裂」，差別在哪裡？',
+    o:['自發分裂是原子核自己裂開，不需要外來的中子','自發分裂放出的能量比較小','兩者完全是同一件事','自發分裂不會放出中子'],a:0,
+    w:'自發分裂很罕見（鈾-238 大約兩百萬次衰變才有一次），但正因為它存在，一塊鈾裡隨時都有零星中子在飛——那就是連鎖反應的種子。'}],
+4:[{q:'一次核分裂之後，除了兩塊碎片和能量，還會放出什麼？',
+    o:['電子','質子','2 到 3 顆中子','什麼都沒有'],a:2,
+    w:'這正是關鍵！放出來的中子可以再去撞下一顆 U-235，這才有可能形成連鎖反應。'},
+   {q:'核分裂放出的巨大能量，原本是什麼？',
+    o:['原本儲存在電子裡的電力','分裂後「少掉的那一點點質量」','中子撞進來時帶的動能','原子核裡的熱'],a:1,
+    w:'分裂後所有碎片加起來比原本輕約 0.1%。這消失的質量依照 E=mc² 變成了能量——而 c² 大得驚人。'}],
+5:[{q:'k = 1 代表什麼狀態？',
+    o:['反應會慢慢熄滅','反應穩定持續，不增不減','反應會越來越猛','完全沒有反應'],a:1,
+    w:'k=1 叫做「臨界」。每一代分裂剛好引發下一代同樣多的分裂——這就是核電廠要維持的狀態。'},
+   {q:'為什麼燃料塊「太小」就無法維持連鎖反應？',
+    o:['太小就沒有 U-235','中子還沒撞到東西就先跑出去了','小塊的鈾比較重','小塊會太冷'],a:1,
+    w:'這就是臨界質量的概念。燃料越小，表面積相對越大，中子逃走的機會就越高，k 就掉到 1 以下。'}],
+6:[{q:'核電廠用什麼隨時控制反應速度？',
+    o:['控制棒，吸收多餘的中子','加更多鈾進去','把溫度降低','切斷電源'],a:0,
+    w:'控制棒由會吸收中子的材料做成。插深一點 k 就下降，拉出來一點 k 就上升——操作員就是靠它把 k 穩在 1。'},
+   {q:'為什麼核電廠不可能像原子彈那樣核爆？',
+    o:['因為有厚厚的水泥牆','因為燃料濃縮度只有 3–5%，達不到核爆條件','因為反應爐比較小','因為有很多工程師在看著'],a:1,
+    w:'物理上就辦不到。核爆需要極高濃縮度的燃料在極短時間內超臨界；3–5% 的燃料無論如何都做不到這件事。'}],
+7:[{q:'核彈設計要解決的核心矛盾是什麼？',
+    o:['要夠重才丟得準','平常必須次臨界（安全），引爆瞬間卻要變超臨界','要能重複使用','要能被遙控關掉'],a:1,
+    w:'而且轉換必須極快。慢了的話，一開始放出的能量就會把燃料自己推散，反應中斷，變成失敗的引爆。'},
+   {q:'內爆式設計是怎麼讓燃料變成超臨界的？',
+    o:['把兩塊燃料撞在一起','從四面八方同時擠壓，讓密度變高','把燃料加熱到很高溫','加入更多中子'],a:1,
+    w:'密度變高，中子在同樣距離內撞到原子核的機會就大增，k 就跨過 1。難點在於擠壓必須完全均勻、完全同時。'}],
+8:[{q:'從核分裂被發現，到廣島長崎，中間隔了多久？',
+    o:['不到 7 年','大約 25 年','大約 50 年','超過 100 年'],a:0,
+    w:'1938 年底發現，1945 年 8 月使用。這是科學史上從基礎發現到改變世界最快的例子之一。'},
+   {q:'人類史上，核武器在戰爭中被使用過幾次？',
+    o:['從來沒有','兩次','大約二十次','無法計算'],a:1,
+    w:'只有 1945 年 8 月的廣島和長崎兩次。此後八十年，即使核彈頭數量一度超過七萬枚，也沒有再被用於戰爭。'},
+   {q:'這一課最重要的一個想法是什麼？',
+    o:['科學家都很危險','同一組物理定律，可以帶來電力也可以帶來毀滅——差別在於人的選擇','核能應該全面禁止','原子彈其實沒那麼可怕'],a:1,
+    w:'物理定律本身沒有善惡。真正做選擇的是人——而看懂了科學，你才有資格參與那個選擇。'}]
+};
+
+$$('.quiz').forEach(box=>{
+  const n=+box.dataset.quiz;
+  const qs=QUIZ[n];
+  let html='<div class="quiz-hd"><span class="lbl">關卡測驗 · Station '+String(n).padStart(2,'0')+'</span><span class="lbl">全部答對才能前往下一站</span></div><div class="quiz-bd">';
+  qs.forEach((q,qi)=>{
+    html+='<div class="q" data-qi="'+qi+'"><div class="qt">'+(qi+1)+'. '+q.q+'</div><div class="opts">';
+    q.o.forEach((o,oi)=>{
+      html+='<button type="button" class="opt" data-oi="'+oi+'"><span class="mk">'+'ABCD'[oi]+'</span><span>'+o+'</span></button>';
+    });
+    html+='</div><div class="why"><b>為什麼：</b>'+q.w+'</div></div>';
+  });
+  html+='</div><div class="quiz-ft"><span class="msg" id="qmsg'+n+'">還沒作答</span><button class="btn" id="qnext'+n+'" disabled>'+(n<8?'前往第 '+(n+1)+' 站 →':'完成全部 8 站 🎓')+'</button></div>';
+  box.innerHTML=html;
+
+  const state=new Array(qs.length).fill(false);
+  $$('.q',box).forEach(qEl=>{
+    const qi=+qEl.dataset.qi;
+    $$('.opt',qEl).forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const oi=+btn.dataset.oi;
+        const right = oi===qs[qi].a;
+        btn.dataset.r = right?'right':'wrong';
+        if(right){
+          state[qi]=true;
+          $$('.opt',qEl).forEach(b=>b.disabled=true);
+          $('.why',qEl).classList.add('on');
+        }else{
+          setTimeout(()=>{ btn.removeAttribute('data-r'); },1400);
+        }
+        const got=state.filter(Boolean).length;
+        $('#qmsg'+n).textContent = got===qs.length ? '全部答對 ✓' : ('答對 '+got+' / '+qs.length);
+        const nx=$('#qnext'+n);
+        nx.disabled = got<qs.length;
+        if(got===qs.length){ done.add(n); save(); paint(); }
+      });
+    });
+  });
+  $('#qnext'+n).addEventListener('click',()=>{ if(n<8) go(n+1); else { paint(); $('#badge').scrollIntoView({behavior:REDUCED?'auto':'smooth'}); } });
+});
+
+/* ============================================================
+   canvas helper
+   ============================================================ */
+function fitCanvas(cv, h){
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  const w = cv.clientWidth || 600;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx, w, h};
+}
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+/* ============================================================
+   1 — ATOM BUILDER
+   ============================================================ */
+const SYM=("H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U").split(" ");
+const ZH="氫氦鋰鈹硼碳氮氧氟氖鈉鎂鋁矽磷硫氯氬鉀鈣鈧鈦釩鉻錳鐵鈷鎳銅鋅鎵鍺砷硒溴氪銣鍶釔鋯鈮鉬鎝釕銠鈀銀鎘銦錫銻碲碘氙銫鋇鑭鈰鐠釹鉕釤銪釓鋱鏑鈥鉺銩鐿鎦鉿鉭鎢錸鋨銥鉑金汞鉈鉛鉍釙砈氡鍅鐳錒釷鏷鈾";
+const ENG={1:'Hydrogen',2:'Helium',6:'Carbon',8:'Oxygen',26:'Iron',82:'Lead',92:'Uranium'};
+
+const atomCv=$('#atomCv');
+let atomP=1, atomN=0, atomSeed=[];
+function atomLayout(){
+  const tot=atomP+atomN;
+  atomSeed=[];
+  // sunflower packing of nucleons
+  for(let i=0;i<tot;i++){
+    const a = i*2.39996;                 // golden angle
+    const r = 4.6*Math.sqrt(i);
+    atomSeed.push({x:Math.cos(a)*r, y:Math.sin(a)*r, p:false});
+  }
+  // deterministic shuffle, then hand the first atomP slots to protons
+  const idx=atomSeed.map((_,i)=>i);
+  let sd=2463534242;
+  for(let i=idx.length-1;i>0;i--){
+    sd=(sd*1103515245+12345)&0x7fffffff;
+    const j=sd%(i+1); const tmp=idx[i]; idx[i]=idx[j]; idx[j]=tmp;
+  }
+  for(let i=0;i<atomP && i<idx.length;i++) atomSeed[idx[i]].p=true;
+}
+function drawAtom(t){
+  const {ctx,w,h}=atomCv._fit;
+  ctx.clearRect(0,0,w,h);
+  const cx=w/2, cy=h/2;
+  const tot=atomP+atomN;
+  const scale = clamp(50/(4.6*Math.sqrt(tot)+7), .55, 3.4);
+  // electron shells (illustrative, max 4 rings)
+  const rings=Math.min(4, Math.ceil(Math.cbrt(atomP)));
+  ctx.strokeStyle=css('--muted'); ctx.lineWidth=1;
+  const inner = 4.6*Math.sqrt(tot)*scale + 22;
+  for(let i=1;i<=rings;i++){
+    const rr = inner + i*Math.min(24,(Math.min(w,h)/2-inner-14)/rings);
+    ctx.globalAlpha=.4; ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.ellipse(cx,cy,rr,rr*0.34,i*0.7,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha=1;
+    const per=Math.min(8, Math.ceil(atomP/rings));
+    for(let k=0;k<per;k++){
+      const a = t*0.0006*(1+i*.25) + k*Math.PI*2/per;
+      const ex=cx+Math.cos(a)*rr*Math.cos(i*0.7)-Math.sin(a)*rr*0.34*Math.sin(i*0.7);
+      const ey=cy+Math.cos(a)*rr*Math.sin(i*0.7)+Math.sin(a)*rr*0.34*Math.cos(i*0.7);
+      ctx.fillStyle=css('--neutron'); ctx.globalAlpha=.75;
+      ctx.beginPath(); ctx.arc(ex,ey,2.6,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1;
+    }
+  }
+  // nucleus
+  const R = 5.4*scale;
+  atomSeed.forEach(s=>{
+    ctx.beginPath();
+    ctx.arc(cx+s.x*scale, cy+s.y*scale, R, 0, Math.PI*2);
+    ctx.fillStyle = s.p ? css('--energy') : css('--muted');
+    ctx.globalAlpha = s.p ? .95 : .8;
+    ctx.fill(); ctx.globalAlpha=1;
+  });
+  // key
+  ctx.font='500 11px "IBM Plex Mono", monospace';
+  ctx.fillStyle=css('--energy'); ctx.fillText('● 質子 proton', 12, h-26);
+  ctx.fillStyle=css('--muted');  ctx.fillText('● 中子 neutron', 12, h-11);
+  ctx.fillStyle=css('--neutron');ctx.textAlign='right'; ctx.fillText('● 電子 electron', w-12, h-11); ctx.textAlign='left';
+}
+function stableness(z,n){
+  if(z>83) return {ok:false, why:'所有質子超過 83 的元素都沒有穩定的同位素——它們都會放出輻射，慢慢衰變成別的元素。鈾就是其中之一。'};
+  const exp = z*(1+z/145);
+  const tol = Math.max(1.2, z*0.075);
+  if(Math.abs(n-exp)<=tol) return {ok:true, why:'這個質子與中子的比例很平衡，是自然界中穩定存在的組合。'};
+  return {ok:false, why: n>exp ? '中子太多了，這樣的原子核不穩定，會自己衰變。' : '中子太少了，質子之間的排斥力壓過了核力，這樣的原子核撐不住。'};
+}
+function atomUpdate(){
+  const z=atomP, n=atomN;
+  const sym=SYM[z-1]||'?', zh=ZH[z-1]||'?';
+  $('#atomName').textContent = zh+' '+sym+'-'+(z+n);
+  $('#pVal').textContent=z; $('#nVal').textContent=n;
+  const st=stableness(z,n);
+  const v=$('#atomVerdict');
+  v.dataset.tone = st.ok?'sub':'super';
+  const eng = ENG[z] ? ' ('+ENG[z]+')' : '';
+  v.innerHTML='<b>'+zh+' '+sym+'-'+(z+n)+'</b>'+eng+'　'+z+' 質子 ＋ '+n+' 中子。<br>'+
+    (st.ok?'<b class="hl-n">穩定</b>：':'<b class="hl-e">不穩定 / 放射性</b>：')+st.why;
+  atomLayout();
+}
+$('#pSl').addEventListener('input',e=>{ atomP=+e.target.value; atomUpdate(); });
+$('#nSl').addEventListener('input',e=>{ atomN=+e.target.value; atomUpdate(); });
+$$('[data-atom]').forEach(b=>b.addEventListener('click',()=>{
+  const [p,n]=b.dataset.atom.split(',').map(Number);
+  atomP=p; atomN=n; $('#pSl').value=p; $('#nSl').value=n; atomUpdate();
+}));
+
+/* ============================================================
+   2 — ISOTOPE DOT FIELD
+   ============================================================ */
+const field=$('#dotfield');
+const FIELD_N=1000;
+for(let i=0;i<FIELD_N;i++) field.appendChild(document.createElement('i'));
+const dots=Array.from(field.children);
+const order=(function(){ const a=dots.map((_,i)=>i); let s=12345;
+  for(let i=a.length-1;i>0;i--){ s=(s*1103515245+12345)&0x7fffffff; const j=s%(i+1); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; })();
+function setEnrich(pm){                       // per-mille
+  const k=Math.round(pm);
+  dots.forEach(d=>d.classList.remove('u5'));
+  for(let i=0;i<k;i++) dots[order[i]].classList.add('u5');
+  const pct=(k/10);
+  $('#enrVal').textContent = (pct<1? pct.toFixed(1): pct.toFixed(0))+' %';
+  $('#enrLbl').textContent = 'U-235：'+k+' 顆 / 1000';
+  const v=$('#enrVerdict');
+  if(pct<1){ v.dataset.tone='sub'; v.innerHTML='<b>天然鈾</b>。1000 顆裡面只有 7 顆是可以分裂的 U-235。這樣的鈾放在一起，中子撞到 U-238 的機會太高，連鎖反應撐不下去。'; }
+  else if(pct<=5){ v.dataset.tone='crit'; v.innerHTML='<b>核電廠燃料等級</b>（3–5%）。搭配水或石墨把中子減速之後，剛好可以維持 k = 1 的穩定反應——但永遠達不到核爆的條件。'; }
+  else if(pct<20){ v.dataset.tone='crit'; v.innerHTML='<b>高濃縮的研究用等級</b>。多用於研究用反應爐與少數特殊用途，受到國際嚴格監管。'; }
+  else { v.dataset.tone='super'; v.innerHTML='<b>受到最嚴格管制的區域</b>。濃縮度超過 20% 在國際上就被歸類為高濃縮鈾，是核不擴散條約與國際原子能總署盯得最緊的一條線。'; }
+}
+$('#enrSl').addEventListener('input',e=>setEnrich(+e.target.value));
+
+/* ============================================================
+   3a — SHIELDING : who stops what
+   ============================================================ */
+const shieldCv=$('#shieldCv');
+const LANES=[
+  {name:'α',zh:'α 粒子',stop:0,col:'--energy'},
+  {name:'β',zh:'β 粒子',stop:1,col:'--neutron'},
+  {name:'γ',zh:'γ 射線',stop:2,col:'--nucleus'}
+];
+let rays=[], raySpawn=0;
+function drawShield(dt){
+  const f=shieldCv._fit; if(!f) return;
+  const {ctx,w,h}=f;
+  ctx.clearRect(0,0,w,h);
+  const x0=w*0.16;
+  const bars=[
+    {x:w*0.42, thick:4,  a:.30, zh:'紙',   en:'paper'},
+    {x:w*0.60, thick:10, a:.55, zh:'鋁板', en:'aluminium'},
+    {x:w*0.80, thick:24, a:.85, zh:'鉛牆', en:'lead'}
+  ];
+  const ys=[h*0.30, h*0.52, h*0.74];
+
+  // barriers
+  ctx.font='500 10px "IBM Plex Mono", monospace'; ctx.textAlign='center';
+  bars.forEach(b=>{
+    ctx.fillStyle=css('--ink-2'); ctx.globalAlpha=b.a;
+    ctx.fillRect(b.x-b.thick/2, h*0.16, b.thick, h*0.70);
+    ctx.globalAlpha=1;
+    ctx.fillStyle=css('--ink-2'); ctx.fillText(b.zh, b.x, h*0.115);
+    ctx.fillStyle=css('--muted');  ctx.fillText(b.en, b.x, h*0.955);
+  });
+  ctx.textAlign='left';
+
+  // spawn
+  raySpawn+=dt;
+  if(raySpawn>210){
+    raySpawn=0;
+    LANES.forEach((L,i)=>rays.push({x:x0, y:ys[i], lane:i, a:1}));
+  }
+  // move + draw
+  const keep=[];
+  for(const r of rays){
+    const L=LANES[r.lane];
+    const wall=bars[L.stop].x - bars[L.stop].thick/2 - 3;
+    const passes = (L.stop===2 && r.pass);
+    if(r.x < wall || passes) r.x += dt*0.13;
+    else if(L.stop===2 && r.pass===undefined){ r.pass = Math.random()<0.45; if(r.pass) r.x+=dt*0.13; else r.a-=dt*0.004; }
+    else r.a -= dt*0.004;
+    if(r.a<=0 || r.x>w-6) continue;
+    ctx.globalAlpha=Math.max(0,r.a);
+    ctx.fillStyle=css(L.col);
+    if(r.lane===2){ ctx.fillRect(r.x-9, r.y-1.4, 18, 2.8); }
+    else { ctx.beginPath(); ctx.arc(r.x, r.y, r.lane===0?5:3.4, 0, Math.PI*2); ctx.fill(); }
+    ctx.globalAlpha=1;
+    keep.push(r);
+  }
+  rays = keep.length>240 ? keep.slice(-240) : keep;
+
+  // lane labels
+  LANES.forEach((L,i)=>{
+    ctx.font='600 15px "IBM Plex Mono", monospace';
+    ctx.fillStyle=css(L.col);
+    ctx.fillText(L.name, w*0.035, ys[i]+6);
+    ctx.font='500 10px "IBM Plex Mono", monospace';
+    ctx.fillStyle=css('--muted');
+    ctx.fillText(L.zh.slice(2), w*0.072, ys[i]+4);
+  });
+}
+
+/* ============================================================
+   3b — HALF-LIFE SIMULATOR
+   ============================================================ */
+const hlCv=$('#hlCv');
+const hlField=$('#hlField');
+for(let i=0;i<1000;i++){ const d=document.createElement('i'); d.className='alive'; hlField.appendChild(d); }
+const hlDots=Array.from(hlField.children);
+const hlOrder=(function(){ const a=hlDots.map((_,i)=>i); let s=55555;
+  for(let i=a.length-1;i>0;i--){ s=(s*1103515245+12345)&0x7fffffff; const j=s%(i+1); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; })();
+let hlHalf=2092882, hlName='碳-14', hlLabel='5,730 年', hlT=0;   // half-life in days
+
+function fmtDays(d){
+  if(d<1) return (d*24).toFixed(1).replace(/\.0$/,'')+' 小時';
+  if(d<400) return (d<10? d.toFixed(1): Math.round(d).toString())+' 天';
+  const y=d/365.25;
+  if(y<10000) return Math.round(y).toLocaleString()+' 年';
+  if(y<1e8) return (y/1e4).toFixed(y<1e6?1:0)+' 萬年';
+  return (y/1e8).toFixed(2)+' 億年';
+}
+function drawHalfCurve(){
+  const f=hlCv._fit; if(!f) return;
+  const {ctx,w,h}=f;
+  ctx.clearRect(0,0,w,h);
+  const L=42, R=w-16, T=16, B=h-26;
+  // grid at 100/50/25/12.5%
+  ctx.font='500 9px "IBM Plex Mono", monospace';
+  [1,.5,.25,.125].forEach(v=>{
+    const y=B-(B-T)*v;
+    ctx.strokeStyle=css('--line'); ctx.setLineDash([2,4]);
+    ctx.beginPath(); ctx.moveTo(L,y); ctx.lineTo(R,y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=css('--muted'); ctx.textAlign='right';
+    ctx.fillText((v*100)+'%', L-6, y+3); ctx.textAlign='left';
+  });
+  // axes
+  ctx.strokeStyle=css('--line');
+  ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,B); ctx.lineTo(R,B); ctx.stroke();
+  ctx.fillStyle=css('--muted'); ctx.textAlign='center';
+  for(let k=0;k<=10;k+=2){ const x=L+(R-L)*k/10; ctx.fillText(k, x, B+14); }
+  ctx.fillText('經過幾個半衰期', (L+R)/2, h-3); ctx.textAlign='left';
+  // curve
+  ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const t=i/20, x=L+(R-L)*t/10, y=B-(B-T)*Math.pow(0.5,t);
+    i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+  }
+  ctx.strokeStyle=css('--neutron'); ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+  // marker
+  const frac=Math.pow(0.5,hlT);
+  const mx=L+(R-L)*hlT/10, my=B-(B-T)*frac;
+  ctx.setLineDash([3,3]); ctx.strokeStyle=css('--nucleus');
+  ctx.beginPath(); ctx.moveTo(mx,B); ctx.lineTo(mx,my); ctx.lineTo(L,my); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(mx,my,4.5,0,Math.PI*2); ctx.fillStyle=css('--nucleus'); ctx.fill();
+}
+function hlUpdate(){
+  const frac=Math.pow(0.5,hlT);
+  const left=Math.round(1000*frac);
+  hlDots.forEach(d=>d.classList.remove('alive'));
+  for(let i=0;i<left;i++) hlDots[hlOrder[i]].classList.add('alive');
+  $('#hlN').textContent=hlT.toFixed(1);
+  const pc=frac*100;
+  $('#hlPct').textContent=(pc<1?pc.toFixed(2):(pc<20?pc.toFixed(1):pc.toFixed(0)))+' %';
+  $('#hlCnt').textContent=left;
+  $('#hlTime').textContent=hlT===0?'0':fmtDays(hlHalf*hlT);
+  $('#hlIso').textContent=hlName+' · 半衰期 '+hlLabel;
+  const v=$('#hlVerdict');
+  if(hlT===0){ v.dataset.tone='sub'; v.innerHTML='一開始，1000 顆 <b>'+hlName+'</b> 全部都還在。把滑桿往右拉，時間就往前跑。'; }
+  else if(hlT<1.05){ v.dataset.tone='sub'; v.innerHTML='經過 '+fmtDays(hlHalf*hlT)+'，還剩 '+left+' 顆。<b>一個半衰期</b>剛好讓它們少掉一半。'; }
+  else if(hlT<4){ v.dataset.tone='crit'; v.innerHTML='經過 '+hlT.toFixed(1)+' 個半衰期（'+fmtDays(hlHalf*hlT)+'），只剩 '+left+' 顆。注意曲線的形狀：<b>越來越平</b>，因為每次都只拿掉「剩下的一半」。'; }
+  else { v.dataset.tone='super'; v.innerHTML='過了 '+hlT.toFixed(1)+' 個半衰期（'+fmtDays(hlHalf*hlT)+'），只剩下 '+left+' 顆。<b>但永遠除不完。</b>這就是為什麼核廢料的放射性會拖那麼久——它只會越來越弱，不會突然歸零。'; }
+  drawHalfCurve();
+}
+$('#hlSl').addEventListener('input',e=>{ hlT=+e.target.value/10; hlUpdate(); });
+$$('#hlPicks [data-hl]').forEach(b=>b.addEventListener('click',()=>{
+  const [hf,nm,lb]=b.dataset.hl.split('|');
+  hlHalf=+hf; hlName=nm; hlLabel=lb; hlUpdate();
+}));
+
+/* ============================================================
+   4 — FISSION ANIMATION
+   ============================================================ */
+const fisCv=$('#fisCv');
+const fis={phase:'idle', t:0, count:0, parts:[], neus:[], flash:0};
+function fisReset(){ fis.phase='idle'; fis.t=0; fis.parts=[]; fis.neus=[]; fis.flash=0;
+  $('#fisVerdict').innerHTML='按下「發射中子」，看看鈾-235 的原子核發生什麼事。'; $('#fisVerdict').removeAttribute('data-tone'); }
+function fisFire(){
+  if(fis.phase!=='idle' && fis.phase!=='done') return;
+  fis.phase='incoming'; fis.t=0; fis.parts=[]; fis.neus=[]; fis.flash=0;
+}
+$('#fireBtn').addEventListener('click',fisFire);
+$('#fisReset').addEventListener('click',()=>{ fis.count=0; $('#fisCount').textContent='分裂次數 0'; fisReset(); });
+
+function drawFission(dt){
+  const {ctx,w,h}=fisCv._fit;
+  ctx.clearRect(0,0,w,h);
+  const cx=w*0.52, cy=h*0.46;
+  fis.t+=dt;
+
+  const summary=(ctx,w,label)=>{
+    label('分裂碎片 ×2', w*0.18, 20, css('--nucleus'), 11);
+    label('新中子 ×3',   w*0.50, 20, css('--neutron'), 11);
+    label('＋ 大量能量', w*0.82, 20, css('--energy'), 11);
+  };
+  const label=(txt,x,y,col,size)=>{ ctx.font='500 '+(size||11)+'px "IBM Plex Mono", monospace'; ctx.fillStyle=col; ctx.textAlign='center'; ctx.fillText(txt,x,y); ctx.textAlign='left'; };
+
+  if(fis.phase==='idle'||fis.phase==='incoming'||fis.phase==='wobble'){
+    let wob=0, r=34;
+    if(fis.phase==='wobble'){ wob=Math.sin(fis.t*0.035)*(3+fis.t*0.02); r=34+fis.t*0.012; }
+    ctx.save(); ctx.translate(cx,cy);
+    ctx.beginPath(); ctx.ellipse(0,0, r+wob, r-wob*0.8, 0,0,Math.PI*2);
+    ctx.fillStyle=css('--nucleus'); ctx.globalAlpha=.85; ctx.fill(); ctx.globalAlpha=1;
+    ctx.restore();
+    label(fis.phase==='wobble'?'U-236':'U-235', cx, cy+4, css('--void'), 13);
+    label(fis.phase==='wobble'?'很不穩定！':'鈾-235 原子核', cx, cy+56, css('--muted'));
+  }
+  if(fis.phase==='incoming'){
+    const x = -20 + fis.t*0.55;
+    ctx.beginPath(); ctx.arc(x, cy, 7,0,Math.PI*2); ctx.fillStyle=css('--neutron'); ctx.fill();
+    label('中子 neutron', x, cy-18, css('--neutron'),10);
+    if(x >= cx-36){ fis.phase='wobble'; fis.t=0; }
+  }
+  if(fis.phase==='wobble' && fis.t>900){
+    fis.phase='split'; fis.t=0; fis.flash=1;
+    fis.parts=[{x:cx,y:cy,vx:-0.105,vy:-0.030,r:24,n:'鋇 Ba-141'},{x:cx,y:cy,vx:0.100,vy:0.034,r:21,n:'氪 Kr-92'}];
+    fis.neus=[]; const k=3;
+    for(let i=0;i<k;i++){ const a=(i/k)*Math.PI*2 + 1.05; fis.neus.push({x:cx,y:cy,vx:Math.cos(a)*0.105,vy:Math.sin(a)*0.105}); }
+    fis.count++; $('#fisCount').textContent='分裂次數 '+fis.count;
+    const v=$('#fisVerdict'); v.dataset.tone='super';
+    v.innerHTML='一顆中子進去，出來的是：<b class="hl-u">兩塊碎片</b>（鋇-141 ＋ 氪-92）＋ <b class="hl-n">3 顆新中子</b> ＋ <b class="hl-e">大量能量</b>。<br>那 3 顆新中子，就是下一站「連鎖反應」的主角。';
+  }
+  if(fis.phase==='split'){
+    if(fis.flash>0){
+      ctx.beginPath(); ctx.arc(cx,cy, 40+ (1-fis.flash)*120, 0, Math.PI*2);
+      ctx.fillStyle=css('--energy'); ctx.globalAlpha=fis.flash*0.35; ctx.fill(); ctx.globalAlpha=1;
+      fis.flash=Math.max(0, fis.flash-dt*0.0018);
+    }
+    const moving = fis.t < 1050;
+    fis.parts.forEach(p=>{
+      if(moving){ p.x+=p.vx*dt; p.y+=p.vy*dt; }
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=css('--nucleus'); ctx.globalAlpha=.8; ctx.fill(); ctx.globalAlpha=1;
+      label(p.n, p.x, p.y+p.r+15, css('--ink-2'),10);
+    });
+    fis.neus.forEach(n=>{
+      if(moving){ n.x+=n.vx*dt; n.y+=n.vy*dt; }
+      ctx.beginPath(); ctx.arc(n.x,n.y,6,0,Math.PI*2); ctx.fillStyle=css('--neutron'); ctx.fill();
+    });
+    if(!moving) summary(ctx,w,label);
+    if(fis.t>1500) fis.phase='done';
+  }
+  if(fis.phase==='done'){
+    fis.parts.forEach(p=>{ ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=css('--nucleus'); ctx.globalAlpha=.8; ctx.fill(); ctx.globalAlpha=1; label(p.n,p.x,p.y+p.r+15,css('--ink-2'),10); });
+    fis.neus.forEach(n=>{ ctx.beginPath(); ctx.arc(n.x,n.y,6,0,Math.PI*2); ctx.fillStyle=css('--neutron'); ctx.fill(); });
+    summary(ctx,w,label);
+    label('再按一次「發射中子」試試', w/2, h-14, css('--muted'),10);
+  }
+}
+
+/* E = mc^2 calculator */
+function mc(){
+  const g=+$('#mcSl').value;
+  const J = (g/1000) * 9e16;
+  $('#mcVal').textContent = g+' 公克';
+  $('#mcJ').textContent = J.toExponential(1).replace('e+',' ×10^')+' J';
+  $('#mcCoal').textContent = Math.round(g*3750).toLocaleString()+' 噸';
+  $('#mcHome').textContent = Math.round(J/3.6e6/4000).toLocaleString()+' 年';
+}
+$('#mcSl').addEventListener('input',mc);
+
+/* ============================================================
+   4 — CHAIN REACTION SIM
+   ============================================================ */
+const chainCv=$('#chainCv');
+const chainSim=(function(){
+  let nuclei=[], grid=new Map(), neutrons=[], stats={f:0,g:0,esc:0}, running=false, settle=0;
+  const SP=11;
+  let R=90, enr=0.20, cx=0, cy=0;
+  let genQ=[], curGen=0;
+
+  function key(x,y){ return ((x/SP)|0)+','+((y/SP)|0); }
+  function build(){
+    const {w,h}=chainCv._fit||{w:600,h:330};
+    cx=w/2; cy=h/2;
+    R=+$('#cSize').value; enr=+$('#cEnr').value/100;
+    nuclei=[]; grid=new Map(); neutrons=[]; stats={f:0,g:0,esc:0}; running=false; settle=0; curGen=0;
+    let s=987654321;
+    const rnd=()=>{ s=(s*1103515245+12345)&0x7fffffff; return s/0x7fffffff; };
+    for(let y=cy-R; y<=cy+R; y+=SP){
+      for(let x=cx-R; x<=cx+R; x+=SP){
+        const jx=x+(rnd()-.5)*6, jy=y+(rnd()-.5)*6;
+        if((jx-cx)**2+(jy-cy)**2 > R*R) continue;
+        const n={x:jx,y:jy, u5: rnd()<enr, spent:false};
+        nuclei.push(n);
+        const k=key(jx,jy);
+        if(!grid.has(k)) grid.set(k,[]);
+        grid.get(k).push(n);
+      }
+    }
+    render();
+    upd();
+  }
+  function near(x,y){
+    const gx=(x/SP)|0, gy=(y/SP)|0; const out=[];
+    for(let i=-1;i<=1;i++) for(let j=-1;j<=1;j++){
+      const a=grid.get((gx+i)+','+(gy+j)); if(a) for(const n of a) out.push(n);
+    }
+    return out;
+  }
+  function fire(){
+    if(!nuclei.length) build();
+    // three seed neutrons — exactly what one spontaneous fission throws out (station 3)
+    for(let i=0;i<3;i++){
+      const a = Math.random()*Math.PI*2;
+      neutrons.push({x:cx+Math.cos(a)*(R+18), y:cy+Math.sin(a)*(R+18),
+                     vx:-Math.cos(a)*0.22, vy:-Math.sin(a)*0.22, g:1});
+    }
+    running=true; settle=0; stats.g=Math.max(stats.g,1);
+  }
+  function step(dt){
+    if(!running) return;
+    dt=Math.min(dt,34);
+    const nxt=[];
+    for(const n of neutrons){
+      n.x+=n.vx*dt; n.y+=n.vy*dt;
+      if((n.x-cx)**2+(n.y-cy)**2 > (R+30)*(R+30)){ stats.esc++; continue; }
+      let hit=null;
+      for(const t of near(n.x,n.y)){
+        if(t.spent) continue;
+        if((t.x-n.x)**2+(t.y-n.y)**2 < 30){ hit=t; break; }
+      }
+      if(hit){
+        hit.spent=true;
+        if(hit.u5){
+          stats.f++; stats.g=Math.max(stats.g, n.g+1);
+          const k = 2 + (Math.random()<0.4?1:0);
+          for(let i=0;i<k;i++){
+            const a=Math.random()*Math.PI*2;
+            nxt.push({x:hit.x,y:hit.y,vx:Math.cos(a)*0.22,vy:Math.sin(a)*0.22,g:n.g+1});
+          }
+        } // U-238 : neutron absorbed, nothing emitted
+      } else nxt.push(n);
+    }
+    neutrons = nxt.length>3000 ? nxt.slice(0,3000) : nxt;
+    if(!neutrons.length){ settle+=dt; if(settle>250){ running=false; verdict(); } }
+  }
+  function verdict(){
+    const v=$('#cVerdict');
+    const total=nuclei.filter(n=>n.u5).length||1;
+    const frac=stats.f/total;
+    if(stats.f<=6){ v.dataset.tone='sub'; $('#chainStatus').textContent='熄滅 Subcritical';
+      v.innerHTML='<b class="hl-n">k &lt; 1 — 反應熄滅了。</b>放出來的中子大多撞上 U-238 被吞掉，或是直接從燃料球邊緣跑掉。連鎖反應接不下去。'; }
+    else if(frac<0.35){ v.dataset.tone='crit'; $('#chainStatus').textContent='勉強維持 Near critical';
+      v.innerHTML='<b class="hl-u">k ≈ 1 — 剛好在邊緣。</b>反應傳出去了一段，但很快就後繼無力。核電廠要的就是這個微妙的平衡，只是它有控制棒可以隨時微調。'; }
+    else { v.dataset.tone='super'; $('#chainStatus').textContent='失控 Supercritical';
+      v.innerHTML='<b class="hl-e">k &gt; 1 — 超臨界。</b>共發生 '+stats.f.toLocaleString()+' 次分裂，橫掃了 '+Math.round(frac*100)+'% 的 U-235，只花了 '+stats.g+' 個世代。真實的核彈裡，這整件事在<b>不到百萬分之一秒</b>內結束。'; }
+    upd();
+  }
+  function upd(){
+    $('#cFis').textContent=stats.f.toLocaleString();
+    $('#cGen').textContent=stats.g;
+    $('#cNeu').textContent=neutrons.length;
+    $('#cEsc').textContent=stats.esc.toLocaleString();
+  }
+  function render(){
+    const f=chainCv._fit; if(!f) return;
+    const {ctx,w,h}=f;
+    ctx.clearRect(0,0,w,h);
+    ctx.beginPath(); ctx.arc(cx,cy,R+6,0,Math.PI*2);
+    ctx.strokeStyle=css('--line'); ctx.setLineDash([4,5]); ctx.stroke(); ctx.setLineDash([]);
+    for(const n of nuclei){
+      ctx.beginPath(); ctx.arc(n.x,n.y, n.u5?3.6:2.6, 0, Math.PI*2);
+      if(n.spent){ ctx.fillStyle=css('--energy'); ctx.globalAlpha=.55; }
+      else if(n.u5){ ctx.fillStyle=css('--nucleus'); ctx.globalAlpha=.95; }
+      else { ctx.fillStyle=css('--muted'); ctx.globalAlpha=.42; }
+      ctx.fill(); ctx.globalAlpha=1;
+    }
+    ctx.fillStyle=css('--neutron');
+    for(const n of neutrons){ ctx.beginPath(); ctx.arc(n.x,n.y,2.4,0,Math.PI*2); ctx.fill(); }
+    ctx.font='500 10px "IBM Plex Mono", monospace';
+    ctx.fillStyle=css('--nucleus'); ctx.fillText('● U-235', 10, h-24);
+    ctx.fillStyle=css('--muted');   ctx.fillText('● U-238', 10, h-11);
+    ctx.fillStyle=css('--energy');  ctx.fillText('● 已分裂', 78, h-24);
+    ctx.fillStyle=css('--neutron'); ctx.fillText('● 中子', 78, h-11);
+  }
+  $('#cEnr').addEventListener('input',e=>{ $('#cEnrV').textContent=e.target.value+' %'; build(); });
+  $('#cSize').addEventListener('input',e=>{
+    const v=+e.target.value;
+    $('#cSizeV').textContent = v<70?'小':(v<115?'中':'大');
+    build();
+  });
+  $('#cFire').addEventListener('click',fire);
+  $('#cReset').addEventListener('click',()=>{ build(); $('#chainStatus').textContent='待命 Ready';
+    const v=$('#cVerdict'); v.removeAttribute('data-tone'); v.textContent='先調整兩個滑桿，再射入中子。試試看：什麼時候會熄滅？什麼時候會失控？'; });
+
+  return {build, step, render, upd, reset:build, get running(){return running;}};
+})();
+
+/* ============================================================
+   5 — REACTOR
+   ============================================================ */
+const rxCv=$('#rxCv');
+const reactor=(function(){
+  let rod=1, k=0.35, power=0.0001, temp=20, hist=new Array(120).fill(0), on=false, auto=false;
+  function set(r){ rod=r; k = 1.35 - 1.0*rod; }
+  function tick(dt){
+    if(auto){
+      // proportional-plus-damping control on log(power); settles at power = 1, k = 1
+      const e = clamp(Math.log(Math.max(power,1e-7)), -9, 4);
+      const kT = clamp(1 - 0.035*e - 0.55*Math.log(k), 0.86, 1.14);
+      set(clamp(1.35-kT, 0, 1));
+      $('#rodSl').value=Math.round(rod*100);
+      $('#rodV').textContent=Math.round(rod*100)+' %';
+    }
+    const gens = dt/60;
+    power = clamp(power * Math.pow(k, gens) + 0.00004*gens, 1e-6, 400);
+    temp = temp + (20 + power*280 - temp)*0.006*(dt/16);
+    hist.push(power); if(hist.length>120) hist.shift();
+    $('#rxK').textContent=k.toFixed(3);
+    $('#rxP').textContent=(power*100<0.01?'~0':(power*100).toFixed(power<0.1?2:0))+' %';
+    $('#rxT').textContent=Math.round(temp)+' °C';
+    const s=$('#rxState'), v=$('#rxVerdict');
+    if(power<0.01){ s.textContent='停機中 Shutdown'; v.dataset.tone='sub';
+      v.innerHTML='控制棒插得很深，中子幾乎都被吸走了。<b>k &lt; 1</b>，反應停下來。'; }
+    else if(power>1.6){ s.textContent='⚠ 功率過高 Overpower'; v.dataset.tone='super';
+      v.innerHTML='<b class="hl-e">k &gt; 1，功率一路往上衝。</b>真實的反應爐這時會自動 SCRAM——控制棒在幾秒內全部落下。快把控制棒插回去，或按緊急停機。'; }
+    else if(Math.abs(k-1)<0.02 && power>0.5){ s.textContent='✓ 穩定運轉 Critical'; v.dataset.tone='crit';
+      v.innerHTML='<b class="hl-u">k = 1.000，臨界。</b>這就是核電廠一天 24 小時在做的事：把 k 死死地釘在 1。1942 年芝加哥一號堆第一次達成的，就是這個狀態。'; }
+    else { s.textContent='運轉中 Operating'; v.removeAttribute('data-tone');
+      v.innerHTML='慢慢調。<b>k 只要偏離 1 一點點</b>，功率就會指數式地跑掉——這就是操作核反應爐困難的地方。'; }
+  }
+  function draw(){
+    const f=rxCv._fit; if(!f) return;
+    const {ctx,w,h}=f;
+    ctx.clearRect(0,0,w,h);
+    const coreX=24, coreY=34, coreW=Math.min(300, w*0.48), coreH=h-72;
+    // core vessel
+    ctx.strokeStyle=css('--line'); ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.roundRect(coreX,coreY,coreW,coreH,8); ctx.stroke();
+    // glow by power
+    const gl=clamp(power,0,2)/2;
+    ctx.fillStyle=css('--energy'); ctx.globalAlpha=gl*0.30;
+    ctx.beginPath(); ctx.roundRect(coreX+2,coreY+2,coreW-4,coreH-4,7); ctx.fill(); ctx.globalAlpha=1;
+    // fuel rods
+    const nR=7, gap=coreW/(nR+1);
+    for(let i=0;i<nR;i++){
+      const x=coreX+gap*(i+1);
+      ctx.strokeStyle=css('--nucleus'); ctx.globalAlpha=.55; ctx.lineWidth=5;
+      ctx.beginPath(); ctx.moveTo(x,coreY+10); ctx.lineTo(x,coreY+coreH-10); ctx.stroke(); ctx.globalAlpha=1;
+    }
+    // control rods descend from top
+    for(let i=0;i<nR-1;i++){
+      const x=coreX+gap*(i+1)+gap/2;
+      const len=(coreH-16)*rod;
+      ctx.strokeStyle=css('--ink-2'); ctx.lineWidth=7; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(x,coreY-10); ctx.lineTo(x,coreY+8+len); ctx.stroke();
+    }
+    ctx.lineWidth=1; ctx.lineCap='butt';
+    ctx.font='500 10px "IBM Plex Mono", monospace';
+    ctx.fillStyle=css('--muted'); ctx.fillText('爐心 CORE', coreX, coreY-12);
+    ctx.fillStyle=css('--nucleus'); ctx.fillText('▮ 燃料棒', coreX, coreY+coreH+16);
+    ctx.fillStyle=css('--ink-2'); ctx.fillText('▮ 控制棒', coreX+70, coreY+coreH+16);
+    // power chart
+    const gx=coreX+coreW+26, gw=w-gx-20, gy=coreY+8, gh=coreH-40;
+    if(gw>60){
+      ctx.strokeStyle=css('--line');
+      ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx,gy+gh); ctx.lineTo(gx+gw,gy+gh); ctx.stroke();
+      const y100 = gy+gh - gh*(1/2.2);
+      ctx.setLineDash([3,4]); ctx.strokeStyle=css('--nucleus');
+      ctx.beginPath(); ctx.moveTo(gx,y100); ctx.lineTo(gx+gw,y100); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=css('--nucleus'); ctx.font='500 9px "IBM Plex Mono", monospace';
+      ctx.fillText('100%', gx+2, y100-4);
+      ctx.beginPath();
+      hist.forEach((p,i)=>{
+        const x=gx+ (i/(hist.length-1))*gw;
+        const y=gy+gh - clamp(p/2.2,0,1)*gh;
+        i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+      });
+      ctx.strokeStyle=css('--neutron'); ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+      ctx.fillStyle=css('--muted'); ctx.font='500 10px "IBM Plex Mono", monospace';
+      ctx.fillText('功率 POWER', gx, gy-6);
+    }
+  }
+  $('#rodSl').addEventListener('input',e=>{ auto=false; set(+e.target.value/100); $('#rodV').textContent=e.target.value+' %'; });
+  $('#scram').addEventListener('click',()=>{ auto=false; set(1); $('#rodSl').value=100; $('#rodV').textContent='100 %'; power=Math.min(power,0.02); });
+  $('#rxAuto').addEventListener('click',()=>{ auto=!auto; $('#rxAuto').textContent = auto?'自動控制中（點此關閉）':'自動穩定在 100%'; });
+  return {tick, draw, start(){on=true;}, get on(){return on;}};
+})();
+
+/* ============================================================
+   6 — SCHEMATICS
+   ============================================================ */
+const GUN_CAP=[
+ '兩塊燃料各自都太小、太分散，中子還沒撞到東西就跑掉了——所以都是安全的次臨界狀態。',
+ '引爆時，一般的化學炸藥把左邊那塊燃料，沿著管子高速推向右邊那塊。',
+ '兩塊合而為一。體積變大、中子逃走的機會急遽下降，k 一瞬間跨過 1，變成超臨界。',
+ '此時射入中子，連鎖反應在極短時間內完成。廣島的「小男孩」就是這一型。'
+];
+const IMP_CAP=[
+ '一顆燃料球，密度正常。此時它的體積夠大、密度夠低，中子容易從表面逃走，所以是次臨界。',
+ '外圍的化學炸藥同時引爆，從四面八方往中心壓——關鍵在於必須完全均勻、完全同時。',
+ '球被壓得更小、更密。原子核之間擠得更近，中子在同樣的距離裡撞到東西的機會大增，k 跨過 1。',
+ '連鎖反應開始。長崎的「胖子」和第一次核試「三位一體」都是這一型，燃料是鈽-239。'
+];
+function setGun(s){
+  const plug=$('#gunPlug'), spark=$('#gunSpark');
+  plug.style.transform = s>=2 ? 'translateX(114px)' : (s===1?'translateX(50px)':'none');
+  spark.setAttribute('r', s>=3 ? 30 : 0);
+  spark.style.opacity = s>=3 ? .5 : 0;
+  const merged = s>=2;
+  $('#gunLA').style.opacity = merged?0:1;
+  $('#gunLB').style.opacity = merged?0:1;
+  $('#gunLC').style.opacity = merged?1:0;
+  $('#gunCap').textContent=GUN_CAP[s];
+}
+function setImp(s){
+  const core=$('#impCore'), arr=$('#impArrows');
+  arr.style.opacity = (s===1)?1:0;
+  core.setAttribute('r', s>=2 ? 18 : 30);
+  core.style.opacity = s>=2 ? .95 : .55;
+  core.setAttribute('fill', s>=3 ? css('--energy') : css('--nucleus'));
+  $('#impCap').textContent=IMP_CAP[s];
+}
+$$('.stepbar').forEach(bar=>{
+  bar.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    $$('button',bar).forEach(x=>x.setAttribute('aria-pressed', x===b ? 'true':'false'));
+    const s=+b.dataset.s;
+    if(bar.dataset.steps==='gun') setGun(s); else setImp(s);
+  });
+});
+
+/* ============================================================
+   MAIN LOOP + RESIZE
+   ============================================================ */
+/* a hidden canvas measures 0 wide, so (re)fit each one the moment its station is shown */
+function refitOne(n){
+  if(n===1) atomCv._fit = fitCanvas(atomCv, 300);
+  if(n===3){ shieldCv._fit = fitCanvas(shieldCv, 230); hlCv._fit = fitCanvas(hlCv, 180); drawHalfCurve(); }
+  if(n===4) fisCv._fit  = fitCanvas(fisCv, 290);
+  if(n===5){ chainCv._fit = fitCanvas(chainCv, 330); chainSim.build(); }
+  if(n===6) rxCv._fit   = fitCanvas(rxCv, 260);
+}
+function refit(){ for(let i=1;i<=8;i++) if(i===current) refitOne(i); }
+let lastT=performance.now();
+function loop(t){
+  const dt=Math.min(50, t-lastT); lastT=t;
+  if(atomCv._fit && current===1) drawAtom(t);
+  if(shieldCv._fit && current===3) drawShield(dt);
+  if(fisCv._fit && current===4) drawFission(dt);
+  if(chainCv._fit && current===5){ chainSim.step(dt); chainSim.render(); chainSim.upd(); }
+  if(rxCv._fit && current===6){ reactor.tick(dt); reactor.draw(); }
+  requestAnimationFrame(loop);
+}
+
+let rt;
+window.addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(refit,180); });
+
+/* boot */
+load();
+atomCv._fit  = fitCanvas(atomCv, 300);
+shieldCv._fit= fitCanvas(shieldCv, 230);
+hlCv._fit    = fitCanvas(hlCv, 180);
+fisCv._fit   = fitCanvas(fisCv, 290);
+chainCv._fit = fitCanvas(chainCv, 330);
+rxCv._fit    = fitCanvas(rxCv, 260);
+atomUpdate();
+setEnrich(7);
+hlUpdate();
+mc();
+setGun(0); setImp(0);
+current = 1;
+for(let i=8;i>=1;i--){ if(unlocked(i)){ current=i; break; } }
+go(current);
+requestAnimationFrame(loop);
+})();
+</script>
+</body></html>
