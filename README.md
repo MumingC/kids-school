@@ -8,11 +8,12 @@ A small collection of static learning websites I build for my kids.
 | | Folder | Title | About |
 |---|---|---|---|
 | 01 | [`rocket/`](rocket/) | 從地面到軌道 · Ground to Orbit | 12 關火箭課程，小三起點，終點是理解真實火箭如何進入軌道。每關附互動模擬器與 Space English。 |
+| 02 | [`ww2/`](ww2/) | 小小歷史家 · WWII | 二次世界大戰互動教材：會動的戰爭地圖、1931–1945 歷史大軸線、老照片、武器圖鑑、臺灣篇與小測驗。另有[國小中低年級簡單版](ww2/kids.html)。 |
 
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.
-- Each subject is one self-contained `index.html` inside its own folder.
+- Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`).
 - Progress is stored in the browser's `localStorage`, so it never leaves the device.
 
 ## Local preview
@@ -29,3 +30,4 @@ Settings → Pages → Source: `Deploy from a branch` → Branch `main` / `(root
 
 - Home: `https://mumingc.github.io/kids-school/`
 - Rocket course: `https://mumingc.github.io/kids-school/rocket/`
+- WWII: `https://mumingc.github.io/kids-school/ww2/` (easy version: `.../ww2/kids.html`)
