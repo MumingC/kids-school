@@ -13,8 +13,9 @@
   var CFG = window.KS_FEEDBACK;
   if (!CFG || !CFG.course) return;
 
+  // 在 Vercel 上就走同源；GitHub Pages 那份沒有後端，跨站送到 Vercel。
   var API = location.hostname.endsWith(".github.io")
-    ? "https://kids-school.vercel.app/api/feedback"
+    ? "https://kids-school-tawny.vercel.app/api/feedback"
     : "/api/feedback";
 
   function currentSection() {
