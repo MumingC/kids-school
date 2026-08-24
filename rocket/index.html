@@ -1,0 +1,1585 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>從地面到軌道</title>
+<meta name="description" content="給小學三年級開始的火箭學校：12 關互動課程，每一關都有可以動手玩的模擬器，並附一段 Space English。">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="從地面到軌道">
+<meta property="og:description" content="給小學三年級開始的火箭學校：12 關互動課程，每一關都有可以動手玩的模擬器，並附一段 Space English。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --paper:#E7EDF3; --surface:#FFFFFF; --surface-2:#F2F6FA;
+  --ink:#0F2137; --ink-soft:#54718F; --ink-faint:#8AA0B6;
+  --line:#C3D3E1; --line-soft:#DDE7F0;
+  --flame:#D2431C; --flame-soft:#FBE6DE;
+  --instr:#0B7F8E; --instr-soft:#DDF0F2;
+  --sky-top:#0F2137; --sky-bot:#3E6C93;
+  --shadow:0 1px 2px rgba(15,33,55,.06),0 8px 24px rgba(15,33,55,.07);
+  --grid:rgba(15,33,55,.055);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+    --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+    --line:#22414F; --line-soft:#1A3340;
+    --flame:#FF7E52; --flame-soft:#341A12;
+    --instr:#3FC9D6; --instr-soft:#0C2E33;
+    --sky-top:#04090F; --sky-bot:#123048;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+    --grid:rgba(150,200,230,.07);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+  --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+  --line:#22414F; --line-soft:#1A3340;
+  --flame:#FF7E52; --flame-soft:#341A12;
+  --instr:#3FC9D6; --instr-soft:#0C2E33;
+  --sky-top:#04090F; --sky-bot:#123048;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --grid:rgba(150,200,230,.07);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Noto Sans TC","Chakra Petch",system-ui,sans-serif;
+  font-size:17px; line-height:1.85; letter-spacing:.01em;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+h1,h2,h3,h4{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-weight:700;line-height:1.35;text-wrap:balance;margin:0}
+.mono{font-family:"IBM Plex Mono","Chakra Petch",monospace;font-variant-numeric:tabular-nums}
+a{color:var(--instr)}
+button{font-family:inherit}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;background:linear-gradient(178deg,var(--sky-top),var(--sky-bot));color:#EAF2F8;padding:clamp(48px,9vw,104px) 24px clamp(40px,7vw,72px)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:.9}
+.hero-in{position:relative;max-width:1120px;margin:0 auto}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#8FD3DC}
+.hero h1{font-size:clamp(38px,7.4vw,76px);font-weight:700;letter-spacing:-.01em;margin:14px 0 0;color:#fff}
+.hero h1 em{font-style:normal;color:#FFB08A}
+.hero p{max-width:34em;color:#C2D5E4;margin:18px 0 0;font-size:clamp(16px,1.6vw,19px)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:30px}
+.hero-meta div{display:flex;flex-direction:column;gap:2px}
+.hero-meta b{font-family:"IBM Plex Mono",monospace;font-size:22px;color:#fff;font-weight:600}
+.hero-meta span{font-size:12.5px;color:#95B2C8;letter-spacing:.1em}
+
+/* ---------- shell ---------- */
+.shell{max-width:1180px;margin:0 auto;padding:0 20px 100px;display:grid;grid-template-columns:238px minmax(0,1fr);gap:38px;align-items:start;overflow-x:clip}
+@media(max-width:900px){.shell{grid-template-columns:minmax(0,1fr);gap:0;padding-bottom:64px}}
+
+/* ---------- flight-profile rail ---------- */
+.rail{position:sticky;top:20px;margin-top:34px;min-width:0;max-width:100%}
+.rail h4{font-size:12px;letter-spacing:.18em;color:var(--ink-faint);font-family:"IBM Plex Mono",monospace;font-weight:600;margin-bottom:14px}
+.profile{position:relative;padding-left:34px}
+.profile::before{content:"";position:absolute;left:12px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--instr),var(--line))}
+.stop{position:relative;display:flex;gap:9px;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:5px 6px;margin:1px 0;cursor:pointer;color:var(--ink-soft);border-radius:7px;font-size:13.5px;line-height:1.5}
+.stop:hover{background:var(--surface-2);color:var(--ink)}
+.stop::before{content:"";position:absolute;left:-27px;top:12px;width:9px;height:9px;border-radius:50%;background:var(--paper);border:2px solid var(--line)}
+.stop.done::before{background:var(--instr);border-color:var(--instr)}
+.stop.active{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+.stop.active::before{background:var(--flame);border-color:var(--flame);box-shadow:0 0 0 4px var(--flame-soft)}
+.stop i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);flex:none;width:22px}
+.alt{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-faint);padding:9px 0 3px 0;letter-spacing:.06em;border-top:1px dashed var(--line);margin-top:9px}
+.alt:first-child{border-top:0;margin-top:0}
+.railfoot{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap}
+.tinybtn{border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);border-radius:99px;padding:5px 12px;font-size:12px;cursor:pointer}
+.tinybtn:hover{border-color:var(--instr);color:var(--instr)}
+
+/* mobile rail */
+@media(max-width:900px){
+  .rail{position:static;margin:22px 0 4px;min-width:0;max-width:100%;overflow:hidden}
+  .profile{padding-left:0;display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;max-width:100%;-webkit-overflow-scrolling:touch}
+  .profile::before{display:none}
+  .stop{width:auto;flex:none;white-space:nowrap;border:1px solid var(--line);background:var(--surface)}
+  .stop::before{display:none}
+  .alt{display:none}
+}
+
+/* ---------- content ---------- */
+.pane{margin-top:34px;min-width:0}
+.chapline{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.16em;color:var(--flame);text-transform:uppercase}
+.pane h2{font-size:clamp(27px,3.6vw,38px);margin:8px 0 0;letter-spacing:-.005em}
+.lede{color:var(--ink-soft);margin:12px 0 0;font-size:18px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.tag{font-size:11.5px;letter-spacing:.06em;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);background:var(--surface)}
+.tag.m{color:var(--instr);border-color:var(--instr);background:var(--instr-soft)}
+
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:24px 26px;margin-top:22px;box-shadow:var(--shadow)}
+@media(max-width:600px){.card{padding:20px 17px;border-radius:12px}}
+.card > h3{font-size:13px;letter-spacing:.16em;font-family:"IBM Plex Mono",monospace;color:var(--ink-faint);font-weight:600;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.card > h3::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.card p{margin:0 0 14px}
+.card p:last-child{margin-bottom:0}
+.card ul,.card ol{margin:0 0 14px;padding-left:1.3em}
+.card li{margin:5px 0}
+b.hl{color:var(--flame)}
+.key{border-left:3px solid var(--flame);background:var(--flame-soft);padding:13px 16px;border-radius:0 9px 9px 0;font-weight:700;color:var(--ink)}
+.warn{border-left:3px solid #C99A00;background:rgba(201,154,0,.09);padding:12px 16px;border-radius:0 9px 9px 0;font-size:15px}
+.parent{background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;padding:18px 20px;margin-top:22px;font-size:15.5px;color:var(--ink-soft)}
+.parent strong{color:var(--ink)}
+
+/* sim */
+.sim{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.sim canvas{display:block;width:100%;background:transparent}
+.ctrl{display:flex;flex-wrap:wrap;gap:14px 20px;padding:14px 16px;border-top:1px solid var(--line-soft);background:var(--surface)}
+.ctrl label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-soft);min-width:150px;flex:1}
+.ctrl label span b{color:var(--ink);font-family:"IBM Plex Mono",monospace}
+input[type=range]{width:100%;accent-color:var(--flame);height:22px}
+.btn{border:1px solid var(--flame);background:var(--flame);color:#fff;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--surface);color:var(--flame)}
+.btn.small{padding:5px 12px;font-size:13px}
+.readout{display:flex;flex-wrap:wrap;gap:8px 26px;padding:12px 16px;border-top:1px solid var(--line-soft);background:var(--surface-2);font-family:"IBM Plex Mono",monospace;font-size:13px}
+.readout div{display:flex;gap:7px;align-items:baseline}
+.readout span{color:var(--ink-faint);font-size:11px;letter-spacing:.08em}
+.readout b{color:var(--ink);font-weight:600;font-size:15px}
+.verdict{padding:11px 16px;font-size:14px;font-weight:700;border-top:1px solid var(--line-soft)}
+.verdict.ok{background:var(--instr-soft);color:var(--instr)}
+.verdict.no{background:var(--flame-soft);color:var(--flame)}
+
+/* math */
+.mathbox{background:var(--surface-2);border-radius:10px;padding:16px 18px;margin:14px 0;font-family:"IBM Plex Mono",monospace;font-size:15px;overflow-x:auto}
+.mathbox .lbl{font-family:"Noto Sans TC",sans-serif;color:var(--ink-soft);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-soft)}
+th{font-size:12px;letter-spacing:.08em;color:var(--ink-faint);font-weight:600}
+td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+details.ans{margin:8px 0 0;border:1px solid var(--line-soft);border-radius:9px;background:var(--surface-2)}
+details.ans summary{cursor:pointer;padding:10px 14px;font-size:14px;font-weight:700;color:var(--instr);list-style:none}
+details.ans summary::-webkit-details-marker{display:none}
+details.ans summary::before{content:"▸ ";}
+details.ans[open] summary::before{content:"▾ ";}
+details.ans div{padding:0 14px 14px;font-size:15px;color:var(--ink-soft)}
+
+/* space english */
+.en{border-left:3px solid var(--instr);background:var(--instr-soft);padding:16px 18px;border-radius:0 10px 10px 0}
+.en p.txt{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-size:17.5px;line-height:1.95;color:var(--ink);margin:0}
+.en p.zh{margin:12px 0 0;font-size:15px;color:var(--ink-soft);display:none}
+.en.show p.zh{display:block}
+.entoggle{margin-top:12px;border:1px solid var(--instr);background:transparent;color:var(--instr);border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer}
+.words{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:16px}
+.word{background:var(--surface);border:1px solid var(--line-soft);border-radius:9px;padding:9px 12px;line-height:1.45}
+.word b{display:block;font-family:"Chakra Petch","IBM Plex Mono",monospace;font-size:15px;color:var(--ink);letter-spacing:.01em}
+.word span{font-size:13px;color:var(--ink-soft)}
+
+/* quiz */
+.q{margin-bottom:18px}
+.q:last-child{margin-bottom:0}
+.q > p{font-weight:700;margin-bottom:10px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:10px 14px;font-size:15px;cursor:pointer;color:var(--ink);line-height:1.6}
+.opt:hover{border-color:var(--instr)}
+.opt.right{border-color:var(--instr);background:var(--instr-soft);color:var(--instr);font-weight:700}
+.opt.wrong{border-color:var(--flame);background:var(--flame-soft);color:var(--flame)}
+.fb{margin-top:9px;font-size:14.5px;color:var(--ink-soft);padding-left:2px}
+
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:30px;flex-wrap:wrap}
+.navbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 18px;cursor:pointer;color:var(--ink);font-size:14.5px;text-align:left;max-width:48%}
+.navbtn:hover{border-color:var(--flame);color:var(--flame)}
+.navbtn small{display:block;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.1em}
+.navbtn:disabled{opacity:.35;cursor:default}
+.done-toggle{width:100%;margin-top:16px;border:1px solid var(--instr);background:var(--surface);color:var(--instr);border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer}
+.done-toggle.on{background:var(--instr);color:#fff}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 20px 60px;text-align:center;color:var(--ink-faint);font-size:13px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+:focus-visible{outline:2px solid var(--instr);outline-offset:2px}
+</style>
+
+<header class="hero">
+  <canvas id="heroCv" aria-hidden="true"></canvas>
+  <div class="hero-in">
+    <div class="eyebrow">Ground → Orbit · 12 Missions</div>
+    <h1>從地面到<em>軌道</em></h1>
+    <p>給小學三年級開始的火箭學校。從「球為什麼會掉下來」一路走到「真正的火箭怎麼進入軌道」——每一關都有一個可以動手玩的模擬器，數學、物理、化學藏在裡面，不用先學會才能玩。每一關還附一段 Space English：一小段英文短文、中文對照，加上六個太空單字。</p>
+    <div class="hero-meta">
+      <div><b>12</b><span>MISSIONS</span></div>
+      <div><b>4</b><span>CHAPTERS</span></div>
+      <div><b>12</b><span>模擬器</span></div>
+      <div><b>72</b><span>英文單字</span></div>
+      <div><b>7.8</b><span>KM/S 終點</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <aside class="rail">
+    <h4>FLIGHT PROFILE</h4>
+    <nav class="profile" id="profile"></nav>
+    <div class="railfoot">
+      <button class="tinybtn" id="resetBtn">清除進度</button>
+      <button class="tinybtn" id="themeBtn">切換配色</button>
+    </div>
+  </aside>
+  <section class="pane" id="pane" tabindex="-1"></section>
+</main>
+<footer>從地面到軌道 · 一份親子共學的火箭課程　|　所有實驗請由大人陪同進行<br><a href="../" style="color:var(--ink-faint)">← 回到 Kids School 首頁</a></footer>
+
+<script>
+"use strict";
+const LEVELS = [
+{
+ n:1, ch:"第一章 · 掉下來與飛上去", alt:"地面 0 m", sim:"fall",
+ title:"東西為什麼都會掉下來",
+ ask:"你丟出去的球，最後為什麼一定會回到地上？",
+ tags:["物理：重力","數學：測量與表格"],
+ story:`<p>把球往上丟，它會慢下來、停一下、再掉回你手上。把石頭往前丟，它也會一邊往前一邊往下。<b class="hl">不管你怎麼丟，最後都會往下。</b></p>
+ <p>這是因為地球一直在拉所有東西，這個看不見的拉力叫做<b class="hl">重力</b>。重力不用碰到你就能拉你，它從地球中心往外拉住每一樣東西——包括你、空氣、月亮，還有火箭。</p>
+ <p>所以火箭的第一個敵人，不是外星人，是重力。火箭要飛，就得推得比重力拉得更用力。</p>
+ <div class="key">重力：地球把所有東西往地心方向拉的力。這就是火箭一輩子要對抗的東西。</div>`,
+ hands:`<p><b>實驗：誰先落地？</b></p>
+ <ol>
+  <li>找一顆彈珠（重）和一張紙揉成的紙團（輕）。</li>
+  <li>站在椅子上（請大人扶著），兩手舉到同一高度，<b>同時放開</b>。</li>
+  <li>聽落地的聲音——是「叩、叩」兩聲，還是「叩」一聲？</li>
+  <li>再試一次，這次紙不要揉，攤平放開。</li>
+ </ol>
+ <p>你會發現：<b class="hl">紙團和彈珠幾乎同時落地，但攤平的紙慢很多。</b>所以「掉得慢」不是因為輕，是因為<b>空氣擋住它</b>。這件事伽利略在四百多年前就發現了。</p>`,
+ simNote:`<p>把「空氣」關掉試試看：在沒有空氣的地方（例如月球），羽毛和鐵球是同時落地的。1971 年阿波羅 15 號的太空人真的在月球上做過這個實驗。</p>`,
+ math:`<p class="lbl" style="margin-bottom:6px">從不同高度放開一顆球，落地要多久？</p>
+ <div class="scroll"><table>
+  <tr><th>放開的高度</th><th class="n">落地時間</th><th>你發現了嗎</th></tr>
+  <tr><td>5 公尺</td><td class="n">1.0 秒</td><td>——</td></tr>
+  <tr><td>20 公尺</td><td class="n">2.0 秒</td><td>高度 ×4，時間只有 ×2</td></tr>
+  <tr><td>45 公尺</td><td class="n">3.0 秒</td><td>高度 ×9，時間只有 ×3</td></tr>
+ </table></div>
+ <p>看出規律了嗎？高度變成 4 倍、9 倍、16 倍，時間才變成 2 倍、3 倍、4 倍。</p>
+ <details class="ans"><summary>那麼 80 公尺高，落地要幾秒？</summary><div>80 是 5 的 16 倍，而 16 = 4 × 4，所以時間是 4 秒。<br>（長大後你會學到這個規律寫成 h = 5 × t × t。）</div></details>`,
+ quiz:[
+  {q:"在完全沒有空氣的地方，同時放開一根羽毛和一顆鐵球，會怎樣？",opts:["鐵球先落地，因為比較重","羽毛和鐵球同時落地","羽毛先落地"],a:1,fb:"沒有空氣擋路時，所有東西掉落的快慢都一樣。重的東西並不會掉得比較快。"},
+  {q:"火箭要飛上天，最主要要對抗的是什麼？",opts:["太陽的光","地球的重力","月亮的引力"],a:1,fb:"重力一路把火箭往回拉，火箭必須推得更用力才走得掉。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>這一關的重點是把「重」和「掉得快」分開。孩子幾乎一定會說重的先落地——先讓他猜，再做實驗，猜錯的經驗比答對更有價值。攤平的紙那一步不要省略，那是下一關「空氣是有東西的」的伏筆。`
+},
+{
+ n:2, ch:"第一章 · 掉下來與飛上去", alt:"地面 0 m", sim:"balloon",
+ title:"往後丟東西，自己就會往前",
+ ask:"火箭在天上沒有輪子、沒有地板，它到底在推什麼？",
+ tags:["物理：作用力與反作用力","數學：平均數"],
+ story:`<p>你走路是腳推地板，游泳是手推水，划船是槳推水。那火箭在高空中沒有東西可以推，怎麼還會往前？</p>
+ <p>答案很妙：<b class="hl">火箭推的是它自己噴出去的東西。</b></p>
+ <p>想像你站在很滑的溜冰場上，抱著一顆保齡球。你用力把球往前丟出去——你會發現自己往後滑走了。你沒有推任何人，只是丟了一個東西，卻讓自己動了。</p>
+ <p>火箭就是這樣，只是它每一秒鐘都在往後丟東西：滾燙的高速氣體。丟得越快、丟得越多，火箭就被推得越用力。這叫做<b class="hl">作用力與反作用力</b>——你推東西多用力，東西就用同樣的力氣推回你。</p>
+ <div class="key">火箭不是靠推空氣前進的。它靠的是「把東西往後丟」，所以在真空的太空裡照樣能飛。</div>`,
+ hands:`<p><b>實驗：氣球火箭</b></p>
+ <ol>
+  <li>拿一條長棉線（3～5 公尺），穿過一根吸管。</li>
+  <li>棉線兩端綁在椅背或門把上，拉直。</li>
+  <li>吹一顆氣球，<b>先不要打結</b>，用膠帶把氣球黏在吸管上，氣球的開口朝後。</li>
+  <li>放手！</li>
+ </ol>
+ <p>氣球往後噴氣，自己就往前衝。試試看：吹得越飽，跑得越遠嗎？跑幾次，把距離記下來。</p>`,
+ simNote:`<p>拉動滑桿，看看氣球裡的空氣量怎麼影響飛行距離。注意氣球是「一邊噴一邊變輕」的——這正是真火箭的樣子。</p>`,
+ math:`<p class="lbl">小明的氣球火箭跑了三次，距離分別是：</p>
+ <div class="mathbox">240 cm　　260 cm　　250 cm</div>
+ <p>要回報「平均跑多遠」，就把三次加起來再除以三：</p>
+ <div class="mathbox">(240 + 260 + 250) ÷ 3 = 750 ÷ 3 = <b>250 cm</b></div>
+ <p>科學家從來不只做一次實驗。做三次取平均，是因為每一次都會有一點誤差。</p>
+ <details class="ans"><summary>換你算：310、290、300 公分的平均是多少？</summary><div>310 + 290 + 300 = 900，900 ÷ 3 = <b>300 公分</b>。</div></details>`,
+ quiz:[
+  {q:"太空中沒有空氣，火箭為什麼還能前進？",opts:["因為它推空氣","因為它把氣體往後丟，氣體也把它往前推","因為太空沒有重力"],a:1,fb:"推進靠的是「丟東西」，不需要外面有東西可以推。"},
+  {q:"氣球火箭飛行時，氣球的重量會怎麼變？",opts:["越來越輕","不會變","越來越重"],a:0,fb:"空氣一直被噴掉，所以越飛越輕。真的火箭也是這樣，這件事在第 12 關會變得非常重要。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>「作用力與反作用力」不必背名詞，讓孩子用身體記住它：在光滑地板上坐在滑板或辦公椅上丟一顆球，人會往後退。這一關的核心句只有一句——「火箭往後丟東西，自己就往前」，其他都是包裝。`
+},
+{
+ n:3, ch:"第一章 · 掉下來與飛上去", alt:"對流層 0–12 km", sim:"drag",
+ title:"空氣不是「什麼都沒有」",
+ ask:"看不見的空氣，真的能擋住一台火箭嗎？",
+ tags:["物理：空氣阻力","化學：空氣的成分","數學：百分比入門"],
+ story:`<p>我們常說「那裡什麼都沒有，只有空氣」。但空氣其實是<b class="hl">真的東西</b>：它有重量，會被推、也會推回來。一個教室裡的空氣，大約有 50 公斤重，跟一個大人差不多。</p>
+ <p>火箭剛升空時速度不快，空氣還好對付；但當它衝到每秒好幾百公尺，空氣就像一堵牆。工程師把火箭撞空氣最痛的那一刻叫做 <span class="mono">Max Q</span>（最大動壓），大約發生在起飛後 70 秒、高度 11 公里左右。那時候火箭甚至要<b>先把引擎關小</b>，等衝過去再開回全力。</p>
+ <p>空氣裡有什麼？</p>
+ <ul>
+  <li><b>氮氣 78%</b>——最多，但不太參加反應</li>
+  <li><b>氧氣 21%</b>——燃燒需要它，我們呼吸也需要它</li>
+  <li><b>其他 1%</b>——氬氣、二氧化碳、水蒸氣⋯⋯</li>
+ </ul>
+ <div class="key">空氣越高越稀薄。到了 100 公里高的「卡門線」，空氣幾乎沒有了，那裡就算是太空了。</div>`,
+ hands:`<p><b>實驗一：空氣有重量</b><br>拿一根竹筷或衣架當天平，兩端各綁一顆<b>沒吹</b>的氣球，調到平衡。取下一顆吹飽再綁回去——它會往下沉，因為裡面的空氣有重量。</p>
+ <p><b>實驗二：空氣會擋住東西</b><br>拿兩張一樣的紙，一張揉成球，一張攤平，同時放開。攤平的那張慢得多——那不是重量的差別，是<b class="hl">迎風面積</b>的差別。</p>
+ <p><b>實驗三：做一個降落傘</b><br>用塑膠袋剪成正方形，四角綁線，掛一個小玩具。傘面越大，掉得越慢。</p>`,
+ simNote:`<p>換不同的東西丟丟看，並調整空氣的濃度。把空氣調到 0（太空），所有東西掉的速度就一模一樣了。</p>`,
+ math:`<p class="lbl">用 100 格方格想像空氣</p>
+ <p>如果把空氣分成 100 份：</p>
+ <div class="mathbox">氮氣 <b>78</b> 格　+　氧氣 <b>21</b> 格　+　其他 <b>1</b> 格　=　100 格</div>
+ <p>這就是「百分比」的意思：<b>78% 就是 100 份裡面佔 78 份</b>。</p>
+ <details class="ans"><summary>如果你吸進 500 毫升的空氣，其中大約有多少毫升是氧氣？</summary><div>500 的 21% ≈ 500 ÷ 100 × 21 = <b>105 毫升</b>。<br>而且你只用掉其中一小部分，吐出來的氣裡還有 16% 左右的氧氣——這就是為什麼人工呼吸有用。</div></details>`,
+ quiz:[
+  {q:"為什麼攤平的紙比揉成團的紙掉得慢？",opts:["因為攤平比較輕","因為攤平的迎風面積大，被空氣擋住","因為紙團比較大"],a:1,fb:"重量沒變，變的是「撞到空氣的面積」。降落傘就是把這件事做到極致。"},
+  {q:"空氣中最多的氣體是？",opts:["氧氣","二氧化碳","氮氣"],a:2,fb:"氮氣佔了 78%。氧氣只有 21%，卻是燃燒和呼吸的關鍵。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>三年級還沒正式學百分比，方格圖是最好的橋樑——可以真的畫一張 10×10 的格子塗色。降落傘實驗值得多做幾種尺寸，讓孩子自己記錄「傘面邊長 vs 落下秒數」，這是他第一份真正的實驗數據表。`
+},
+{
+ n:4, ch:"第二章 · 做一支會飛的火箭", alt:"低空 100–300 m", sim:"water",
+ title:"水火箭：水到底要裝多少？",
+ ask:"水裝越多，火箭一定飛得越高嗎？",
+ tags:["物理：質量與推進","數學：分數與找最佳值"],
+ story:`<p>水火箭裡有兩樣東西：<b class="hl">水</b>和<b class="hl">壓縮空氣</b>。它們的角色完全不同——</p>
+ <ul>
+  <li><b>空氣是彈簧。</b>你打氣打進去的力氣，全部存在被壓扁的空氣裡。</li>
+  <li><b>水是子彈。</b>火箭要往後丟的，就是這些水。</li>
+ </ul>
+ <p>現在你就懂為什麼不能裝滿了：</p>
+ <p>水裝太滿 → 沒有空間存空氣 → 彈簧太小，一下就噴完了。<br>水裝太少 → 空氣很多，但沒東西可丟 → 空氣自己噴出去太輕，推不動。</p>
+ <p>所以一定有一個「剛剛好」。實際上，把瓶子裝到大約 <b class="hl">1/3 到 2/5</b> 的水（33%～40%）通常飛得最高。而且打氣壓力越高，最佳水量還會再多一點——這件事你可以在下面的模擬器裡自己驗證。</p>
+ <div class="key">推進的力量 = 丟出去的東西「有多重」×「丟得多快」。兩者都要，只有一邊多沒有用。</div>`,
+ hands:`<p><b>製作：600 毫升寶特瓶水火箭</b></p>
+ <ol>
+  <li>寶特瓶裝水到大約 1/3（約 200 毫升）。</li>
+  <li>軟木塞中間鑽洞，插入打氣筒的針閥，塞緊瓶口。</li>
+  <li>瓶子倒過來架好（用三根竹筷綁成的架子），<b>發射方向遠離所有人</b>。</li>
+  <li>打氣——到某個壓力，軟木塞會自己被推開，火箭升空。</li>
+ </ol>
+ <p><b>比較實驗：</b>分別裝 1/5、1/3、1/2、滿瓶的水，各射三次，量高度或落點距離，畫成表格。你會自己找到那個最佳值。</p>
+ <div class="warn"><b>安全第一：</b>一定要有大人在場。戴護目鏡，人站在火箭側邊而不是上方，絕不要在打氣時把臉靠近瓶口，也不要用玻璃瓶或加壓超過建議值。</div>`,
+ simNote:`<p>調整水量與打氣壓力，看看飛得多高。右邊的曲線是「每一種水量會飛多高」，虛線是你現在的設定。試著找出最高點——再把壓力調大，看看最佳水量有沒有跟著移動。</p>`,
+ math:`<p class="lbl">一個 1500 毫升的寶特瓶，要裝多少水？</p>
+ <div class="scroll"><table>
+  <tr><th>分數</th><th class="n">水量</th><th class="n">剩下的空氣</th></tr>
+  <tr><td>1/5</td><td class="n">300 mL</td><td class="n">1200 mL</td></tr>
+  <tr><td>1/3</td><td class="n">500 mL</td><td class="n">1000 mL</td></tr>
+  <tr><td>1/2</td><td class="n">750 mL</td><td class="n">750 mL</td></tr>
+  <tr><td>2/3</td><td class="n">1000 mL</td><td class="n">500 mL</td></tr>
+ </table></div>
+ <p>算法：<b>1500 ÷ 分母 × 分子</b>。例如 2/3 就是 1500 ÷ 3 × 2 = 1000。</p>
+ <details class="ans"><summary>換你算：2000 毫升的瓶子，裝 1/4 是多少水？</summary><div>2000 ÷ 4 × 1 = <b>500 毫升</b>。</div></details>`,
+ quiz:[
+  {q:"水火箭裡的壓縮空氣扮演什麼角色？",opts:["它是被丟出去的子彈","它是儲存力氣的彈簧","它讓火箭比較輕"],a:1,fb:"空氣存住你打氣的力氣，再把水擠出去。真正被丟出去的是水。"},
+  {q:"為什麼水裝滿反而飛不高？",opts:["太重了飛不動","沒有空間存壓縮空氣，推力一下就沒了","水會把噴嘴塞住"],a:1,fb:"雖然「太重」也有一點影響，但主因是沒有空氣可以壓縮，等於彈簧被拿掉了。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>這一關是整個課程第一次出現「最佳化」——不是越多越好，而是有一個剛剛好。這個思考方式之後會一直用到。務必讓孩子自己做 4 種水量的對照實驗並記錄，那份表格比任何講解都有效。安全部分請務必照做。`
+},
+{
+ n:5, ch:"第二章 · 做一支會飛的火箭", alt:"低空 300 m–2 km", sim:"stability",
+ title:"為什麼火箭是尖的、屁股有翅膀",
+ ask:"為什麼火箭飛上去不會像丟出去的樹枝一樣亂翻？",
+ tags:["物理：穩定性","數學：長度與位置比較"],
+ story:`<p>火箭上有兩個看不見的點，工程師整天在管它們：</p>
+ <ul>
+  <li><b class="hl">重心</b>（CG）——火箭的平衡點。用一根手指就能撐住它的那個位置。</li>
+  <li><b class="hl">風壓中心</b>（CP）——空氣推它的力氣「集中」的那個位置。</li>
+ </ul>
+ <p>規則只有一條：<b class="hl">重心要在風壓中心的前面（比較靠近頭）。</b></p>
+ <p>想想射箭的箭：重的箭頭在前，輕的羽毛在後，所以箭飛得很直。如果把箭反過來，尾巴在前，它一定會翻回來。飛鏢、羽毛球，全都是同一個道理。</p>
+ <p>所以火箭要：<b>頭尖而重</b>（減少空氣阻力，把重心往前拉）、<b>尾巴裝尾翼</b>（把風壓中心往後推）。這樣只要火箭稍微歪掉，空氣就會自動把它推正。</p>
+ <div class="key">穩定 = 重心在前、風壓中心在後。歪掉時空氣會幫你轉回來，這叫「被動穩定」。</div>`,
+ hands:`<p><b>實驗一：找出平衡點</b><br>用一根手指橫著撐住你的水火箭（裝好水的狀態），慢慢移動直到它平衡——那裡就是重心。用膠帶做記號。</p>
+ <p><b>實驗二：改變重心</b><br>在火箭頭部黏一小塊黏土，再找一次平衡點——重心往前跑了。發射看看，是不是飛得更直？</p>
+ <p><b>實驗三：尾翼</b><br>用珍珠板或厚紙板剪三片尾翼，等距黏在瓶身下方。有尾翼跟沒尾翼各射三次，比較它們飛得直不直。</p>`,
+ simNote:`<p>拖動兩個滑桿，看火箭在飛行中會自己擺正，還是翻滾失控。試著找出「重心剛好在風壓中心前面多少」最穩。</p>`,
+ math:`<p class="lbl">量一量、比一比</p>
+ <p>一支 30 公分長的火箭（從頭部算起）：</p>
+ <div class="scroll"><table>
+  <tr><th>設定</th><th class="n">重心位置</th><th class="n">風壓中心</th><th>結果</th></tr>
+  <tr><td>沒有尾翼</td><td class="n">16 cm</td><td class="n">14 cm</td><td>翻滾</td></tr>
+  <tr><td>加上尾翼</td><td class="n">16 cm</td><td class="n">22 cm</td><td>穩定</td></tr>
+  <tr><td>頭部加配重</td><td class="n">12 cm</td><td class="n">22 cm</td><td>非常穩定</td></tr>
+ </table></div>
+ <p>工程師的口訣：兩點之間至少要差<b>一個火箭直徑</b>那麼多。</p>
+ <details class="ans"><summary>火箭直徑 6 公分，重心在 12 公分處，風壓中心至少要在哪裡才夠安全？</summary><div>12 + 6 = <b>18 公分之後</b>。上表第三列是 22 公分，差了 10 公分，很安全。</div></details>`,
+ quiz:[
+  {q:"要讓火箭飛得直，重心和風壓中心的關係應該是？",opts:["重心在前，風壓中心在後","風壓中心在前，重心在後","兩個在同一個位置"],a:0,fb:"就像箭：重的頭在前、羽毛在後。反過來一定會翻。"},
+  {q:"加尾翼的主要作用是？",opts:["讓火箭比較好看","把風壓中心往後移，讓火箭自己擺正","增加推力"],a:1,fb:"尾翼不會產生推力，它是在空氣裡當「羽毛」用的。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>重心可以真的用手指找出來，這是這一關最值得做的動作。風壓中心比較抽象，可以用「風從側面吹過來時，火箭會繞著哪裡轉」來描述。真正的太空火箭其實沒有大尾翼，它靠引擎擺動來轉向——這點可以留到第 11 關再說。`
+},
+{
+ n:6, ch:"第二章 · 做一支會飛的火箭", alt:"平流層 12–50 km", sim:"vt",
+ title:"越飛越快：速度與加速度",
+ ask:"火箭離開發射台時慢得像走路，一分鐘後卻比子彈還快，中間發生了什麼？",
+ tags:["物理：速度與加速度","數學：除法、讀折線圖"],
+ story:`<p>先分清楚兩個詞：</p>
+ <ul>
+  <li><b class="hl">速度</b>：你「現在」跑多快。走路大約 1.4 公尺／秒。</li>
+  <li><b class="hl">加速度</b>：你的速度「每秒鐘增加多少」。</li>
+ </ul>
+ <p>火箭引擎的推力幾乎是固定的，但火箭一直在燒掉燃料、一直變輕。同樣的推力推越來越輕的東西——<b class="hl">加速度會越來越大</b>。</p>
+ <p>獵鷹九號起飛時加速度小到人幾乎坐得住；但在第一節快燒完時，太空人身上會壓到 3 到 4 個 G，等於被三、四個自己壓在胸口。所以引擎反而要<b>減小推力</b>，免得把人和貨物壓壞。</p>
+ <div class="key">起飛慢不是引擎沒力，是因為那時候火箭最重——90% 以上的重量都是燃料。</div>`,
+ hands:`<p><b>實驗：量出你自己的速度</b></p>
+ <ol>
+  <li>在走廊上用膠帶貼出 10 公尺。</li>
+  <li>用手機碼錶量：走完要幾秒？跑完要幾秒？</li>
+  <li>速度 = 距離 ÷ 時間。</li>
+ </ol>
+ <p><b>進階：</b>每 2 公尺貼一條線，請人幫你在每條線報時。你會發現起跑那幾秒，你的速度也是「越來越快」的——你自己就是一支小火箭。</p>`,
+ simNote:`<p>調整推力和燃料量，按下發射。左邊是火箭的高度，右邊兩條線是速度和加速度。注意看：燃料燒完那一瞬間（引擎關機），速度就不再增加了。</p>`,
+ math:`<p class="lbl">速度 = 距離 ÷ 時間</p>
+ <div class="mathbox">跑 10 公尺用了 2 秒　→　10 ÷ 2 = <b>5 公尺／秒</b></div>
+ <p class="lbl">加速度 = 速度變化 ÷ 時間</p>
+ <div class="mathbox">火箭 10 秒內從 0 加速到 <b>100</b> 公尺／秒<br>100 ÷ 10 = <b>10 公尺／秒，每秒</b></div>
+ <p>地球重力給每樣東西的加速度大約是 <b>10 公尺／秒每秒</b>（精確值 9.8）。所以火箭的加速度要大於 10，它才升得上去。</p>
+ <details class="ans"><summary>火箭 20 秒內從 0 加速到 400 公尺／秒，加速度是多少？</summary><div>400 ÷ 20 = <b>20 公尺／秒每秒</b>，大約是重力的兩倍，人會感覺被壓在椅背上。</div></details>`,
+ quiz:[
+  {q:"火箭的推力不變，但它越飛加速度越大，為什麼？",opts:["因為空氣變稀薄了","因為燃料燒掉了，火箭變輕","因為重力變小了"],a:1,fb:"最主要是變輕。空氣變稀也有幫助，但影響小得多；100 公里內重力幾乎沒變。"},
+  {q:"引擎關機的那一刻，火箭的速度會怎樣？",opts:["立刻變成零","不再增加，然後被重力慢慢拉慢","繼續變快"],a:1,fb:"沒有推力就沒有加速，但已經有的速度不會消失——這是牛頓第一定律。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>「速度」和「加速度」的差別是這一關唯一的難點，三年級的孩子容易混在一起。用汽車比喻很有效：速度是時速表上的數字，加速度是你被壓進椅背的感覺。走廊計時實驗一定要做，那是他第一次親手算出一個物理量。`
+},
+{
+ n:7, ch:"第三章 · 火箭吃什麼", alt:"中氣層 50–85 km", sim:"fire",
+ title:"燒起來需要三件事",
+ ask:"太空裡沒有空氣，火箭引擎裡的火怎麼還燒得起來？",
+ tags:["化學：燃燒與氧化","物理：能量"],
+ story:`<p>要有火，一定要同時有三樣東西，缺一不可：</p>
+ <ul>
+  <li><b class="hl">燃料</b>——會燒的東西（木頭、蠟、汽油、氫氣）</li>
+  <li><b class="hl">氧化劑</b>——通常就是空氣中的氧氣</li>
+  <li><b class="hl">熱</b>——一開始的那把火，讓反應啟動</li>
+ </ul>
+ <p>這叫<b>燃燒三角形</b>。滅火就是拿掉其中任何一個：用水降溫（拿掉熱）、用鍋蓋蓋住（拿掉氧氣）、關瓦斯（拿掉燃料）。</p>
+ <p>現在回到那個問題。飛機的噴射引擎是<b>吸空氣</b>的，所以飛機飛不出大氣層。火箭不一樣——<b class="hl">火箭自己帶氧化劑上去。</b></p>
+ <p>所以獵鷹九號的兩個大槽子，一個裝煤油（燃料），另一個裝<b>液態氧</b>（氧化劑，冷到 −183°C）。這也是為什麼火箭這麼大：一半以上的重量，其實是「氧氣」。</p>
+ <div class="key">飛機吸外面的氧氣，火箭自己扛氧氣。這一個差別，就是「能飛」和「能上太空」的分界線。</div>`,
+ hands:`<p><b>實驗：把火悶熄（請大人操作）</b></p>
+ <ol>
+  <li>點一根蠟燭，放在盤子上。</li>
+  <li>用一個玻璃杯罩住它，開始數秒。</li>
+  <li>火過幾秒就熄了——不是燃料燒完，是<b>杯子裡的氧氣用完了</b>。</li>
+  <li>換一個更大的杯子再試一次，記錄秒數。杯子越大，撐越久。</li>
+ </ol>
+ <p>把「杯子容量」和「熄滅秒數」做成表，你會看到它們幾乎成正比——氧氣越多，火燒越久。這就是火箭要帶那麼大一個氧化劑槽的原因。</p>
+ <div class="warn">明火實驗全程必須由大人操作，遠離窗簾與紙張，旁邊備水。</div>`,
+ simNote:`<p>點一下三角形的任何一個角，把那個要素拿掉，看火會怎樣。再點一次可以放回去。</p>`,
+ math:`<p class="lbl">火箭上，燃料和氧化劑誰比較重？</p>
+ <p>燒 1 公斤的煤油，需要大約 <b>3.4 公斤</b> 的氧氣。所以一支煤油火箭上：</p>
+ <div class="scroll"><table>
+  <tr><th>裝的東西</th><th class="n">重量</th><th class="n">佔比</th></tr>
+  <tr><td>煤油（燃料）</td><td class="n">100 公噸</td><td class="n">約 23%</td></tr>
+  <tr><td>液態氧（氧化劑）</td><td class="n">340 公噸</td><td class="n">約 77%</td></tr>
+ </table></div>
+ <p>意外吧？火箭裝的「油」裡，超過四分之三其實是氧氣。</p>
+ <details class="ans"><summary>要燒掉 50 公斤煤油，需要多少氧氣？</summary><div>50 × 3.4 = <b>170 公斤</b>。</div></details>`,
+ quiz:[
+  {q:"燃燒三角形的三個要素是？",opts:["燃料、氧化劑、熱","燃料、水、空氣","火、煙、灰"],a:0,fb:"拿掉任何一個，火就熄了。滅火器的原理全都在這三個裡。"},
+  {q:"火箭為什麼要自己帶液態氧上去？",opts:["因為液態氧比較冷，可以降溫","因為大氣層外沒有氧氣可以吸","因為液態氧比較輕"],a:1,fb:"液態氧非常重，火箭不是為了輕才帶它，是因為外面沒有。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>蠟燭悶熄實驗是這一關的關鍵，孩子第一次會直觀感覺到「氧氣是有限的東西」。可以順便問：「太空人的太空衣背包裡裝什麼？」（也是氧氣）。三年級不需要背化學式，知道「氧氣參與燃燒」就夠了。`
+},
+{
+ n:8, ch:"第三章 · 火箭吃什麼", alt:"熱氣層 85–100 km", sim:"balance",
+ title:"火箭噴出來的白煙，其實是水",
+ ask:"燃料燒完以後，去哪裡了？",
+ tags:["化學：原子、分子、化學反應式","數學：比例與守恆"],
+ story:`<p>所有東西都是由<b class="hl">原子</b>組成的，就像積木。氫原子寫成 H，氧原子寫成 O。</p>
+ <p>原子會牽手變成<b class="hl">分子</b>：兩個氫原子牽手是 H₂（氫氣），兩個氧原子牽手是 O₂（氧氣），兩個氫加一個氧就是 H₂O——<b>水</b>。</p>
+ <p>現在看火箭引擎裡發生的事：</p>
+ <div class="mathbox" style="font-size:19px;text-align:center">2 H₂　+　O₂　→　2 H₂O　+　<b>好多能量</b></div>
+ <p>左邊是 4 個氫原子、2 個氧原子。右邊呢？2 個水分子，也是 4 個氫、2 個氧。<b class="hl">原子一個都沒有多，也一個都沒有少。</b>它們只是重新牽手了，而重新牽手的時候放出巨大的能量。</p>
+ <p>這叫<b>質量守恆</b>：物質不會憑空消失，只會變成別的東西。</p>
+ <p>所以太空梭主引擎噴出來那條又白又長的雲——那不是煙，<b class="hl">那是水蒸氣</b>。氫氧火箭是所有火箭裡最乾淨的，它的廢氣可以喝。</p>`,
+ hands:`<p><b>活動：用積木或黏土做分子</b></p>
+ <ol>
+  <li>白色黏土球代表氫（小），紅色黏土球代表氧（大）。</li>
+  <li>做 4 個白球、2 個紅球，排成左邊：兩組「白白」、一組「紅紅」。</li>
+  <li>現在拆開重組成右邊：兩組「白紅白」。</li>
+  <li>數數看——球的總數變了嗎？</li>
+ </ol>
+ <p>沒有變。這就是化學反應的全部真相：<b>拆開、重排、放出能量</b>。</p>`,
+ simNote:`<p>用按鈕調整左邊的氫氣和氧氣數量，看能不能剛好配成完整的水分子、一個原子都不剩。試試看 2 個 H₂ 配 1 個 O₂。</p>`,
+ math:`<p class="lbl">數原子：配平的意思</p>
+ <div class="scroll"><table>
+  <tr><th>組合</th><th class="n">氫原子</th><th class="n">氧原子</th><th>結果</th></tr>
+  <tr><td>1 H₂ + 1 O₂</td><td class="n">2</td><td class="n">2</td><td>剩下 1 個氧，不完美</td></tr>
+  <tr><td><b>2 H₂ + 1 O₂</b></td><td class="n">4</td><td class="n">2</td><td><b>剛好 2 個 H₂O</b></td></tr>
+  <tr><td>3 H₂ + 1 O₂</td><td class="n">6</td><td class="n">2</td><td>剩下 1 個 H₂</td></tr>
+ </table></div>
+ <p>所以氫和氧要用 <b>2 比 1</b> 的比例。這是化學裡第一個重要的比例。</p>
+ <details class="ans"><summary>要做出 10 個水分子，需要幾個 H₂ 和幾個 O₂？</summary><div>10 個 H₂ 和 5 個 O₂。（比例永遠是 2:1）</div></details>`,
+ quiz:[
+  {q:"氫氧火箭噴出來的白色氣體主要是什麼？",opts:["二氧化碳","水蒸氣","黑煙"],a:1,fb:"氫加氧就是水。這是最乾淨的火箭燃料組合。"},
+  {q:"化學反應前後，原子的總數會怎樣？",opts:["變多","變少","不會變，只是重新組合"],a:2,fb:"這叫質量守恆。原子只是換了牽手的對象。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>三年級孩子完全可以理解「原子是積木」這個層次，不需要講電子或鍵結。黏土實作務必做，「拆開重組但總數不變」用手做過一次，比講十遍有用。如果孩子問「那能量從哪裡來？」，可以回答：原子牽手的方式不同，抓得越緊就越穩定，多出來的那部分就變成熱和光跑出來了。`
+},
+{
+ n:9, ch:"第三章 · 火箭吃什麼", alt:"卡門線 100 km", sim:"nozzle",
+ title:"噴嘴：把「熱」變成「快」",
+ ask:"為什麼火箭的屁股是一個大喇叭？",
+ tags:["物理：能量轉換、超音速","數學：乘法與流率"],
+ story:`<p>燃燒室裡，氣體又熱（3000°C 以上）又擠（高壓），但它們只是亂撞，沒有方向。這樣的氣體推不動火箭。</p>
+ <p>噴嘴的工作，就是把「亂撞的熱」變成「往同一個方向的快」。它長這樣：</p>
+ <ul>
+  <li><b>先收縮</b>——把氣體擠進一個窄窄的「喉部」，這裡速度剛好到達音速。</li>
+  <li><b>再擴張</b>——喇叭口讓氣體繼續膨脹加速，衝到音速的好幾倍。</li>
+ </ul>
+ <p>這種形狀叫做<b class="hl">拉瓦爾噴嘴</b>，1888 年被發明出來，今天每一支火箭都還在用。</p>
+ <p>推力怎麼算？非常直觀：</p>
+ <div class="mathbox" style="text-align:center;font-size:17px">推力 = 每秒噴掉多少公斤　×　噴得多快</div>
+ <p>所以工程師只有兩條路：噴多一點，或噴快一點。噴快一點更划算——因為燃料是要自己扛上去的。</p>
+ <div class="key">真空中的喇叭口比海平面的大得多。這就是為什麼第二節火箭的噴嘴看起來特別誇張。</div>`,
+ hands:`<p><b>實驗：擠水管</b></p>
+ <p>拿澆花的水管開著水，用手指把出水口捏小——水噴得更遠了。水的量沒有變多，但速度變快了。這就是噴嘴喉部在做的事。</p>
+ <p><b>觀察活動：看看真的引擎</b><br>找幾張火箭引擎的照片比較：獵鷹九號的<b>海平面版</b>引擎噴嘴很小，<b>真空版</b>的噴嘴大到像一個浴缸。想想看為什麼——外面壓力越低，可以讓氣體膨脹得越久。</p>`,
+ simNote:`<p>調整喉部大小和喇叭口的張開程度，看看排氣速度和推力怎麼變。注意：喇叭口太大或太小，效率都會掉。</p>`,
+ math:`<p class="lbl">算一下推力</p>
+ <p>一具引擎每秒噴掉 <b>300 公斤</b>的氣體，噴出速度是 <b>3000 公尺／秒</b>。</p>
+ <div class="mathbox">推力 = 300 × 3000 = <b>900,000 牛頓</b>（90 萬牛頓）</div>
+ <p>90 萬牛頓大約可以舉起 90 公噸的東西——差不多是 60 台小轎車。而獵鷹九號有<b>九</b>具這樣的引擎。</p>
+ <details class="ans"><summary>如果排氣速度提高到 4000 公尺／秒，推力變多少？</summary><div>300 × 4000 = <b>1,200,000 牛頓</b>。速度提高 1/3，推力也提高 1/3——而且不用多帶燃料，這就是工程師拼命追求高排氣速度的原因。</div></details>`,
+ quiz:[
+  {q:"拉瓦爾噴嘴為什麼要先變窄再變寬？",opts:["為了讓氣體先到音速，再繼續加速到超音速","為了讓火箭比較好看","為了讓氣體降溫"],a:0,fb:"窄的喉部把氣體加速到音速，之後的喇叭口才能讓它衝到超音速。"},
+  {q:"推力怎麼算？",opts:["燃料重量 ÷ 時間","每秒噴出的質量 × 排氣速度","火箭重量 × 加速度"],a:1,fb:"「丟多重」乘上「丟多快」。兩個都能提高推力，但提高速度比較划算。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>水管實驗一定要做，孩子會立刻懂「同樣的量、通道變窄、速度變快」。至於「為什麼真空版噴嘴更大」，不必深究流體力學，用「外面沒東西擋，就可以一直吹到更開」來理解就很夠了。這一關是本課程第一次出現需要乘法的工程計算。`
+},
+{
+ n:10, ch:"第四章 · 飛進軌道", alt:"軌道 200–400 km", sim:"cannon",
+ title:"牛頓的大砲：軌道到底是什麼",
+ ask:"太空站上的東西一直在往下掉，為什麼永遠掉不到地上？",
+ tags:["物理：軌道運動","數學：大數字與單位換算"],
+ story:`<p>1687 年，牛頓想了一個實驗——他當然做不到，只能用想的：</p>
+ <p>在一座非常高的山頂上放一門大砲，水平發射。</p>
+ <ul>
+  <li>火藥少一點 → 砲彈飛出去，掉在 1 公里外。</li>
+  <li>火藥多一點 → 掉在 100 公里外。</li>
+  <li>再多一點 → 掉在 1000 公里外，這時候地球的<b>弧度</b>已經看得出來了。</li>
+  <li>如果快到某個程度 → 砲彈「往下掉的速度」剛好等於「地面往下彎的速度」，它就<b class="hl">永遠掉不到地面</b>——它繞著地球轉起來了。</li>
+ </ul>
+ <p>這就是軌道。太空人在太空站裡飄，<b>不是因為那裡沒有重力</b>（那裡的重力還有地面的九成！），而是因為他和太空站正在用同樣的速度一起往下掉。</p>
+ <p>那需要多快？在 200 公里高度，答案是<b class="hl">每秒 7.8 公里</b>。</p>
+ <div class="key">進入太空，難的不是「飛得夠高」，是「橫著飛得夠快」。高度只要幾分鐘，速度要花掉整支火箭。</div>`,
+ hands:`<p><b>活動：用一條線和一個小球感覺軌道</b><br>把小球綁在線上，在頭頂水平甩圈。你會感覺手一直在往內拉——那就是重力扮演的角色。放手的瞬間，球會沿著切線直直飛出去（牛頓第一定律）。</p>
+ <p><b>活動：算一算你要多快</b><br>7.8 公里／秒是什麼概念？從台北到高雄大約 350 公里——<b>45 秒就到了</b>。從台北到東京 2100 公里，4 分半鐘。</p>`,
+ simNote:`<p>調整砲彈速度，看它會落回地面、繞成一個橢圓、繞成漂亮的圓，還是直接飛走再也不回來。找出這三個關鍵速度。</p>`,
+ math:`<p class="lbl">單位換算：每秒 vs 每小時</p>
+ <div class="mathbox">7.8 公里／秒 × 60 秒 = 468 公里／分<br>468 × 60 分 = <b>28,080 公里／小時</b></div>
+ <p>對照一下：</p>
+ <div class="scroll"><table>
+  <tr><th>誰</th><th class="n">速度（km/h）</th></tr>
+  <tr><td>你走路</td><td class="n">5</td></tr>
+  <tr><td>高鐵</td><td class="n">300</td></tr>
+  <tr><td>客機</td><td class="n">900</td></tr>
+  <tr><td>步槍子彈</td><td class="n">3,000</td></tr>
+  <tr><td><b>太空站</b></td><td class="n"><b>28,000</b></td></tr>
+ </table></div>
+ <details class="ans"><summary>太空站繞地球一圈大約 42,000 公里，要多久？</summary><div>42,000 ÷ 28,000 = 1.5 小時，也就是 <b>90 分鐘</b>。太空人一天可以看到 16 次日出。</div></details>`,
+ quiz:[
+  {q:"太空人在太空站裡飄起來，是因為？",opts:["那裡沒有重力","他和太空站正以同樣的速度一起往下掉","太空站裡有反重力裝置"],a:1,fb:"400 公里高的重力還有地面的 89%。飄起來是因為大家一起自由落體。"},
+  {q:"要進入低地球軌道，最難的是？",opts:["飛得夠高","橫向速度要夠快（約 7.8 km/s）","溫度要夠低"],a:1,fb:"高度只佔一小部分能量，速度才是絕大部分。這是整門課最重要的一句話。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>這一關是整個課程的轉折點。孩子（和大部分大人）的直覺都是「太空 = 很高」，真相是「太空 = 很快」。牛頓大砲的模擬器值得多玩幾次，尤其是速度剛好不夠、砲彈在地球另一邊擦過去的那種軌跡。可以搭配 YouTube 上太空站的即時窗外畫面一起看。`
+},
+{
+ n:11, ch:"第四章 · 飛進軌道", alt:"入軌 · 重力轉向", sim:"turn",
+ title:"火箭為什麼發射後就開始轉彎",
+ ask:"既然要往上，火箭為什麼飛沒多久就歪掉了？",
+ tags:["物理：重力轉向、速度預算","數學：加總與預算表"],
+ story:`<p>看過發射直播就知道：火箭升空後幾十秒，就慢慢往旁邊倒，一分鐘後已經斜著飛，最後幾乎是<b>橫著</b>的。這不是失控，是計畫好的，叫做<b class="hl">重力轉向</b>。</p>
+ <p>為什麼要這樣飛？因為：</p>
+ <ul>
+  <li>一開始必須<b>垂直</b>——最快穿過最厚、阻力最大的低空空氣。</li>
+  <li>但軌道需要的是<b>橫向速度</b>，一直往上飛只會飛上去再掉下來。</li>
+  <li>所以火箭稍微傾斜一點點，之後就讓<b>重力自己</b>把它慢慢扳過去，不必浪費燃料硬轉。</li>
+ </ul>
+ <p>轉太早：還在濃空氣裡橫飛，會被空氣撕壞。<br>轉太晚：飛太高才開始加速，白白被重力拉住太久。</p>
+ <p>工程師用一張「速度預算表」規劃整趟旅程：</p>
+ <div class="scroll"><table>
+  <tr><th>項目</th><th class="n">需要的速度</th></tr>
+  <tr><td>軌道速度（真正有用的）</td><td class="n">7.8 km/s</td></tr>
+  <tr><td>重力損失（一路被往回拉）</td><td class="n">1.5 km/s</td></tr>
+  <tr><td>空氣阻力損失</td><td class="n">0.1 km/s</td></tr>
+  <tr><td><b>火箭實際要做出來的</b></td><td class="n"><b>9.4 km/s</b></td></tr>
+ </table></div>
+ <div class="key">重力損失就是「垂直飛的時間越長，浪費越多」。重力轉向的整個目的，就是把這 1.5 壓到最小。</div>`,
+ hands:`<p><b>觀察活動：看一場真的發射</b><br>找一段火箭發射的影片（獵鷹九號、Electron 都行），拿紙筆記下畫面上的數字：</p>
+ <ul>
+  <li>T+70 秒左右的 Max Q（最大動壓）——注意主播會說 "Max Q"</li>
+  <li>MECO（第一節引擎關機）的時間、高度、速度</li>
+  <li>SECO（第二節關機、入軌）的時間、高度、速度</li>
+ </ul>
+ <p>你會看到一件很有意思的事：<b>高度早就不太變了，速度卻還在一路狂飆。</b>這正好印證第 10 關的結論。</p>`,
+ simNote:`<p>這是一支兩節火箭。你只能決定兩件事：<b>什麼時候開始轉</b>，以及<b>第一下傾斜幾度</b>——之後火箭就順著自己的速度方向飛，讓重力慢慢把它扳平。轉太早會摔回地面，轉太晚會飛得太高卻進不了軌道。下面的提示會告訴你該往哪個方向調。</p>`,
+ math:`<p class="lbl">預算表：把需要的加起來</p>
+ <div class="mathbox">7.8　+　1.5　+　0.1　=　<b>9.4 km/s</b></div>
+ <p>這就像存錢買東西：你要的東西標價 7.8 元，但還有 1.5 元運費和 0.1 元手續費，所以你得準備 9.4 元。</p>
+ <p>火箭工程師整天在做的事，就是想辦法把「運費」壓低——這正是重力轉向的意義。</p>
+ <details class="ans"><summary>如果一支火箭轉向得太晚，重力損失變成 2.3，總共要多少？</summary><div>7.8 + 2.3 + 0.1 = <b>10.2 km/s</b>。多出來的 0.8 看起來不多，但它會讓火箭必須多帶好幾十公噸燃料——你在下一關就會知道為什麼。</div></details>`,
+ quiz:[
+  {q:"火箭發射後為什麼要慢慢傾斜？",opts:["為了避開雲","因為軌道需要的是橫向速度，不是高度","因為引擎壞了"],a:1,fb:"垂直只是為了快點離開濃空氣，真正的目標一直是橫向速度。"},
+  {q:"「重力損失」指的是什麼？",opts:["火箭飛太高，重力變小的損失","火箭在垂直爬升時被重力一路拉住而浪費掉的速度","燃料漏掉的損失"],a:1,fb:"垂直飛的每一秒，重力都在扣你速度。所以要盡早轉成橫飛。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>這一關最好的教材是真實發射直播——SpaceX 的直播畫面左下角同時顯示速度和高度，非常適合親子一起看。可以在 MECO 時暫停，問孩子：「現在高度 70 公里，離 200 公里還很遠，但速度已經 2.3 km/s 了，你覺得接下來會先追高度還是先追速度？」`
+},
+{
+ n:12, ch:"第四章 · 飛進軌道", alt:"入軌完成 · MISSION", sim:"stage",
+ title:"為什麼火箭要把自己丟掉一半",
+ ask:"火箭飛到一半突然斷成兩截，那不是壞掉嗎？",
+ tags:["物理：質量比與火箭方程式","數學：倍數、乘法、累加"],
+ story:`<p>回到第 2 關那句話：<b>火箭往後丟東西，自己就往前。</b>能丟的東西丟完了，火箭就再也加不了速。</p>
+ <p>問題是：燃料燒完以後，空油箱還在，引擎還在，它們變成了<b class="hl">死重</b>——推不動又丟不掉，只會拖累剩下的旅程。</p>
+ <p>所以：<b>那就丟掉它。</b>這叫<b class="hl">節（stage）</b>。第一節燒完就整個脫落掉回地球，剩下輕巧的第二節繼續加速。獵鷹九號的第一節佔了整支火箭七成以上的長度，丟掉它以後，第二節加速得飛快。</p>
+ <p>一百多年前，俄國老師<b>齊奧爾科夫斯基</b>算出了火箭能達到的速度，寫成了火箭方程式。它的意思用白話講是：</p>
+ <div class="key">火箭最後的速度，取決於「起飛時多重」除以「燒完時多重」——這個比值叫質量比。而且它增加得很慢：質量比每翻一倍，速度只多增加固定的一段。</div>
+ <p>具體來說（用排氣速度 3.4 km/s 的引擎）：</p>
+ <div class="scroll"><table>
+  <tr><th>質量比</th><th>意思</th><th class="n">能得到的速度</th></tr>
+  <tr><td>2</td><td>一半是燃料</td><td class="n">2.4 km/s</td></tr>
+  <tr><td>4</td><td>四分之三是燃料</td><td class="n">4.7 km/s</td></tr>
+  <tr><td>8</td><td>八分之七是燃料</td><td class="n">7.1 km/s</td></tr>
+  <tr><td>16</td><td>十六分之十五是燃料</td><td class="n">9.4 km/s</td></tr>
+ </table></div>
+ <p>看到了嗎？質量比要<b>翻一倍</b>，速度才多 2.4。要用一節火箭做到 9.4 km/s，全火箭得有 <b>15/16 = 94%</b> 都是燃料，只剩 6% 可以是金屬、引擎和乘客——做不出來。</p>
+ <p><b class="hl">所以火箭一定要分節。</b>把難題切成兩三段，每一段只要質量比 4 左右就好，這是做得到的。</p>`,
+ hands:`<p><b>畢業任務：畫出你自己的發射剖面圖</b></p>
+ <p>拿一張大紙，橫軸是時間、縱軸是高度，畫出這幾個里程碑（可參考獵鷹九號的真實數據）：</p>
+ <div class="scroll"><table>
+  <tr><th>時間</th><th>事件</th><th class="n">高度</th><th class="n">速度</th></tr>
+  <tr><td>T+0</td><td>點火升空</td><td class="n">0 km</td><td class="n">0</td></tr>
+  <tr><td>T+70 秒</td><td>Max Q 最大動壓</td><td class="n">11 km</td><td class="n">0.4 km/s</td></tr>
+  <tr><td>T+2 分半</td><td>MECO 第一節關機</td><td class="n">70 km</td><td class="n">2.3 km/s</td></tr>
+  <tr><td>T+2 分 40 秒</td><td>級間分離</td><td class="n">75 km</td><td class="n">2.3 km/s</td></tr>
+  <tr><td>T+3 分半</td><td>整流罩分離</td><td class="n">110 km</td><td class="n">2.6 km/s</td></tr>
+  <tr><td>T+9 分</td><td>SECO 入軌</td><td class="n">200 km</td><td class="n"><b>7.8 km/s</b></td></tr>
+ </table></div>
+ <p>畫完以後看著你的圖回答：高度在第幾分鐘就差不多到頂了？速度呢？</p>`,
+ simNote:`<p>選擇火箭有幾節、每一節的質量比是多少，看看總速度夠不夠 9.4 km/s。試試看用一節能不能達標。</p>`,
+ math:`<p class="lbl">把每一節的速度加起來</p>
+ <p>一支兩節火箭，每一節的質量比都是 4（也就是每節有 3/4 是燃料）：</p>
+ <div class="mathbox">第一節：4.7 km/s<br>第二節：4.7 km/s<br>合計：4.7 + 4.7 = <b>9.4 km/s</b>　✓ 剛好夠</div>
+ <p>而單節火箭要達到同樣的 9.4，質量比得是 16——幾乎不可能造出來。分成兩節，難度就從「16」降到「4 兩次」。</p>
+ <details class="ans"><summary>三節火箭，每節質量比 2.7（各給 3.4 km/s），總共多少？</summary><div>3.4 × 3 = <b>10.2 km/s</b>。夠了，而且還有餘裕。這就是為什麼很多火箭是三節的。</div></details>`,
+ quiz:[
+  {q:"火箭為什麼要分節？",opts:["為了比較好運送","為了把燒完的空油箱這種死重丟掉","為了讓火箭看起來比較長"],a:1,fb:"帶著空油箱加速，等於一路揹著沒用的重量。"},
+  {q:"單節火箭要達到入軌所需的 9.4 km/s，全重裡大約要有多少比例是燃料？",opts:["一半","四分之三","超過九成"],a:2,fb:"質量比要 16，也就是 94% 是燃料。剩下 6% 要裝下引擎、油箱、電腦和酬載——做不出來。"}
+ ],
+ parent:`<strong>陪讀提示：</strong>火箭方程式的對數本質不必說破，用「質量比翻倍、速度只多加一段」這個描述就完全捕捉到重點了，孩子長大學到 ln 時會恍然大悟。畢業任務的剖面圖建議真的動手畫在大紙上貼牆——那張圖把這 12 關全部串起來了。畫完可以問他最後一個問題：「如果要去月球，這張圖後面還要接什麼？」`
+}
+];
+
+/* ================= helpers ================= */
+const cleanups = [];
+function E(t,c,h){const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;}
+function C(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||"#888";}
+function canvasIn(host,hpx){
+  const cv=E("canvas"); host.appendChild(cv);
+  const st={cv,ctx:cv.getContext("2d"),W:600,H:hpx,draw:null};
+  function fit(){
+    const w=cv.clientWidth||host.clientWidth||600, d=window.devicePixelRatio||1;
+    cv.width=Math.round(w*d); cv.height=Math.round(hpx*d); cv.style.height=hpx+"px";
+    st.ctx.setTransform(d,0,0,d,0,0); st.W=w; if(st.draw)st.draw();
+  }
+  st.fit=fit; requestAnimationFrame(fit);
+  window.addEventListener("resize",fit); cleanups.push(()=>window.removeEventListener("resize",fit));
+  return st;
+}
+function row(host){const c=E("div","ctrl"); host.appendChild(c); return c;}
+function slider(r,label,min,max,val,step,fmt,on){
+  const l=E("label"), s=E("span"), i=E("input");
+  s.innerHTML=label+"：<b>"+fmt(val)+"</b>";
+  i.type="range"; i.min=min; i.max=max; i.value=val; i.step=step;
+  l.appendChild(s); l.appendChild(i); r.appendChild(l);
+  i.addEventListener("input",()=>{s.innerHTML=label+"：<b>"+fmt(+i.value)+"</b>"; on(+i.value);});
+  return i;
+}
+function readout(host,items){
+  const r=E("div","readout"), map={};
+  items.forEach(it=>{const d=E("div"); d.appendChild(E("span",null,it.label)); const b=E("b",null,"–"); d.appendChild(b); r.appendChild(d); map[it.k]=b;});
+  host.appendChild(r); return map;
+}
+function verdict(host){const v=E("div","verdict"); v.style.display="none"; host.appendChild(v); return v;}
+function setVerdict(v,ok,txt){v.style.display="block"; v.className="verdict "+(ok?"ok":"no"); v.textContent=txt;}
+function loop(fn){let id=0,run=true; function step(t){if(!run)return; fn(t); id=requestAnimationFrame(step);} id=requestAnimationFrame(step);
+  cleanups.push(()=>{run=false;cancelAnimationFrame(id);}); return ()=>{run=false;cancelAnimationFrame(id);};}
+function rocketShape(g,x,y,len,wid,ang,flame){
+  g.save(); g.translate(x,y); g.rotate(ang);
+  if(flame>0){g.fillStyle=C("--flame"); g.globalAlpha=.85; g.beginPath();
+    g.moveTo(-wid*.5,len*.5); g.lineTo(wid*.5,len*.5); g.lineTo(0,len*.5+flame); g.closePath(); g.fill(); g.globalAlpha=1;}
+  g.fillStyle=C("--ink");
+  g.beginPath(); g.moveTo(0,-len*.5); g.lineTo(wid*.5,-len*.18); g.lineTo(wid*.5,len*.5); g.lineTo(-wid*.5,len*.5); g.lineTo(-wid*.5,-len*.18); g.closePath(); g.fill();
+  g.fillStyle=C("--instr");
+  g.beginPath(); g.moveTo(wid*.5,len*.24); g.lineTo(wid*1.25,len*.5); g.lineTo(wid*.5,len*.5); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(-wid*.5,len*.24); g.lineTo(-wid*1.25,len*.5); g.lineTo(-wid*.5,len*.5); g.closePath(); g.fill();
+  g.restore();
+}
+function ground(g,W,y,H){
+  g.strokeStyle=C("--line"); g.lineWidth=1.5; g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.stroke();
+  g.fillStyle=C("--line-soft"); g.fillRect(0,y,W,H-y);
+}
+function axes(g,x0,y0,w,h,xlab,ylab){
+  g.strokeStyle=C("--line"); g.lineWidth=1; g.beginPath();
+  g.moveTo(x0,y0-h); g.lineTo(x0,y0); g.lineTo(x0+w,y0); g.stroke();
+  g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace';
+  g.fillText(xlab,x0+w-g.measureText(xlab).width,y0+15); g.fillText(ylab,x0+2,y0-h-5);
+}
+
+/* ================= simulations ================= */
+const SIMS={};
+
+/* 1. free fall */
+SIMS.fall=function(host){
+  const c=canvasIn(host,270); const r=row(host);
+  let H0=20, air=true, t=0, running=false;
+  const objs=[{n:"鐵球",k:0.004,y:0,v:0,tl:0,col:"--ink"},{n:"羽毛",k:0.9,y:0,v:0,tl:0,col:"--instr"}];
+  const ro=readout(host,[{k:"a",label:"鐵球落地"},{k:"b",label:"羽毛落地"},{k:"h",label:"高度"}]);
+  function reset(){t=0;objs.forEach(o=>{o.y=0;o.v=0;o.tl=0;});running=true;}
+  const btn=E("button","btn","放開！"); btn.onclick=reset;
+  const btn2=E("button","btn ghost","空氣：開"); 
+  btn2.onclick=()=>{air=!air; btn2.textContent="空氣："+(air?"開":"關（真空）"); reset();};
+  slider(r,"放開的高度",5,45,20,1,v=>v+" 公尺",v=>{H0=v;reset();});
+  const bw=E("label"); bw.style.flexDirection="row"; bw.style.gap="8px"; bw.style.alignItems="center"; bw.style.minWidth="auto";
+  bw.appendChild(btn); bw.appendChild(btn2); r.appendChild(bw);
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const gy=Hp-26, top=26, span=gy-top;
+    ground(g,W,gy,Hp);
+    g.strokeStyle=C("--line-soft"); g.setLineDash([3,5]);
+    for(let i=1;i<4;i++){const y=top+span*i/4; g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+    g.setLineDash([]);
+    objs.forEach((o,i)=>{
+      const x=W*(0.33+i*0.34);
+      const frac=Math.min(1,o.y/H0);
+      const y=top+span*frac;
+      g.fillStyle=C(o.col); g.beginPath(); g.arc(x,y,i===0?9:7,0,7); g.fill();
+      if(i===1){g.strokeStyle=C(o.col);g.lineWidth=2;g.beginPath();g.moveTo(x-9,y-4);g.lineTo(x+9,y+4);g.stroke();}
+      g.fillStyle=C("--ink-soft"); g.font='12px "Noto Sans TC"'; g.textAlign="center";
+      g.fillText(o.n,x,top-10); g.textAlign="left";
+    });
+    g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace';
+    g.fillText("t = "+t.toFixed(2)+" s",10,18);
+    g.fillText(air?"有空氣":"真空",W-56,18);
+  };
+  loop(()=>{
+    if(running){
+      const dt=0.016;
+      let done=true;
+      objs.forEach(o=>{
+        if(o.y<H0){done=false;
+          const drag=air?o.k*o.v*o.v:0;
+          o.v+=(9.8-drag)*dt; o.y+=o.v*dt; o.tl=t;
+          if(o.y>=H0){o.y=H0;}
+        }
+      });
+      t+=0.016; if(done)running=false;
+    }
+    ro.a.textContent=objs[0].y>=H0?objs[0].tl.toFixed(2)+" 秒":"…";
+    ro.b.textContent=objs[1].y>=H0?objs[1].tl.toFixed(2)+" 秒":"…";
+    ro.h.textContent=H0+" m";
+    c.draw();
+  });
+  reset();
+};
+
+/* 2. balloon rocket */
+SIMS.balloon=function(host){
+  const c=canvasIn(host,200); const r=row(host);
+  let fill=80, x=0, v=0, air=0, running=false, dist=0;
+  const ro=readout(host,[{k:"d",label:"飛行距離"},{k:"v",label:"目前速度"},{k:"a",label:"剩下的空氣"}]);
+  function reset(){x=0;v=0;air=fill;running=true;dist=0;}
+  slider(r,"氣球裡的空氣",20,100,80,5,v=>v+" %",v=>{fill=v;reset();});
+  const b=E("label"); b.style.minWidth="auto"; const bt=E("button","btn","放手！"); bt.onclick=reset; b.appendChild(bt); r.appendChild(b);
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const y=Hp*0.5, x0=40, x1=W-30, track=x1-x0;
+    g.strokeStyle=C("--line"); g.lineWidth=2; g.beginPath(); g.moveTo(x0,y); g.lineTo(x1,y); g.stroke();
+    g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace';
+    for(let i=0;i<=5;i++){const px=x0+track*i/5; g.beginPath();g.moveTo(px,y-5);g.lineTo(px,y+5);g.stroke(); g.fillText((i*100)+"cm",px-14,y+22);}
+    const px=x0+Math.min(1,x/500)*track;
+    const sz=8+air*0.16;
+    g.fillStyle=C("--flame"); g.globalAlpha=.9;
+    g.beginPath(); g.ellipse(px,y-14,sz,sz*0.72,0,0,7); g.fill(); g.globalAlpha=1;
+    g.fillStyle=C("--ink"); g.fillRect(px-14,y-4,28,7);
+    if(running&&air>0){g.strokeStyle=C("--instr"); g.lineWidth=2;
+      for(let i=0;i<4;i++){g.globalAlpha=.7-i*.15; g.beginPath(); g.moveTo(px-sz-4-i*8,y-14); g.lineTo(px-sz-11-i*8,y-14); g.stroke();} g.globalAlpha=1;}
+  };
+  loop(()=>{
+    if(running){
+      const dt=0.03;
+      if(air>0){const mdot=Math.min(air,55*dt); air-=mdot; const m=0.004+air*0.00002;
+        v+=(mdot*0.9/dt*0.0008)/m*dt*0.02;}
+      v-=v*0.9*dt; x+=v*120*dt; dist=x;
+      if(x>500||v<0.02&&air<=0){running=false;}
+    }
+    ro.d.textContent=Math.round(Math.min(dist,500))+" cm";
+    ro.v.textContent=(v*1.2).toFixed(2)+" m/s";
+    ro.a.textContent=Math.round(air)+" %";
+    c.draw();
+  });
+  reset();
+};
+
+/* 3. air drag */
+SIMS.drag=function(host){
+  const c=canvasIn(host,280); const r=row(host);
+  const items=[{n:"鐵球",k:0.004},{n:"紙團",k:0.05},{n:"攤平的紙",k:1.6},{n:"降落傘",k:4.5}];
+  let rho=1, t=0, run=false, H0=20;
+  const st=items.map(()=>({y:0,v:0,tl:0}));
+  function reset(){t=0;st.forEach(s=>{s.y=0;s.v=0;s.tl=0;});run=true;}
+  slider(r,"空氣濃度",0,150,100,5,v=>v+" %",v=>{rho=v/100;reset();});
+  const b=E("label"); b.style.minWidth="auto"; const bt=E("button","btn","同時放開"); bt.onclick=reset; b.appendChild(bt); r.appendChild(b);
+  const ro=readout(host,items.map((it,i)=>({k:"t"+i,label:it.n})));
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const gy=Hp-30, top=34, span=gy-top; ground(g,W,gy,Hp);
+    items.forEach((it,i)=>{
+      const x=W*(i+0.5)/items.length, y=top+span*Math.min(1,st[i].y/H0);
+      g.fillStyle=C("--ink-soft"); g.font='12px "Noto Sans TC"'; g.textAlign="center"; g.fillText(it.n,x,20);
+      g.textAlign="left";
+      g.fillStyle=i===3?C("--instr"):C("--ink");
+      if(i===3){g.beginPath();g.arc(x,y-8,11,Math.PI,0);g.fill();g.strokeStyle=C("--ink");g.lineWidth=1;
+        g.beginPath();g.moveTo(x-11,y-8);g.lineTo(x,y+2);g.lineTo(x+11,y-8);g.stroke(); g.fillStyle=C("--ink"); g.fillRect(x-3,y+2,6,6);}
+      else if(i===2){g.fillRect(x-13,y-2,26,4);}
+      else {g.beginPath();g.arc(x,y,i===0?8:9,0,7);g.fill();}
+    });
+    g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace'; g.fillText("t = "+t.toFixed(2)+" s",10,18);
+  };
+  loop(()=>{
+    if(run){const dt=0.016; let done=true;
+      st.forEach((s,i)=>{ if(s.y<H0){done=false; s.v+=(9.8-items[i].k*rho*s.v*s.v)*dt; s.y+=s.v*dt; s.tl=t; if(s.y>H0)s.y=H0;} });
+      t+=dt; if(done)run=false;}
+    st.forEach((s,i)=>{ro["t"+i].textContent=s.y>=H0?s.tl.toFixed(2)+" 秒":"…";});
+    c.draw();
+  });
+  reset();
+};
+
+/* 4. water rocket */
+SIMS.water=function(host){
+  const c=canvasIn(host,300); const r=row(host);
+  let wf=33, P=6;
+  function sim(waterFrac,bar){
+    const V=1.5e-3, A=3.6e-4, rho=1000, g0=9.8, mdry=0.09, Pa=101325, gam=1.4;
+    let Vw=V*waterFrac, Va=V-Vw, P0=bar*1e5+Pa, v=0, h=0;
+    const dt=0.0003, Va0=Va, cd=0.0018;
+    for(let i=0;i<60000;i++){
+      const Pc=P0*Math.pow(Va0/Va,gam);
+      if(Vw<=0||Pc<=Pa)break;
+      const u=Math.sqrt(2*(Pc-Pa)/rho), F=2*(Pc-Pa)*A, m=mdry+rho*Vw;
+      v+=(F/m-g0-cd*v*Math.abs(v)/m)*dt; h+=v*dt;
+      const dV=A*u*dt; Vw-=dV; Va+=dV;
+    }
+    return {apo:Math.max(0,h+Math.max(0,v*v/(2*g0))*0.72), burnV:v};
+  }
+  const ro=readout(host,[{k:"h",label:"最高點"},{k:"w",label:"水量"},{k:"best",label:"最佳水量"}]);
+  slider(r,"水量",5,90,33,1,v=>v+" %",v=>{wf=v;c.draw();upd();});
+  slider(r,"打氣壓力",2,9,6,0.5,v=>v+" bar",v=>{P=v;c.draw();upd();});
+  let curve=[],best=0,bestV=0;
+  function build(){ curve=[]; best=0;bestV=0;
+    for(let w=5;w<=90;w+=1){const a=sim(w/100,P).apo; curve.push([w,a]); if(a>best){best=a;bestV=w;}} }
+  function upd(){ build(); const cur=sim(wf/100,P).apo;
+    ro.h.textContent=cur.toFixed(1)+" m"; ro.w.textContent=wf+" %"; ro.best.textContent=bestV+" %"; }
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    build();
+    const bw=Math.min(96,W*0.24), bx=18, by=30, bh=Hp-70;
+    g.strokeStyle=C("--line"); g.lineWidth=2;
+    g.beginPath(); g.roundRect(bx,by,bw,bh,[bw*0.4,bw*0.4,10,10]); g.stroke();
+    g.fillStyle=C("--instr"); g.globalAlpha=.75;
+    const wh=bh*0.86*(wf/100); g.fillRect(bx+2,by+bh-wh-2,bw-4,wh); g.globalAlpha=1;
+    g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace';
+    g.fillText("空氣",bx+bw/2-13,by+26); g.fillText("水",bx+bw/2-8,by+bh-wh+16);
+    g.fillText("寶特瓶 1.5 L",bx-2,Hp-16);
+    const x0=bx+bw+46, x1=W-14, y0=Hp-42, hgt=Hp-78;
+    axes(g,x0,y0,x1-x0,hgt,"水量 %","高度 m");
+    const mx=Math.max(...curve.map(p=>p[1]))*1.12||1;
+    g.strokeStyle=C("--flame"); g.lineWidth=2.4; g.beginPath();
+    curve.forEach((p,i)=>{const X=x0+(x1-x0)*(p[0]-5)/85, Y=y0-hgt*p[1]/mx; i?g.lineTo(X,Y):g.moveTo(X,Y);});
+    g.stroke();
+    const cx=x0+(x1-x0)*(wf-5)/85, cy=y0-hgt*sim(wf/100,P).apo/mx;
+    g.strokeStyle=C("--instr"); g.setLineDash([3,4]); g.lineWidth=1;
+    g.beginPath(); g.moveTo(cx,y0); g.lineTo(cx,cy); g.stroke(); g.setLineDash([]);
+    g.fillStyle=C("--instr"); g.beginPath(); g.arc(cx,cy,5,0,7); g.fill();
+    g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace';
+    g.fillText("最高 "+bestV+"%",x0+(x1-x0)*(bestV-5)/85-20,y0-hgt-2);
+  };
+  upd();
+};
+
+/* 5. stability */
+SIMS.stability=function(host){
+  const c=canvasIn(host,300); const r=row(host);
+  let cg=35, fin=60;
+  let ang=0.18, w=0, y=0, vy=0, x=0, t=0;
+  const ro=readout(host,[{k:"cg",label:"重心"},{k:"cp",label:"風壓中心"},{k:"m",label:"安定裕度"}]);
+  const vd=verdict(host);
+  function cp(){return 52+fin*0.30;}
+  function reset(){ang=0.2;w=0;y=0;vy=0;x=0;t=0;}
+  slider(r,"重心位置（從頭部算）",10,80,35,1,v=>v+" %",v=>{cg=v;reset();});
+  slider(r,"尾翼大小",0,100,60,1,v=>v+" %",v=>{fin=v;reset();});
+  const b=E("label"); b.style.minWidth="auto"; const bt=E("button","btn","重新發射"); bt.onclick=reset; b.appendChild(bt); r.appendChild(b);
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const gy=Hp-24; ground(g,W,gy,Hp);
+    g.strokeStyle=C("--line-soft"); g.setLineDash([2,6]);
+    for(let i=1;i<5;i++){const yy=gy-i*(Hp-40)/5; g.beginPath();g.moveTo(0,yy);g.lineTo(W,yy);g.stroke();}
+    g.setLineDash([]);
+    const px=W*0.5+x, py=gy-24-Math.min(y,Hp-90);
+    const len=74, wid=14;
+    g.save(); g.translate(px,py); g.rotate(ang);
+    g.fillStyle=C("--ink");
+    g.beginPath(); g.moveTo(0,-len*.5); g.lineTo(wid*.5,-len*.2); g.lineTo(wid*.5,len*.5); g.lineTo(-wid*.5,len*.5); g.lineTo(-wid*.5,-len*.2); g.closePath(); g.fill();
+    const fs=fin/100;
+    g.fillStyle=C("--instr");
+    g.beginPath(); g.moveTo(wid*.5,len*.5-22*fs); g.lineTo(wid*.5+20*fs,len*.5); g.lineTo(wid*.5,len*.5); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(-wid*.5,len*.5-22*fs); g.lineTo(-wid*.5-20*fs,len*.5); g.lineTo(-wid*.5,len*.5); g.closePath(); g.fill();
+    g.fillStyle=C("--flame"); g.globalAlpha=.85;
+    g.beginPath(); g.moveTo(-5,len*.5); g.lineTo(5,len*.5); g.lineTo(0,len*.5+16+Math.random()*7); g.closePath(); g.fill(); g.globalAlpha=1;
+    const cgY=-len*.5+len*cg/100, cpY=-len*.5+len*cp()/100;
+    g.strokeStyle=C("--flame"); g.lineWidth=2; g.beginPath(); g.arc(0,cgY,5,0,7); g.stroke();
+    g.beginPath(); g.moveTo(-5,cgY); g.lineTo(5,cgY); g.stroke();
+    g.strokeStyle=C("--instr"); g.setLineDash([2,2]); g.beginPath(); g.arc(0,cpY,5,0,7); g.stroke(); g.setLineDash([]);
+    g.restore();
+    g.font='11px "Noto Sans TC"';
+    g.fillStyle=C("--flame"); g.fillText("● 重心 CG",12,Hp-52);
+    g.fillStyle=C("--instr"); g.fillText("○ 風壓中心 CP",12,Hp-36);
+  };
+  loop(()=>{
+    const dt=0.02; t+=dt;
+    const margin=(cp()-cg)/100;
+    const v=Math.max(1,60-y*0.02);
+    const torque=-margin*Math.sin(ang)*v*0.055;
+    w+=torque*dt; w*=0.985; ang+=w*dt;
+    if(margin<=0) ang+=0.004*Math.sign(ang||1);
+    vy=Math.max(0,70*Math.cos(ang)); y+=vy*dt*1.4; x+=Math.sin(ang)*vy*dt*0.9;
+    if(y>Hpmax()||Math.abs(x)>c.W*0.45){reset();}
+    ro.cg.textContent=cg+" %"; ro.cp.textContent=cp().toFixed(0)+" %";
+    ro.m.textContent=(cp()-cg).toFixed(0)+" %";
+    const m2=cp()-cg;
+    if(m2<=0) setVerdict(vd,false,"翻滾失控：重心跑到風壓中心後面了，火箭會像丟出去的樹枝一樣亂翻。");
+    else if(m2<8) setVerdict(vd,false,"勉強穩定：安定裕度太小，一陣風就可能翻掉。把重心往前移，或把尾翼加大。");
+    else setVerdict(vd,true,"穩定飛行：歪掉時空氣會自動把火箭推正。這就是被動穩定。");
+    c.draw();
+  });
+  function Hpmax(){return c.H-90;}
+  reset();
+};
+
+/* 6. velocity & acceleration */
+SIMS.vt=function(host){
+  const c=canvasIn(host,300); const r=row(host);
+  let twr=1.6, tb=60, playT=0, playing=false, data=[];
+  const ro=readout(host,[{k:"h",label:"高度"},{k:"v",label:"速度"},{k:"a",label:"加速度"},{k:"t",label:"T+"}]);
+  function build(){
+    data=[]; const m0=1, mf=1/6, dt=0.2;
+    const F=twr*9.8*m0, mdot=(m0-mf)/tb;
+    let m=m0,v=0,h=0;
+    for(let t=0;t<=tb*1.7;t+=dt){
+      const burning=t<=tb;
+      const thrust=burning?F:0;
+      if(burning)m=Math.max(mf,m0-mdot*t);
+      const a=thrust/m-9.8;
+      v+=a*dt; h+=v*dt; if(h<0){h=0;v=0;}
+      data.push({t,h,v,a:thrust?a:-9.8});
+    }
+  }
+  slider(r,"推力（相對於火箭重量）",1.1,4,1.6,0.1,v=>v.toFixed(1)+" 倍",v=>{twr=v;build();c.draw();});
+  slider(r,"燃燒時間",20,120,60,5,v=>v+" 秒",v=>{tb=v;build();c.draw();});
+  const b=E("label"); b.style.minWidth="auto"; const bt=E("button","btn","發射");
+  bt.onclick=()=>{playT=0;playing=true;}; b.appendChild(bt); r.appendChild(b);
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const idx=Math.min(data.length-1,Math.floor(playT/0.2));
+    const d=data[idx]||{t:0,h:0,v:0,a:0};
+    const tw=Math.min(70,W*0.17), gy=Hp-34;
+    ground(g,tw,gy,Hp);
+    const maxH=Math.max(...data.map(p=>p.h));
+    rocketShape(g,tw/2,gy-16-(gy-46)*Math.min(1,d.h/maxH),34,11,0,d.t<=tb?12+Math.random()*6:0);
+    const x0=tw+42, x1=W-12, y0=Hp-40, hh=Hp-70;
+    axes(g,x0,y0,x1-x0,hh,"時間 s","");
+    const mv=Math.max(...data.map(p=>p.v))*1.1||1;
+    const mh=maxH*1.1||1;
+    function plot(key,mx,col,wd){
+      g.strokeStyle=C(col); g.lineWidth=wd; g.beginPath();
+      data.forEach((p,i)=>{const X=x0+(x1-x0)*p.t/data[data.length-1].t, Y=y0-hh*p[key]/mx; i?g.lineTo(X,Y):g.moveTo(X,Y);});
+      g.stroke();
+    }
+    plot("h",mh,"--line",2); plot("v",mv,"--flame",2.4);
+    const cx=x0+(x1-x0)*d.t/data[data.length-1].t;
+    g.strokeStyle=C("--instr"); g.setLineDash([3,3]); g.beginPath(); g.moveTo(cx,y0); g.lineTo(cx,y0-hh); g.stroke(); g.setLineDash([]);
+    const bx=x0+(x1-x0)*tb/data[data.length-1].t;
+    g.strokeStyle=C("--ink-faint"); g.lineWidth=1; g.beginPath(); g.moveTo(bx,y0); g.lineTo(bx,y0-hh); g.stroke();
+    g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace'; g.fillText("MECO 關機",bx-28,y0-hh-3);
+    g.fillStyle=C("--flame"); g.font='11px "IBM Plex Mono",monospace'; g.fillText("速度",x1-58,y0-hh+12);
+    g.fillStyle=C("--ink-soft"); g.fillText("高度",x1-24,y0-hh+12);
+  };
+  loop(()=>{
+    if(playing){playT+=0.35; if(playT>data[data.length-1].t){playing=false;}}
+    const d=data[Math.min(data.length-1,Math.floor(playT/0.2))]||{t:0,h:0,v:0,a:0};
+    ro.h.textContent=(d.h/1000).toFixed(1)+" km"; ro.v.textContent=Math.round(d.v)+" m/s";
+    ro.a.textContent=d.a.toFixed(1)+" m/s²"; ro.t.textContent=d.t.toFixed(0)+" s";
+    c.draw();
+  });
+  build();
+};
+
+/* 7. fire triangle */
+SIMS.fire=function(host){
+  const c=canvasIn(host,260);
+  const on={fuel:true,ox:true,heat:true};
+  const vd=verdict(host);
+  const r=row(host);
+  [["fuel","燃料"],["ox","氧化劑"],["heat","熱"]].forEach(([k,n])=>{
+    const l=E("label"); l.style.minWidth="auto";
+    const b=E("button","btn ghost",n+"：有"); 
+    b.onclick=()=>{on[k]=!on[k]; b.textContent=n+"："+(on[k]?"有":"沒有"); b.className="btn"+(on[k]?" ghost":""); upd();};
+    l.appendChild(b); r.appendChild(l);
+  });
+  function upd(){
+    const n=(on.fuel?1:0)+(on.ox?1:0)+(on.heat?1:0);
+    if(n===3) setVerdict(vd,true,"三個都在——火燒得起來！火箭引擎裡就是這個狀態。");
+    else setVerdict(vd,false,"火熄了。少了"+[!on.fuel&&"燃料",!on.ox&&"氧化劑",!on.heat&&"熱"].filter(Boolean).join("、")+"，燃燒就不能繼續。");
+  }
+  let tick=0;
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const cx=W/2, cy=Hp*0.56, R=Math.min(92,Hp*0.36);
+    const pts=[[cx,cy-R],[cx-R*0.92,cy+R*0.62],[cx+R*0.92,cy+R*0.62]];
+    const keys=["heat","fuel","ox"], names=["熱","燃料","氧化劑"];
+    g.strokeStyle=C("--line"); g.lineWidth=2;
+    g.beginPath(); g.moveTo(pts[0][0],pts[0][1]); g.lineTo(pts[1][0],pts[1][1]); g.lineTo(pts[2][0],pts[2][1]); g.closePath(); g.stroke();
+    const alive=on.fuel&&on.ox&&on.heat;
+    if(alive){
+      for(let i=0;i<9;i++){
+        const s=1-i/9, fy=cy+18-i*7-Math.sin(tick/9+i)*2;
+        g.fillStyle=i<4?C("--flame"):"#F5C542"; g.globalAlpha=.28+s*0.45;
+        g.beginPath(); g.ellipse(cx+Math.sin(tick/13+i)*3,fy,15*s+5,20*s+6,0,0,7); g.fill();
+      }
+      g.globalAlpha=1;
+    } else {
+      g.strokeStyle=C("--ink-faint"); g.lineWidth=2; g.globalAlpha=.5;
+      for(let i=0;i<3;i++){g.beginPath(); g.moveTo(cx-10+i*10,cy+16); g.quadraticCurveTo(cx-18+i*10+Math.sin(tick/16+i)*8,cy-4,cx-6+i*10,cy-24); g.stroke();}
+      g.globalAlpha=1;
+    }
+    keys.forEach((k,i)=>{
+      g.fillStyle=on[k]?C("--instr"):C("--line");
+      g.beginPath(); g.arc(pts[i][0],pts[i][1],17,0,7); g.fill();
+      g.fillStyle=on[k]?"#fff":C("--ink-faint"); g.font='700 12px "Noto Sans TC"'; g.textAlign="center";
+      g.fillText(names[i].slice(0,2),pts[i][0],pts[i][1]+5); g.textAlign="left";
+    });
+  };
+  loop(()=>{tick++;c.draw();});
+  upd();
+};
+
+/* 8. balancing 2H2 + O2 */
+SIMS.balance=function(host){
+  const c=canvasIn(host,240);
+  let h2=2, o2=1;
+  const r=row(host);
+  function stepper(name,get,set,max){
+    const l=E("label"); l.style.minWidth="auto"; l.style.flexDirection="row"; l.style.alignItems="center"; l.style.gap="8px";
+    const s=E("span"); s.innerHTML=name+"：<b>"+get()+"</b>";
+    const m=E("button","btn ghost small","−"), p=E("button","btn ghost small","+");
+    m.onclick=()=>{set(Math.max(0,get()-1)); s.innerHTML=name+"：<b>"+get()+"</b>"; c.draw();};
+    p.onclick=()=>{set(Math.min(max,get()+1)); s.innerHTML=name+"：<b>"+get()+"</b>"; c.draw();};
+    l.appendChild(s); l.appendChild(m); l.appendChild(p); r.appendChild(l);
+  }
+  stepper("氫氣 H₂",()=>h2,v=>h2=v,8);
+  stepper("氧氣 O₂",()=>o2,v=>o2=v,4);
+  const vd=verdict(host);
+  function atom(g,x,y,rr,col,txt){
+    g.fillStyle=C(col); g.beginPath(); g.arc(x,y,rr,0,7); g.fill();
+    g.fillStyle=col==="--instr"?"#fff":C("--paper"); g.font='700 '+(rr*0.95)+'px "IBM Plex Mono",monospace';
+    g.textAlign="center"; g.fillText(txt,x,y+rr*0.34); g.textAlign="left";
+  }
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const water=Math.min(h2,o2*2), leftH=h2-water, leftO=o2-water/2;
+    g.font='12px "Noto Sans TC"'; g.fillStyle=C("--ink-faint");
+    g.fillText("反應前",14,20); g.fillText("反應後",W*0.56,20);
+    let x=22,y=52;
+    for(let i=0;i<h2;i++){atom(g,x,y,10,"--ink","H");atom(g,x+19,y,10,"--ink","H");x+=48; if(x>W*0.42){x=22;y+=40;}}
+    x=22;y+=44;
+    for(let i=0;i<o2;i++){atom(g,x,y,13,"--instr","O");atom(g,x+25,y,13,"--instr","O");x+=60; if(x>W*0.40){x=22;y+=42;}}
+    g.fillStyle=C("--flame"); g.font='700 22px "IBM Plex Mono",monospace'; g.fillText("→",W*0.475,Hp*0.45);
+    let X=W*0.56, Y=52;
+    for(let i=0;i<water;i++){
+      atom(g,X,Y,9,"--ink","H"); atom(g,X+16,Y+7,12,"--instr","O"); atom(g,X+32,Y,9,"--ink","H");
+      X+=58; if(X>W-52){X=W*0.56;Y+=40;}
+    }
+    Y+=44; X=W*0.56;
+    g.fillStyle=C("--ink-faint"); g.font='11px "Noto Sans TC"';
+    if(leftH||leftO){ g.fillText("剩下沒配到的：",X,Y-12);
+      for(let i=0;i<leftH;i++){atom(g,X,Y+8,10,"--ink","H");atom(g,X+19,Y+8,10,"--ink","H");X+=48;}
+      for(let i=0;i<leftO;i++){atom(g,X,Y+8,13,"--instr","O");atom(g,X+25,Y+8,13,"--instr","O");X+=60;}
+    }
+    const bx=14, by=Hp-26, bw=W-28;
+    g.fillStyle=C("--line-soft"); g.fillRect(bx,by,bw,12);
+    g.fillStyle=C("--flame"); g.fillRect(bx,by,bw*Math.min(1,water/8),12);
+    g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace'; g.fillText("放出的能量",bx,by-5);
+    if(water>0&&leftH===0&&leftO===0) setVerdict(vd,true,"完美配平！"+h2+" H₂ + "+o2+" O₂ → "+water+" H₂O，一個原子都沒有剩下。");
+    else if(water===0) setVerdict(vd,false,"沒有反應——氫和氧都要有才行。");
+    else setVerdict(vd,false,"還有剩："+(leftH?leftH+" 個 H₂ ":"")+(leftO?leftO+" 個 O₂":"")+"。氫和氧要用 2 比 1 才會剛剛好。");
+  };
+  c.draw();
+};
+
+/* 9. de Laval nozzle */
+SIMS.nozzle=function(host){
+  const c=canvasIn(host,250); const r=row(host);
+  let eps=16, vac=false;
+  const G=1.2, Pc=7.0e6, Tc=3400, Rg=380;
+  function machFromArea(e){
+    let lo=1.0001, hi=12;
+    const f=M=>(1/M)*Math.pow((2/(G+1))*(1+(G-1)/2*M*M),(G+1)/(2*(G-1)))-e;
+    for(let i=0;i<60;i++){const m=(lo+hi)/2; if(f(m)>0)lo=m; else hi=m;}
+    return (lo+hi)/2;
+  }
+  function calc(){
+    const M=machFromArea(eps);
+    const Pe=Pc*Math.pow(1+(G-1)/2*M*M,-G/(G-1));
+    const Te=Tc/(1+(G-1)/2*M*M);
+    const ve=M*Math.sqrt(G*Rg*Te);
+    const At=0.10, Ae=At*eps;
+    const mdot=Pc*At/Math.sqrt(Tc)*Math.sqrt(G/Rg)*Math.pow((G+1)/2,-(G+1)/(2*(G-1)));
+    const Pa=vac?0:101325;
+    const F=mdot*ve+(Pe-Pa)*Ae;
+    return {M,Pe,ve,F,mdot,Pa};
+  }
+  const ro=readout(host,[{k:"v",label:"排氣速度"},{k:"f",label:"推力"},{k:"m",label:"排氣馬赫數"},{k:"p",label:"出口壓力"}]);
+  const vd=verdict(host);
+  slider(r,"喇叭口張開程度（擴張比）",2,80,16,1,v=>v+" 倍",v=>{eps=v;c.draw();});
+  const b=E("label"); b.style.minWidth="auto";
+  const bt=E("button","btn ghost","環境：海平面");
+  bt.onclick=()=>{vac=!vac; bt.textContent="環境："+(vac?"真空":"海平面"); c.draw();}; b.appendChild(bt); r.appendChild(b);
+  let tick=0;
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H,d=calc(); g.clearRect(0,0,W,Hp);
+    const cy=Hp*0.46, x0=W*0.06, xt=W*0.34, xe=W*0.66;
+    const rc=30, rt=9, re=rt*Math.sqrt(eps/2)*1.05;
+    const rem=Math.min(re,Hp*0.31);
+    function wall(sign){
+      g.beginPath(); g.moveTo(x0,cy+sign*rc);
+      g.bezierCurveTo(x0+(xt-x0)*0.6,cy+sign*rc,xt-14,cy+sign*rt,xt,cy+sign*rt);
+      g.bezierCurveTo(xt+22,cy+sign*rt,xe-(xe-xt)*0.4,cy+sign*rem*0.86,xe,cy+sign*rem);
+      g.stroke();
+    }
+    g.strokeStyle=C("--ink"); g.lineWidth=3; wall(1); wall(-1);
+    g.fillStyle=C("--flame"); g.globalAlpha=.25;
+    g.beginPath(); g.moveTo(x0,cy-rc*0.9); g.lineTo(xt,cy-rt*0.9); g.lineTo(xe,cy-rem*0.9); g.lineTo(xe,cy+rem*0.9); g.lineTo(xt,cy+rt*0.9); g.lineTo(x0,cy+rc*0.9); g.closePath(); g.fill();
+    g.globalAlpha=1;
+    for(let i=0;i<26;i++){
+      const ph=((tick*1.6+i*13)%100)/100;
+      const px=x0+(xe-x0+70)*ph;
+      let rr; if(px<xt) rr=rc+(rt-rc)*(px-x0)/(xt-x0); else rr=rt+(rem-rt)*Math.min(1,(px-xt)/(xe-xt));
+      const py=cy+(((i*37)%100)/100-0.5)*rr*1.6;
+      g.strokeStyle=px>xt?C("--flame"):C("--instr"); g.globalAlpha=.75; g.lineWidth=2;
+      const L=px<xt?5:5+(px-xt)/(xe-xt)*16;
+      g.beginPath(); g.moveTo(px,py); g.lineTo(px+L,py); g.stroke();
+    }
+    g.globalAlpha=1;
+    g.fillStyle=C("--ink-faint"); g.font='11px "IBM Plex Mono",monospace';
+    g.fillText("燃燒室",x0,cy-rc-10); g.fillText("喉部",xt-14,cy-rt-12); g.fillText("擴張段",xe-46,cy-rem-8);
+    g.fillText("音速 M=1",xt-24,cy+rt+18);
+    ro.v.textContent=Math.round(d.ve)+" m/s";
+    ro.f.textContent=(d.F/1000).toFixed(0)+" kN";
+    ro.m.textContent="M "+d.M.toFixed(2);
+    ro.p.textContent=(d.Pe/1000).toFixed(0)+" kPa";
+    if(vac) setVerdict(vd,true,"真空中：喇叭口越大越好，氣體可以一直膨脹加速。真空版引擎的噴嘴就是這麼誇張。");
+    else if(d.Pe<0.4*101325) setVerdict(vd,false,"過度膨脹：喇叭口太大，出口壓力比外面空氣還低，外面的空氣會把噴流擠回來，效率反而變差。");
+    else if(d.Pe>2.5*101325) setVerdict(vd,false,"膨脹不足：喇叭口太小，氣體還沒膨脹完就跑出去了，浪費掉能量。");
+    else setVerdict(vd,true,"剛剛好：出口壓力接近外面的大氣壓，這是海平面上效率最高的設計。");
+  };
+  loop(()=>{tick++;c.draw();});
+};
+
+/* 10. Newton's cannon */
+SIMS.cannon=function(host){
+  const c=canvasIn(host,340); const r=row(host);
+  let v0=5.0;
+  const mu=3.986e14, Re=6.371e6;
+  const ro=readout(host,[{k:"a",label:"最高點"},{k:"p",label:"最低點"},{k:"r",label:"結果"}]);
+  const vd=verdict(host);
+  slider(r,"砲彈速度",0.5,12,5,0.1,v=>v.toFixed(1)+" km/s",v=>{v0=v;c.draw();});
+  function traj(){
+    const h0=6e5;
+    let x=0,y=Re+h0, vx=v0*1000, vy=0, dt=4;
+    const pts=[[x,y]]; let minr=y, maxr=y, hit=false, esc=false;
+    for(let i=0;i<9000;i++){
+      const rr=Math.hypot(x,y);
+      if(rr<Re){hit=true;break;}
+      if(rr>Re*9){esc=true;break;}
+      const a=-mu/(rr*rr*rr);
+      vx+=a*x*dt; vy+=a*y*dt; x+=vx*dt; y+=vy*dt;
+      minr=Math.min(minr,rr); maxr=Math.max(maxr,rr);
+      if(i%2===0)pts.push([x,y]);
+      if(i>60&&Math.hypot(x,y-(Re+h0))<1e5&&pts.length>200)break;
+    }
+    return {pts,hit,esc,minr,maxr};
+  }
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const t=traj();
+    const far=Math.min(t.esc?Re*7:t.maxr*1.15,Re*7.5);
+    const s=Math.min(W,Hp)*0.44/far;
+    const ox=W*0.5, oy=Hp*0.58;
+    g.fillStyle=C("--instr"); g.globalAlpha=.16;
+    g.beginPath(); g.arc(ox,oy,Re*s,0,7); g.fill(); g.globalAlpha=1;
+    g.strokeStyle=C("--instr"); g.lineWidth=1.6; g.beginPath(); g.arc(ox,oy,Re*s,0,7); g.stroke();
+    g.strokeStyle=C("--line"); g.setLineDash([2,4]); g.beginPath(); g.arc(ox,oy,(Re+2e5)*s,0,7); g.stroke(); g.setLineDash([]);
+    g.strokeStyle=C("--flame"); g.lineWidth=2; g.beginPath();
+    t.pts.forEach((p,i)=>{const X=ox+p[0]*s, Y=oy-p[1]*s; i?g.lineTo(X,Y):g.moveTo(X,Y);});
+    g.stroke();
+    g.fillStyle=C("--ink"); g.beginPath(); g.arc(ox,oy-(Re+6e5)*s,4,0,7); g.fill();
+    g.fillStyle=C("--ink-faint"); g.font='11px "Noto Sans TC"';
+    g.fillText("砲台（600 km 高，這裡沒有空氣）",ox+8,oy-(Re+6e5)*s-6);
+    g.font='10px "IBM Plex Mono",monospace'; g.fillText("200 km 軌道高度",ox+(Re+2e5)*s*0.72,oy-(Re+2e5)*s*0.72);
+    const apo=(t.maxr-Re)/1000, per=(t.minr-Re)/1000;
+    ro.a.textContent=t.esc?"飛走了":Math.round(apo)+" km";
+    ro.p.textContent=t.hit?"撞地":Math.round(per)+" km";
+    if(t.hit){ro.r.textContent="掉回地面"; setVerdict(vd,false,"速度不夠，砲彈畫了一條大弧線就掉回地球了。再快一點試試。");}
+    else if(t.esc){ro.r.textContent="逃逸"; setVerdict(vd,true,"超過 11.2 km/s 的逃逸速度——它再也不會回來了。這是去火星要用的速度。");}
+    else if(Math.abs(t.maxr-t.minr)<Re*0.08){ro.r.textContent="接近圓軌道"; setVerdict(vd,true,"漂亮的圓軌道！砲彈一直在往下掉，但地面也一直在下面彎開——它永遠掉不到地上。");}
+    else {ro.r.textContent="橢圓軌道"; setVerdict(vd,true,"橢圓軌道：它會一遠一近地繞著地球轉。真的衛星大多是這樣的形狀。");}
+  };
+  c.draw();
+};
+
+/* 11. gravity turn (two-stage) */
+SIMS.turn=function(host){
+  const c=canvasIn(host,330); const r=row(host);
+  let tStart=30, kick=4.4;
+  const mu=3.986e14, Re=6.371e6;
+  const ST=[{prop:411e3,dry:22e3,thr:7607e3,ve:2950},{prop:112e3,dry:4e3,thr:934e3,ve:3413}];
+  const PAY=16e3;
+  const ro=readout(host,[{k:"h",label:"關機高度"},{k:"v",label:"關機速度"},{k:"ap",label:"最高點"},{k:"p",label:"近地點"},{k:"g",label:"重力損失"}]);
+  const vd=verdict(host);
+  slider(r,"開始轉向的時間",10,62,30,1,v=>"T+"+v+" 秒",v=>{tStart=v;c.draw();});
+  slider(r,"第一下傾斜的角度",0.4,16,4.4,0.2,v=>v.toFixed(1)+"°",v=>{kick=v;c.draw();});
+  function fly(){
+    let x=0,y=Re,vx=0,vy=0,t=0;
+    const dt=0.25; let stage=0, kicked=false, gloss=0, crash=false;
+    let mp1=ST[0].prop, mp2=ST[1].prop, sepPt=null;
+    const pts=[[0,Re]];
+    for(let i=0;i<20000;i++){
+      const rr=Math.hypot(x,y), h=rr-Re;
+      if(rr<Re-50){crash=true;break;}
+      const st=ST[stage];
+      const mm=stage===0?(mp1+ST[0].dry+ST[1].prop+ST[1].dry+PAY):(mp2+ST[1].dry+PAY);
+      let F=st.thr; if(F/mm>4*9.81)F=4*9.81*mm;
+      const mdot=F/st.ve;
+      const v=Math.hypot(vx,vy)||1;
+      const ux=x/rr,uy=y/rr,ex=uy,ey=-ux;
+      let dx,dy;
+      if(t<tStart){dx=ux;dy=uy;}
+      else if(!kicked){const a=kick*Math.PI/180,cs=Math.cos(a),sn=Math.sin(a);
+        dx=(vx/v)*cs+ex*sn; dy=(vy/v)*cs+ey*sn; const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+        vx=dx*v; vy=dy*v; kicked=true;}
+      else{dx=vx/v; dy=vy/v;
+        if(stage===1&&(dx*ux+dy*uy)<0){dx=ex;dy=ey; if(dx*vx+dy*vy<0){dx=-dx;dy=-dy;}}}
+      const g0=mu/(rr*rr);
+      const rho=1.225*Math.exp(-Math.max(0,h)/8400);
+      const D=0.5*rho*v*v*(stage===0?0.9:0.3)*10.5/mm;
+      vx+=(F/mm*dx-g0*ux-D*vx/v)*dt;
+      vy+=(F/mm*dy-g0*uy-D*vy/v)*dt;
+      x+=vx*dt; y+=vy*dt; gloss+=g0*(dx*ux+dy*uy)*dt;
+      if(i%8===0)pts.push([x,y]);
+      if(stage===0){mp1-=mdot*dt; if(mp1<=0){stage=1;sepPt=[x,y];}}
+      else{mp2-=mdot*dt; if(mp2<=0){t+=dt;break;}}
+      t+=dt;
+    }
+    const rr=Math.hypot(x,y), v=Math.hypot(vx,vy);
+    const en=v*v/2-mu/rr, a=-mu/(2*en), hA=x*vy-y*vx;
+    const e=Math.sqrt(Math.max(0,1+2*en*hA*hA/(mu*mu)));
+    return {pts,sepPt,crash,t,alt:(rr-Re)/1000,v:v/1000,
+      peri:a>0?(a*(1-e)-Re)/1000:-1, apo:a>0?(a*(1+e)-Re)/1000:-1, gloss:gloss/1000};
+  }
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H,f=fly(); g.clearRect(0,0,W,Hp);
+    const gy=Hp-24, ox=16;
+    const maxH=Math.max(120e3,...f.pts.map(p=>Math.hypot(p[0],p[1])-Re))*1.18;
+    const s=(gy-16)/maxH;
+    const span=Math.max(60e3,...f.pts.map(p=>p[0]));
+    const sx=(W-ox-14)/span;
+    g.strokeStyle=C("--instr"); g.lineWidth=2; g.beginPath(); g.moveTo(0,gy); g.lineTo(W,gy); g.stroke();
+    g.fillStyle=C("--instr"); g.globalAlpha=.1; g.fillRect(0,gy,W,24); g.globalAlpha=1;
+    g.fillStyle=C("--instr"); g.globalAlpha=.07; g.fillRect(0,gy-100e3*s,W,100e3*s); g.globalAlpha=1;
+    [[100,"卡門線 100 km（太空從這裡開始）"],[200,"200 km"],[400,"400 km（太空站）"]].forEach(([km,lab])=>{
+      const yy=gy-km*1000*s; if(yy>10){
+        g.strokeStyle=C("--line"); g.setLineDash([3,5]); g.beginPath(); g.moveTo(0,yy); g.lineTo(W,yy); g.stroke(); g.setLineDash([]);
+        g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace';
+        g.textAlign="right"; g.fillText(lab,W-8,yy-5); g.textAlign="left";}
+    });
+    g.strokeStyle=C("--flame"); g.lineWidth=2.4; g.beginPath();
+    f.pts.forEach((p,i)=>{const X=ox+p[0]*sx, Y=gy-(Math.hypot(p[0],p[1])-Re)*s; i?g.lineTo(X,Y):g.moveTo(X,Y);});
+    g.stroke();
+    if(f.sepPt){const X=ox+f.sepPt[0]*sx, Y=gy-(Math.hypot(f.sepPt[0],f.sepPt[1])-Re)*s;
+      g.fillStyle=C("--instr"); g.beginPath(); g.arc(X,Y,4.5,0,7); g.fill();
+      g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace'; g.fillText("級間分離",X+8,Y+16);}
+    const L=f.pts[f.pts.length-1], P=f.pts[Math.max(0,f.pts.length-3)];
+    const LX=ox+L[0]*sx, LY=gy-(Math.hypot(L[0],L[1])-Re)*s;
+    const PX=ox+P[0]*sx, PY=gy-(Math.hypot(P[0],P[1])-Re)*s;
+    rocketShape(g,LX,LY,26,9,Math.atan2(LX-PX,-(LY-PY)),0);
+    g.fillStyle=C("--ink-faint"); g.font='10px "IBM Plex Mono",monospace';
+    g.textAlign="right"; g.fillText("水平距離 "+Math.round(span/1000)+" km →",W-8,gy-8); g.textAlign="left";
+    ro.h.textContent=Math.round(f.alt)+" km";
+    ro.v.textContent=f.v.toFixed(2)+" km/s";
+    ro.ap.textContent=f.apo>0?Math.round(f.apo)+" km":"—";
+    ro.p.textContent=f.crash?"—":(f.peri>0?Math.round(f.peri)+" km":"會掉回地面");
+    ro.g.textContent=f.gloss.toFixed(2)+" km/s";
+    if(f.crash) setVerdict(vd,false,"墜毀：太早躺平了，火箭還沒爬夠高就橫著飛。→ 試著晚一點開始轉，或把傾斜角度調小一點。");
+    else if(f.peri>140) setVerdict(vd,true,"入軌成功！近地點 "+Math.round(f.peri)+" km、最高點 "+Math.round(f.apo)+" km，重力損失只花了 "+f.gloss.toFixed(2)+" km/s。");
+    else setVerdict(vd,false,"沒進軌道：飛得太垂直，速度都用來爬高、不夠橫向（重力損失 "+f.gloss.toFixed(2)+" km/s）。→ 試著早一點開始轉，或把傾斜角度調大一點。");
+  };
+  c.draw();
+};
+
+/* 12. staging */
+SIMS.stage=function(host){
+  const c=canvasIn(host,280); const r=row(host);
+  let n=2, mr=4.0;
+  const ve=3.4, NEED=9.4;
+  const ro=readout(host,[{k:"d",label:"總速度"},{k:"n",label:"需要"},{k:"f",label:"燃料佔比"}]);
+  const vd=verdict(host);
+  slider(r,"火箭有幾節",1,3,2,1,v=>v+" 節",v=>{n=v;c.draw();});
+  slider(r,"每一節的質量比",1.5,20,4,0.5,v=>v.toFixed(1)+" 倍",v=>{mr=v;c.draw();});
+  c.draw=()=>{
+    const g=c.ctx,W=c.W,Hp=c.H; g.clearRect(0,0,W,Hp);
+    const per=ve*Math.log(mr), total=per*n;
+    const rx=Math.min(74,W*0.2), cx=rx*0.62;
+    let y=Hp-34;
+    for(let i=0;i<n;i++){
+      const hgt=(Hp-70)/n*(1-i*0.14);
+      const wd=rx*(1-i*0.18);
+      g.fillStyle=i===0?C("--ink"):C("--instr");
+      g.fillRect(cx-wd/2,y-hgt,wd,hgt-4);
+      g.fillStyle=C("--paper"); g.font='10px "IBM Plex Mono",monospace'; g.textAlign="center";
+      g.fillText("S"+(i+1),cx,y-hgt/2);
+      g.textAlign="left";
+      y-=hgt;
+    }
+    g.fillStyle=C("--ink"); g.beginPath(); g.moveTo(cx,y-24); g.lineTo(cx+rx*(1-(n-1)*0.18)/2,y); g.lineTo(cx-rx*(1-(n-1)*0.18)/2,y); g.closePath(); g.fill();
+    const x0=rx+52, x1=W-16, base=Hp-44, bh=Hp-84;
+    const scale=bh/Math.max(NEED*1.25,total*1.1);
+    g.strokeStyle=C("--flame"); g.lineWidth=2; g.setLineDash([4,4]);
+    const ny=base-NEED*scale; g.beginPath(); g.moveTo(x0-6,ny); g.lineTo(x1,ny); g.stroke(); g.setLineDash([]);
+    g.fillStyle=C("--flame"); g.font='11px "IBM Plex Mono",monospace'; g.fillText("入軌需要 9.4 km/s",x0,ny-6);
+    const barW=Math.min(190,(x1-x0)*0.52);
+    let acc=0;
+    for(let i=0;i<n;i++){
+      const h=per*scale;
+      g.fillStyle=i%2?C("--instr"):C("--ink");
+      g.fillRect(x0,base-acc-h,barW,h-3);
+      g.fillStyle=C("--paper"); g.font='12px "IBM Plex Mono",monospace';
+      if(h>19)g.fillText("第"+(i+1)+"節  +"+per.toFixed(2),x0+10,base-acc-h/2+4);
+      acc+=h;
+    }
+    g.strokeStyle=C("--line"); g.lineWidth=1; g.beginPath(); g.moveTo(x0,base); g.lineTo(x1,base); g.stroke();
+    const tx=x0+barW+14, ty=base-acc+4;
+    g.fillStyle=C("--surface-2"); g.fillRect(tx-5,ty-16,120,22);
+    g.fillStyle=total>=NEED?C("--instr"):C("--flame"); g.font='700 16px "IBM Plex Mono",monospace';
+    g.fillText(total.toFixed(2)+" km/s",tx,ty);
+    ro.d.textContent=total.toFixed(2)+" km/s";
+    ro.n.textContent=NEED+" km/s";
+    ro.f.textContent=Math.round((1-1/mr)*100)+" %";
+    const frac=Math.round((1-1/mr)*100);
+    if(total>=NEED&&mr<=8) setVerdict(vd,true,"入軌成功，而且做得出來！"+n+" 節、每節質量比 "+mr.toFixed(1)+"（每節 "+frac+"% 是燃料），總共 "+total.toFixed(2)+" km/s。");
+    else if(total>=NEED) setVerdict(vd,false,"速度夠了，但每一節有 "+frac+"% 都是燃料——結構會薄得像汽水罐，實際上造不出來。試試看多加一節。");
+    else setVerdict(vd,false,"速度不夠（差 "+(NEED-total).toFixed(2)+" km/s）。可以提高質量比，或者多加一節——多加一節通常比較容易。");
+  };
+  c.draw();
+};
+
+/* ================= Space English ================= */
+const EN={
+1:{txt:"Everything you throw goes back down. The Earth pulls on every object around it. This pull is called gravity. Gravity makes a ball fall, and it also keeps the Moon near the Earth. A rocket has to push harder than gravity pulls.",
+ zh:"你丟出去的每一樣東西都會掉下來。地球會拉住它周圍的每一個物體，這個拉力叫做重力。重力讓球落下，也讓月亮留在地球附近。火箭必須推得比重力拉得更用力。",
+ w:[["gravity","重力"],["fall","落下"],["object","物體"],["pull","拉力"],["weight","重量"],["second","秒"]]},
+2:{txt:"In space a rocket has nothing to push against. So it throws hot gas out of the back. When the rocket pushes the gas backward, the gas pushes the rocket forward. This is called action and reaction. Every push has an equal push the other way.",
+ zh:"在太空中，火箭沒有東西可以推。所以它把高溫氣體往後丟。當火箭把氣體往後推，氣體也把火箭往前推。這叫做作用力與反作用力。每一個推，都有一個大小相同、方向相反的推。",
+ w:[["push","推"],["thrust","推力"],["action","作用力"],["reaction","反作用力"],["forward","向前"],["gas","氣體"]]},
+3:{txt:"Air is not nothing. Air has weight, and it can push things. A flat sheet of paper falls slowly because the air holds it back. We call this air resistance, or drag. High above the ground there is almost no air, and that is where space begins.",
+ zh:"空氣不是什麼都沒有。空氣有重量，也能推動東西。一張攤平的紙掉得很慢，是因為空氣擋住了它。我們把這個叫做空氣阻力。在很高的地方幾乎沒有空氣，太空就是從那裡開始的。",
+ w:[["air","空氣"],["drag","空氣阻力"],["oxygen","氧氣"],["nitrogen","氮氣"],["parachute","降落傘"],["atmosphere","大氣層"]]},
+4:{txt:"A water rocket needs two things: water and air. The squeezed air works like a spring inside the bottle. The water is the stuff the rocket throws out. If you put in too much water, there is no room left for air. About one third of water usually flies the highest.",
+ zh:"水火箭需要兩樣東西：水和空氣。被壓縮的空氣在瓶子裡像一根彈簧。水則是火箭往外丟的東西。如果水裝太多，就沒有空間留給空氣了。大約三分之一的水通常飛得最高。",
+ w:[["bottle","寶特瓶"],["pump","打氣筒"],["pressure","壓力"],["spring","彈簧"],["one third","三分之一"],["launch","發射"]]},
+5:{txt:"A rocket has to fly straight. Two points decide this: the center of gravity and the center of pressure. The center of gravity must sit in front. Fins at the back move the center of pressure backward. Then the air turns the rocket straight again whenever it tilts.",
+ zh:"火箭必須飛得直。有兩個點決定這件事：重心和風壓中心。重心必須在前面。尾翼會把風壓中心往後移。這樣一來，只要火箭歪掉，空氣就會把它推正。",
+ w:[["nose cone","鼻錐"],["fin","尾翼"],["center of gravity","重心"],["center of pressure","風壓中心"],["stable","穩定的"],["balance","平衡"]]},
+6:{txt:"Speed tells you how fast you are moving right now. Acceleration tells you how fast your speed is changing. A rocket burns its fuel, so it gets lighter and lighter. The same engine can push a lighter rocket harder. That is why a rocket speeds up near the end of the burn.",
+ zh:"速度告訴你現在移動得多快。加速度告訴你速度變化得多快。火箭一直在燒燃料，所以越來越輕。同樣的引擎推比較輕的火箭會推得更用力。這就是為什麼火箭在快燒完時反而加速最快。",
+ w:[["speed","速度"],["acceleration","加速度"],["fuel","燃料"],["engine","引擎"],["burn","燃燒"],["lighter","更輕"]]},
+7:{txt:"Fire needs three things: fuel, oxygen, and heat. Take any one away and the fire goes out. An airplane takes oxygen from the air around it. A rocket carries its own oxygen in a big tank. That is why a rocket can still burn where there is no air at all.",
+ zh:"火需要三樣東西：燃料、氧氣和熱。拿掉任何一樣，火就熄了。飛機從周圍的空氣取得氧氣。火箭則用一個大槽自己帶氧氣上去。這就是為什麼火箭在完全沒有空氣的地方還能燃燒。",
+ w:[["fuel","燃料"],["oxidizer","氧化劑"],["heat","熱"],["tank","儲槽"],["liquid oxygen","液態氧"],["candle","蠟燭"]]},
+8:{txt:"Everything is made of atoms. Two hydrogen atoms and one oxygen atom make one water molecule. Inside a rocket engine, hydrogen and oxygen join together and become water. They also give out a huge amount of energy. So the white cloud under the rocket is really steam.",
+ zh:"所有東西都是由原子組成的。兩個氫原子加一個氧原子組成一個水分子。在火箭引擎裡，氫和氧結合變成水，同時放出巨大的能量。所以火箭下方那團白雲，其實是水蒸氣。",
+ w:[["atom","原子"],["molecule","分子"],["hydrogen","氫"],["oxygen","氧"],["energy","能量"],["steam","水蒸氣"]]},
+9:{txt:"Hot gas inside the engine moves in every direction at once. The nozzle makes all of it go the same way. First the nozzle gets narrow, then it opens wide like a bell. The gas comes out faster than the speed of sound. Thrust is how much gas you throw times how fast you throw it.",
+ zh:"引擎裡的高溫氣體同時往四面八方亂撞。噴嘴讓它們全部往同一個方向走。噴嘴先變窄，然後像喇叭一樣張開。氣體噴出來時比音速還快。推力就是「丟出多少氣體」乘上「丟得多快」。",
+ w:[["nozzle","噴嘴"],["throat","喉部"],["exhaust","排氣"],["supersonic","超音速"],["thrust","推力"],["bell","鐘形／喇叭形"]]},
+10:{txt:"Astronauts float, but not because gravity has gone away. They are falling all the time. The trick is to move sideways very, very fast. Then the ground curves away just as fast as you fall. Close to the Earth you need about 7.8 kilometers every single second.",
+ zh:"太空人會漂浮，但不是因為那裡沒有重力。他們其實一直在往下掉。訣竅是橫向移動得非常非常快。這樣地面往下彎的速度剛好跟你落下的速度一樣。在地球附近，你需要每秒大約 7.8 公里。",
+ w:[["orbit","軌道"],["astronaut","太空人"],["float","漂浮"],["sideways","橫向"],["curve","彎曲"],["per second","每秒"]]},
+11:{txt:"A rocket does not fly straight up the whole way. It goes up first to get out of the thick air near the ground. Then it tips over slowly until it is flying almost sideways. Engineers call this a gravity turn. If the rocket stays straight up too long, gravity steals its speed.",
+ zh:"火箭不會一路直直往上飛。它先往上，是為了離開地面附近濃厚的空氣。接著它慢慢傾斜，直到幾乎是橫著飛。工程師把這個叫做重力轉向。如果火箭一直保持垂直太久，重力就會偷走它的速度。",
+ w:[["launch","發射"],["gravity turn","重力轉向"],["tip over","傾斜"],["gravity loss","重力損失"],["altitude","高度"],["orbit insertion","入軌"]]},
+12:{txt:"An empty fuel tank is just dead weight. So the rocket drops it and flies on without it. This is called staging. Each stage gives the rocket some more speed. A single stage would have to be 94 percent fuel, which nobody can build. Two or three stages make the job much easier.",
+ zh:"空的油箱只是死重。所以火箭把它丟掉，不帶著它繼續飛。這叫做分節。每一節都給火箭再多一點速度。單節火箭必須有 94% 都是燃料，那是沒有人造得出來的。分成兩節或三節，難度就低多了。",
+ w:[["stage","節"],["staging","分節"],["mass ratio","質量比"],["dead weight","死重"],["payload","酬載"],["separation","分離"]]}
+};
+function enBlock(n){
+  const d=EN[n], wrap=E("div");
+  const box=E("div","en");
+  box.appendChild(E("p","txt",d.txt));
+  box.appendChild(E("p","zh",d.zh));
+  wrap.appendChild(box);
+  const t=E("button","entoggle","顯示中文翻譯");
+  t.onclick=()=>{const on=box.classList.toggle("show"); t.textContent=on?"隱藏中文翻譯":"顯示中文翻譯";};
+  wrap.appendChild(t);
+  const g=E("div","words");
+  d.w.forEach(([en,zh])=>{const c=E("div","word"); c.appendChild(E("b",null,en)); c.appendChild(E("span",null,zh)); g.appendChild(c);});
+  wrap.appendChild(g);
+  return wrap;
+}
+
+/* ================= app ================= */
+const KEY="rocket-school-progress-v1";
+let done={};
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){done={};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(done));}catch(e){}}
+let cur=0;
+
+const profile=document.getElementById("profile");
+const pane=document.getElementById("pane");
+
+function buildRail(){
+  profile.innerHTML="";
+  let lastCh="";
+  LEVELS.forEach((L,i)=>{
+    if(L.ch!==lastCh){lastCh=L.ch; const a=E("div","alt",L.ch.split(" · ")[1]||L.ch); profile.appendChild(a);}
+    const b=E("button","stop"+(done[L.n]?" done":"")+(i===cur?" active":""));
+    b.innerHTML='<i>'+String(L.n).padStart(2,"0")+'</i><span>'+L.title+'</span>';
+    b.onclick=()=>go(i);
+    profile.appendChild(b);
+    if(i===cur&&window.innerWidth<=900) requestAnimationFrame(()=>{
+      try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});}catch(e){}
+    });
+  });
+}
+
+function quizBlock(L){
+  const wrap=E("div");
+  L.quiz.forEach(q=>{
+    const d=E("div","q");
+    d.appendChild(E("p",null,q.q));
+    const o=E("div","opts");
+    const fb=E("div","fb"); fb.style.display="none";
+    q.opts.forEach((txt,idx)=>{
+      const btn=E("button","opt",txt);
+      btn.onclick=()=>{
+        [...o.children].forEach(ch=>{ch.disabled=true;});
+        btn.classList.add(idx===q.a?"right":"wrong");
+        if(idx!==q.a)o.children[q.a].classList.add("right");
+        fb.style.display="block"; fb.textContent=q.fb;
+      };
+      o.appendChild(btn);
+    });
+    d.appendChild(o); d.appendChild(fb); wrap.appendChild(d);
+  });
+  return wrap;
+}
+
+function card(title,node){
+  const c=E("div","card");
+  c.appendChild(E("h3",null,title));
+  if(typeof node==="string")c.insertAdjacentHTML("beforeend",node); else c.appendChild(node);
+  return c;
+}
+
+function go(i){
+  cleanups.splice(0).forEach(f=>f());
+  cur=Math.max(0,Math.min(LEVELS.length-1,i));
+  const L=LEVELS[cur];
+  pane.innerHTML="";
+  pane.appendChild(E("div","chapline",L.ch+" · MISSION "+String(L.n).padStart(2,"0")));
+  pane.appendChild(E("h2",null,L.title));
+  pane.appendChild(E("p","lede",L.ask));
+  const tg=E("div","tags");
+  L.tags.forEach((t,k)=>tg.appendChild(E("span","tag"+(k===1?" m":""),t)));
+  pane.appendChild(tg);
+
+  pane.appendChild(card("先想一想",L.story));
+  pane.appendChild(card("在家動手做",L.hands));
+
+  const simCard=E("div","card");
+  simCard.appendChild(E("h3",null,"動手玩玩看"));
+  const simBox=E("div","sim"); simCard.appendChild(simBox);
+  simCard.insertAdjacentHTML("beforeend",'<div style="margin-top:14px">'+L.simNote+"</div>");
+  pane.appendChild(simCard);
+  try{ SIMS[L.sim](simBox); }catch(e){ simBox.innerHTML='<p style="padding:20px">模擬器載入失敗。</p>'; console.error(e); }
+
+  pane.appendChild(card("數學小站",L.math));
+  pane.appendChild(card("SPACE ENGLISH",enBlock(L.n)));
+  pane.appendChild(card("小測驗",quizBlock(L)));
+
+  const p=E("div","parent",L.parent); pane.appendChild(p);
+
+  const dt=E("button","done-toggle"+(done[L.n]?" on":""),done[L.n]?"✓ 這一關已完成":"把這一關標記為完成");
+  dt.onclick=()=>{ done[L.n]=!done[L.n]; save(); dt.className="done-toggle"+(done[L.n]?" on":"");
+    dt.textContent=done[L.n]?"✓ 這一關已完成":"把這一關標記為完成"; buildRail(); };
+  pane.appendChild(dt);
+
+  const nav=E("div","nav");
+  const prev=E("button","navbtn"); prev.innerHTML="<small>← 上一關</small>"+(cur>0?LEVELS[cur-1].title:"已經是第一關");
+  prev.disabled=cur===0; prev.onclick=()=>go(cur-1);
+  const next=E("button","navbtn"); next.style.textAlign="right";
+  next.innerHTML="<small>下一關 →</small>"+(cur<LEVELS.length-1?LEVELS[cur+1].title:"你完成了整趟旅程");
+  next.disabled=cur===LEVELS.length-1; next.onclick=()=>go(cur+1);
+  nav.appendChild(prev); nav.appendChild(next); pane.appendChild(nav);
+
+  buildRail();
+  if(window.__inited) pane.scrollIntoView({behavior:"smooth",block:"start"});
+  window.__inited=true;
+}
+
+document.getElementById("resetBtn").onclick=()=>{done={};save();buildRail();go(cur);};
+document.getElementById("themeBtn").onclick=()=>{
+  const root=document.documentElement;
+  const isDark=root.getAttribute("data-theme")==="dark"||
+    (!root.getAttribute("data-theme")&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  root.setAttribute("data-theme",isDark?"light":"dark");
+};
+
+/* hero trajectory */
+(function(){
+  const cv=document.getElementById("heroCv"); if(!cv)return;
+  const g=cv.getContext("2d"); let W=0,H=0,t=0;
+  function fit(){const d=window.devicePixelRatio||1; W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=W*d; cv.height=H*d; g.setTransform(d,0,0,d,0,0);}
+  fit(); window.addEventListener("resize",fit);
+  const stars=Array.from({length:80},(_,i)=>({x:Math.random(),y:Math.random()*0.75,r:Math.random()*1.3+0.3,p:Math.random()*6}));
+  function frame(){
+    t+=0.006; g.clearRect(0,0,W,H);
+    stars.forEach(s=>{g.globalAlpha=0.25+0.55*Math.abs(Math.sin(t*2+s.p));
+      g.fillStyle="#CFE6F2"; g.beginPath(); g.arc(s.x*W,s.y*H,s.r,0,7); g.fill();});
+    g.globalAlpha=1;
+    g.strokeStyle="rgba(255,176,138,.42)"; g.lineWidth=1.6; g.setLineDash([5,7]);
+    g.beginPath();
+    for(let i=0;i<=120;i++){
+      const p=i/120, X=W*p, Y=H*(1.02-0.72*Math.pow(p,0.42));
+      i?g.lineTo(X,Y):g.moveTo(X,Y);
+    }
+    g.stroke(); g.setLineDash([]);
+    const p=(t*0.5)%1.25; if(p<=1){
+      const X=W*p, Y=H*(1.02-0.72*Math.pow(p,0.42));
+      g.fillStyle="#FF7E52"; g.beginPath(); g.arc(X,Y,3.4,0,7); g.fill();
+      g.globalAlpha=.28; g.beginPath(); g.arc(X,Y,10,0,7); g.fill(); g.globalAlpha=1;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+go(0);
+</script>
+
+</body>
+</html>
