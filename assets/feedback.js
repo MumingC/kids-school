@@ -156,4 +156,20 @@
   });
 
   (document.body || document.documentElement).appendChild(host);
+
+  // 照片燈箱是全螢幕的，按鈕的 z-index 比它高，會擋在上面。
+  // 燈箱一開就把按鈕收起來，關掉再放回來。
+  if (CFG.hideWhen) {
+    var ov = document.querySelector(CFG.hideWhen);
+    if (ov) {
+      var sync = function () {
+        host.style.display = ov.offsetParent !== null ? "none" : "";
+      };
+      new MutationObserver(sync).observe(ov, {
+        attributes: true,
+        attributeFilter: ["style", "class", "hidden"],
+      });
+      sync();
+    }
+  }
 })();
