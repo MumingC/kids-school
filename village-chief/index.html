@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Village Chief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: strategy-game table — turn banner on top, hex map as the hero on the left, command column on the right; stacks on tablets in portrait */
+:root{
+  --bg:#E8EEE6; --surface:#F6F9F3; --sunk:#DDE6DA; --ink:#1E2A24; --muted:#56655C; --line:#C4D0C1;
+  --pa:#1C62B8; --pb:#A9500E; --wheat:#B87A10; --up:#B0432C; --down:#2B7A4B; --board:#22302A;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,sans-serif;
+  --tint:var(--pa);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131A16; --surface:#1B241F; --sunk:#232E28; --ink:#E4ECE5; --muted:#9BAAA0; --line:#2F3C35;
+  --pa:#6FA8EE; --pb:#F0954A; --wheat:#E2AC47; --up:#E9846B; --down:#66C48F; --board:#0E1411; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131A16; --surface:#1B241F; --sunk:#232E28; --ink:#E4ECE5; --muted:#9BAAA0; --line:#2F3C35;
+  --pa:#6FA8EE; --pb:#F0954A; --wheat:#E2AC47; --up:#E9846B; --down:#66C48F; --board:#0E1411; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:12px 40px}
+#app{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+#top{display:flex;flex-direction:column;gap:10px}
+h1,h2,h3{font-family:var(--display);font-weight:700;margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:10px;min-height:44px;padding:6px 12px}
+button:hover:not(:disabled){border-color:var(--tint)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible{outline:3px solid var(--tint);outline-offset:2px}
+.pa{--tint:var(--pa)} .pb{--tint:var(--pb)}
+
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+header h1{font-size:2rem;letter-spacing:.04em}
+.year{display:flex;gap:3px;align-items:center;flex-wrap:wrap}
+.year i{width:11px;height:11px;border-radius:50%;border:2px solid var(--line);display:block}
+.year i.done{background:var(--wheat);border-color:var(--wheat)}
+.year i.now{border-color:var(--wheat);background:var(--wheat);opacity:.5}
+.year span{margin-left:8px;color:var(--muted);font-size:.9rem}
+
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:var(--tint);color:var(--bg);border-radius:14px;padding:10px 16px}
+.banner h2{font-size:1.4rem}
+.banner .ev{font-size:.92rem;opacity:.95}
+.banner button{background:var(--bg);color:var(--ink);border:none;font-weight:700;font-size:1.05rem;padding:8px 18px}
+.wait{font-weight:700;font-size:1.05rem;background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 16px}
+
+.grid{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.grid{grid-template-columns:minmax(0,1.65fr) minmax(330px,1fr);align-items:start}}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mapwrap{position:relative;background:var(--board);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.mapbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 10px;min-height:60px;
+  background:#2C3A33;color:#F3F6F2;border:2px solid #3E4E46;border-radius:12px;padding:6px 12px;font-size:1rem}
+.mapbar.live{border-color:#FFD23F;background:#33402F}
+.mapbar b{color:#FFE27A}
+.mapbar button{min-height:44px;border:none;font-weight:700;padding:6px 16px}
+.mapbar .ok{background:#FFD23F;color:#1E2A24;font-size:1.05rem}
+.mapbar .no{background:#3A4740;color:#F3F6F2}
+.advhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 10px}
+.advhead h3{font-size:1.25rem}
+.advhead small{color:var(--muted);font-size:.85rem}
+.advisors{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.adv{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--advc);border-radius:14px;padding:10px 12px;min-width:0}
+.adv .who{display:flex;align-items:center;gap:10px}
+.adv .face{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:var(--sunk);border:3px solid var(--advc);overflow:hidden}
+.adv .face img{width:100%;height:100%;object-fit:cover}
+.cover{width:100%;max-height:320px;object-fit:cover;border-radius:12px;display:block}
+.adv .who b{font-family:var(--display);font-size:1.1rem;display:block;line-height:1.2}
+.adv .who small{color:var(--muted);font-size:.8rem}
+.adv .say{position:relative;background:var(--sunk);border-radius:12px;padding:8px 12px;font-size:.98rem;line-height:1.5;flex:1}
+.adv .say::before{content:"";position:absolute;top:-7px;left:18px;border:7px solid transparent;border-top:0;border-bottom-color:var(--sunk)}
+.adv button{min-height:40px;font-size:.92rem;align-self:flex-start}
+.ailog{text-align:left;margin:0;padding-left:1.2em;font-size:.98rem;max-height:40vh;overflow:auto}
+#map{display:block;width:100%;touch-action:manipulation;cursor:pointer;border-radius:10px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:#C9D6CD;padding:0 4px 2px}
+.legend b{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.panel h3{font-size:1.2rem;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.panel h3 small{font-family:var(--body);font-weight:400;font-size:.85rem;color:var(--muted)}
+.panel p{margin:0}
+.village{border-top:6px solid var(--tint)}
+.focus{border:2px solid var(--tint)}
+
+.res{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.res div{background:var(--sunk);border-radius:10px;padding:6px 2px;text-align:center}
+.res b{display:block;font-size:1.5rem;line-height:1.1}
+.res small{color:var(--muted);font-size:.78rem}
+.res .gain{color:var(--down);font-size:.75rem;font-weight:700}
+.people{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.92rem}
+.warn{color:var(--up);font-weight:500;font-size:.92rem}
+.note{font-size:.85rem;color:var(--muted)}
+
+.blds{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.bld{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;background:var(--bg)}
+.bld b{font-family:var(--display);font-size:1.05rem}
+.bld p{font-size:.8rem;color:var(--muted);line-height:1.4;flex:1}
+.cost{display:flex;flex-wrap:wrap;gap:4px;font-size:.85rem}
+.cost span{background:var(--sunk);border-radius:6px;padding:0 6px}
+.cost span.short{color:var(--up);text-decoration:line-through}
+
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tabs button{min-height:40px;padding:4px;font-size:.95rem}
+.tabs button.on{background:var(--tint);color:var(--bg);border-color:var(--tint);font-weight:700}
+
+table.mkt{width:100%;border-collapse:collapse;font-size:.95rem}
+.mkt th{font-weight:500;color:var(--muted);font-size:.8rem;text-align:left;padding:4px}
+.mkt td{padding:6px 4px;border-top:1px solid var(--line);vertical-align:middle}
+.mkt .p{font-size:1.2rem;font-weight:700}
+.arrow{font-size:.8rem;font-weight:700;white-space:nowrap}
+.arrow.up{color:var(--up)} .arrow.down{color:var(--down)} .arrow.flat{color:var(--muted)}
+.mkt button{min-height:40px;padding:4px 10px;font-size:.9rem}
+
+.trade{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trade h4{margin:0 0 4px;font-size:.9rem;font-weight:500;color:var(--muted)}
+.step{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:2px 0}
+.step button{min-height:36px;min-width:36px;padding:0}
+.step b{min-width:22px;text-align:center}
+.neigh{font-size:.88rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+
+.bar{height:12px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--wheat)}
+.bridgerow{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:.92rem}
+.bridgerow button{min-height:38px;padding:2px 10px;font-size:.88rem}
+.cities{display:flex;flex-wrap:wrap;gap:6px}
+.cities span{background:var(--sunk);border-radius:20px;padding:2px 10px;font-size:.9rem}
+
+.tip{background:var(--sunk);border-left:5px solid var(--wheat);border-radius:10px;padding:10px 14px}
+.tip h4{margin:0 0 2px;font-family:var(--display);font-size:1.12rem}
+.tip p{margin:0;font-size:.93rem}
+
+.seatbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:.88rem;color:var(--muted)}
+.seatbar button{min-height:34px;padding:2px 10px;font-size:.85rem}
+.seatbar .dot{width:9px;height:9px;border-radius:50%;background:var(--down);display:inline-block;margin-right:4px}
+.seatbar .dot.bad{background:var(--up)}
+.seats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.seats button{min-height:84px;font-family:var(--display);font-size:1.25rem;border-width:2px}
+.seats .pa{border-color:var(--pa)} .seats .pb{border-color:var(--pb)}
+.seats small{display:block;font-family:var(--body);font-size:.8rem;color:var(--muted)}
+
+.modal{position:fixed;inset:0;background:rgba(10,16,13,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.card{background:var(--surface);color:var(--ink);border-radius:18px;border-top:8px solid var(--tint);max-width:480px;width:100%;padding:22px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.card h2{font-size:1.7rem}
+.card p{margin:0}
+.card .big{font-size:1.2rem}
+.card .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.card .go{background:var(--tint);color:var(--bg);border:none;font-weight:700;font-size:1.1rem;padding:10px 22px}
+.card ul{text-align:left;margin:0;padding-left:1.2em;font-size:.95rem}
+
+.end table{width:100%;border-collapse:collapse;font-size:.95rem}
+.end td,.end th{padding:6px;border-top:1px solid var(--line);text-align:right}
+.end td:first-child,.end th:first-child{text-align:left}
+.end ul{margin:0;padding-left:1.2em}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- rules ---------- */
+const RES=['food','wood','stone','coin'], GOODS=['food','wood','stone'];
+const IC={food:'🌾',wood:'🪵',stone:'🪨',coin:'🪙'};
+const NM={food:'Food',wood:'Wood',stone:'Stone',coin:'Coins'};
+const BASE={food:2,wood:3,stone:5};
+const BLD={
+  farm:{n:'Farm',i:'🌱',cost:{wood:3},prod:{food:2},work:1,on:['grass'],d:'+2 food a year, +1 more next to water'},
+  lumber:{n:'Lumber camp',i:'🪓',cost:{food:2,coin:1},prod:{wood:2},work:1,on:['forest'],d:'+2 wood a year'},
+  quarry:{n:'Quarry',i:'⛏️',cost:{wood:3,food:2},prod:{stone:1},work:1,on:['hill'],d:'+1 stone a year'},
+  market:{n:'Shop',i:'🏪',cost:{wood:2,stone:2},prod:{coin:2},work:1,on:['grass','hill'],d:'+2 coins a year'},
+  house:{n:'House',i:'🏠',cost:{wood:3,stone:1},work:0,on:['grass','hill'],d:'+2 people: more workers, and more mouths to feed'},
+  granary:{n:'Granary',i:'🛖',cost:{wood:2,stone:2},work:0,max:1,on:['grass','hill'],d:'Keeps your food safe in a drought (only 1 allowed)'}
+};
+const ORDER=['farm','lumber','quarry','market','house','granary'];
+const WORKORDER=['farm','lumber','quarry','market'];
+const UNITS={
+  explorer:{n:'Explorer',i:'🧭',mp:3,see:2,cost:{food:1,coin:2},d:'Fast, and opens up the map'},
+  settler:{n:'Settler',i:'🏕️',mp:2,see:1,cost:{food:3,wood:1},pop:1,d:'Walks to a new place to found a city. Takes 1 person along'}
+};
+const TER={
+  grass:{n:'Grassland',mv:1,hint:'Good for farms, shops, houses and granaries.'},
+  forest:{n:'Forest',mv:2,hint:'Good for lumber camps. Lots of trees, so walking is slow.'},
+  hill:{n:'Hills',mv:2,hint:'Good for quarries, shops and houses. Walking is slow.'},
+  mountain:{n:'Mountain',mv:0,hint:'Too steep to cross.'},
+  water:{n:'River and lake',mv:0,hint:'You can\'t cross it, but farms next to water grow 1 extra food.'}
+};
+const CITYNAMES=[['Riverside','Willow Bay','Reedtown','Fishhaven'],['Woodland','Pinecone','Oakhold','Antler Glen']];
+const EVENTS={
+  calm:{n:'A quiet year',d:'Nothing special happens.'},
+  harvest:{n:'Big harvest',d:'Every farm grows 1 extra food this year. More food means lower food prices.',tip:'supply'},
+  drought:{n:'Drought',d:'Villages without a granary lose half their food. Less food means higher food prices.',tip:'insurance'},
+  caravan:{n:'A caravan arrives',d:'Traders from far away want lots of wood. Wood prices go up.',tip:'demand'},
+  castle:{n:'The king builds a castle',d:'Everyone is looking for stone. Stone prices go up.',tip:'demand'}
+};
+const TIPS={
+  demand:{t:'More demand → higher prices',b:'When lots of people want to buy the same thing, there is less to go around, so sellers raise the price.'},
+  supply:{t:'More supply → lower prices',b:'When lots of people sell the same thing, there is more of it, so the price goes down.'},
+  invest:{t:'Investment',b:'You spend resources now on a building, and it pays you back every year. It takes a few years to earn back the cost.'},
+  trade:{t:'Comparative advantage',b:'Riverside is good at growing food and Woodland is good at cutting wood. When each does what it is good at and they trade, both end up better off.'},
+  insurance:{t:'Saving and insurance',b:'A granary works like insurance: you pay a little in good times, and it protects you when something bad happens.'},
+  hunger:{t:'Income and spending',b:'Each person eats 1 food a year. People who go hungry can\'t work next year, so some buildings stop.'},
+  spread:{t:'The trader\'s profit',b:'When you sell to the shop, you get 1 coin less than the buying price. That difference is how the trader earns money.'},
+  bridge:{t:'Public works',b:'The bridge lets people walk between the two villages, and selling no longer costs you 1 coin. Everyone helps build it, and everyone benefits.'},
+  workers:{t:'Labor',b:'Buildings only produce when someone works in them. Too many buildings and not enough people wastes resources.'},
+  land:{t:'Scarcity',b:'The more land you buy, the more the next piece costs. When something is scarce and many people want it, the price goes up.'},
+  location:{t:'Location matters',b:'A farm next to water grows 1 extra food. The same piece of land is worth more in a better spot.'},
+  opportunity:{t:'Opportunity cost',b:'Training a settler costs food and 1 person. When you choose this, you give up using them for something else.'},
+  explore:{t:'The value of information',b:'You have to explore to know where the forests, hills and water are. The more you know, the better you decide.'},
+  city:{t:'Expansion',b:'A new city brings +1 food and +1 coin every year, and new land to build on.'}
+};
+const BRIDGE={wood:8,stone:6,coin:6};
+const YEARS=15;
+const MAPC=['#2B7BE0','#F08A24'];
+
+/* ---------- hex map ---------- */
+const W=16,H=11,N=W*H;
+const cr=i=>[i%W,(i/W)|0];
+const id=(c,r)=>r*W+c;
+const DIRS=[[[1,0],[0,-1],[-1,-1],[-1,0],[-1,1],[0,1]],[[1,0],[1,-1],[0,-1],[-1,0],[0,1],[1,1]]];
+function nb(i){const[c,r]=cr(i);return DIRS[r&1].map(([dc,dr])=>{const C=c+dc,R=r+dr;return(C<0||R<0||C>=W||R>=H)?-1:id(C,R)})}
+function cube(i){const[c,r]=cr(i);const x=c-(r-(r&1))/2;return[x,r,-x-r]}
+function dist(a,b){const A=cube(a),B=cube(b);return Math.max(Math.abs(A[0]-B[0]),Math.abs(A[1]-B[1]),Math.abs(A[2]-B[2]))}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hr(i,k){const x=Math.sin(i*127.1+k*311.7)*43758.5453;return x-Math.floor(x)}
+
+function genMap(seed){
+  const R=rng(seed), t=new Array(N), riverX=[];
+  let rx=7;
+  for(let r=0;r<H;r++){if(r>0){const v=R();if(v<.3&&rx>6)rx--;else if(v>.7&&rx<8)rx++;}riverX.push(rx);}
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++){
+    const i=id(c,r);
+    if(c===riverX[r]){t[i]='water';continue;}
+    const v=R();
+    if(c<riverX[r]) t[i]=v<.52?'grass':v<.68?'forest':v<.84?'hill':v<.92?'mountain':'water';
+    else t[i]=v<.24?'grass':v<.66?'forest':v<.83?'hill':v<.93?'mountain':'grass';
+  }
+  const A=id(3,5),B=id(12,5);
+  t[A]='grass'; t[B]='grass';
+  const na=nb(A), nbB=nb(B);
+  ['grass','grass','water','grass','hill','forest'].forEach((k,j)=>t[na[j]]=k);
+  ['forest','forest','grass','hill','forest','grass'].forEach((k,j)=>t[nbB[j]]=k);
+  return {t,bridge:id(riverX[5],5),capA:A,capB:B,farmA:na[3],lumberB:nbB[0]};
+}
+let MAP=null,MAPSEED=null;
+function M(){if(MAPSEED!==state.seed){MAP=genMap(state.seed);MAPSEED=state.seed;}return MAP}
+
+/* ---------- state ---------- */
+let state, online=false, loaded=false, ref=null, seat=null, localModal=null, writing=false, dirty=false, syncErr=null;
+let sel=null, selU=null, tab='city', shell=false, pend=null, anim=null;
+const LOCAL_ACTS=new Set(['advice','end','nolocal','seat','unseat','reset','resetyes','start','again','tab','deselect','rules','cancelmove']);
+const P=()=>state.players[state.cur];
+const O=()=>state.players[1-state.cur];
+const hasAI=()=>state&&state.ai!=null;
+const canAct=()=>hasAI()?state.cur!==state.ai:(!online||seat==='both'||P().key===seat);
+const oppSeat=()=>hasAI()?false:(!online||seat==='both'||O().key===seat);
+const viewer=()=>hasAI()?1-state.ai:((online&&seat&&seat!=='both')?(seat==='a'?0:1):state.cur);
+const seatName=k=>k==='a'?'Riverside':k==='b'?'Woodland':'Both on this device';
+const zero=()=>({food:0,wood:0,stone:0,coin:0});
+
+function mkP(name,key,res,spec){return{name,key,res,people:3,hungry:0,spec,lastProd:null}}
+function newGame(){
+  state={seed:Math.floor(Math.random()*1e9),round:1,cur:0,phase:'play',event:'calm',
+    players:[mkP('Riverside','a',{food:6,wood:3,stone:1,coin:4},{food:1}),mkP('Woodland','b',{food:5,wood:5,stone:1,coin:4},{wood:2})],
+    owner:Array(N).fill(-1),bld:{},cities:[],units:[],explored:[Array(N).fill(0),Array(N).fill(0)],nextId:1,
+    idx:{...BASE},start:{...BASE},bridge:{wood:0,stone:0,coin:0},bridgeDone:false,
+    draft:{give:zero(),want:zero()},modal:{type:'handoff',first:true},tip:null,learned:[],rev:0,ai:null};
+  const m=M();
+  foundCity(0,m.capA); foundCity(1,m.capB);
+  state.bld[m.farmA]='farm'; state.bld[m.lumberB]='lumber';
+  [0,1].forEach(pl=>{
+    const cap=pl?m.capB:m.capA, spots=nb(cap).filter(j=>j>=0&&passable(j)&&!state.bld[j]);
+    if(spots[0]!=null) state.units.push({id:state.nextId++,o:pl,type:'explorer',i:spots[0],moved:false});
+    if(spots[1]!=null) state.units.push({id:state.nextId++,o:pl,type:'settler',i:spots[1],moved:false});
+    reveal(pl);
+  });
+  return state;
+}
+
+/* ---------- map helpers ---------- */
+function passable(i){const m=M();if(i===m.bridge)return state.bridgeDone;return TER[m.t[i]].mv>0}
+function moveCost(i){const m=M();return i===m.bridge?1:TER[m.t[i]].mv}
+const unitAt=i=>state.units.find(u=>u.i===i);
+const cityAt=i=>state.cities.find(c=>c.i===i);
+const myCities=pl=>state.cities.filter(c=>c.o===pl);
+function reachInfo(u){
+  const mp=UNITS[u.type].mp, best={[u.i]:0}, prev={}, q=[u.i];
+  while(q.length){const i=q.shift();
+    for(const j of nb(i)){if(j<0||!passable(j)||unitAt(j))continue;
+      const c=best[i]+moveCost(j); if(c>mp)continue;
+      if(best[j]===undefined||c<best[j]){best[j]=c;prev[j]=i;q.push(j);}}}
+  delete best[u.i]; return {best,prev};
+}
+const reach=u=>reachInfo(u).best;
+function pathTo(u,t){const {prev}=reachInfo(u); const path=[t]; let k=t, guard=0;
+  while(k!==u.i&&prev[k]!==undefined&&guard++<20){k=prev[k]; path.unshift(k);} if(path[0]!==u.i) path.unshift(u.i); return path;}
+function reveal(pl){
+  const ex=state.explored[pl];
+  const src=myCities(pl).map(c=>[c.i,2]).concat(state.units.filter(u=>u.o===pl).map(u=>[u.i,UNITS[u.type].see]));
+  for(let i=0;i<N;i++) if(!ex[i]) for(const[s,r] of src) if(dist(i,s)<=r){ex[i]=1;break;}
+}
+function foundCity(pl,i){
+  const n=myCities(pl).length;
+  state.cities.push({id:state.nextId++,o:pl,i,name:CITYNAMES[pl][n]||('New Town '+(n+1))});
+  state.owner[i]=pl;
+  for(const j of nb(i)) if(j>=0&&state.owner[j]===-1&&M().t[j]!=='water') state.owner[j]=pl;
+  reveal(pl);
+}
+function canFound(u){
+  const m=M();
+  if(myCities(u.o).length>=4) return 'You can have at most 4 cities.';
+  if(m.t[u.i]==='water'||u.i===m.bridge) return 'You can\'t build on water.';
+  if(state.owner[u.i]===1-u.o) return 'This is your neighbor\'s land.';
+  if(state.cities.some(c=>dist(c.i,u.i)<3)) return 'Too close to another city. Leave at least 2 tiles between cities.';
+  return '';
+}
+const ownedCount=pl=>state.owner.reduce((a,o)=>a+(o===pl?1:0),0);
+const landCost=pl=>2+Math.floor(ownedCount(pl)/8);
+const countBld=(pl,k)=>Object.keys(state.bld).filter(i=>state.owner[i]===pl&&state.bld[i]===k).length;
+const workersNeeded=pl=>Object.keys(state.bld).filter(i=>state.owner[i]===pl&&BLD[state.bld[i]].work).length;
+function canPlace(i,k){
+  const b=BLD[k], m=M(), p=P();
+  return i!=null&&state.owner[i]===state.cur&&!state.bld[i]&&!cityAt(i)&&i!==m.bridge&&b.on.includes(m.t[i])
+    &&canPay(p,b.cost)&&!(b.max&&countBld(state.cur,k)>=b.max);
+}
+function buyable(i){
+  const m=M();
+  return i!=null&&state.owner[i]===-1&&m.t[i]!=='water'&&i!==m.bridge&&state.explored[state.cur][i]&&nb(i).some(j=>j>=0&&state.owner[j]===state.cur);
+}
+function spawnSpot(pl){
+  for(const c of myCities(pl)){
+    if(!unitAt(c.i)) return c.i;
+    for(const j of nb(c.i)) if(j>=0&&passable(j)&&!unitAt(j)) return j;
+  }
+  return -1;
+}
+
+/* ---------- economy ---------- */
+function price(r){return Math.max(1,Math.min(BASE[r]*3,Math.round(state.idx[r])))}
+function sellPrice(r){return state.bridgeDone?price(r):Math.max(1,price(r)-1)}
+function canPay(p,cost){return RES.every(r=>(p.res[r]||0)>=(cost[r]||0))}
+function pay(p,cost){RES.forEach(r=>p.res[r]-=cost[r]||0)}
+function teach(k){state.tip=TIPS[k]; if(!state.learned.includes(k)) state.learned.push(k);}
+
+function calcProd(pl,workers){
+  const p=state.players[pl], out=zero(), m=M(); let idle=0;
+  for(const r in p.spec) out[r]+=p.spec[r];
+  myCities(pl).forEach(()=>{out.food+=1;out.coin+=1;});
+  const mine=Object.keys(state.bld).map(Number).filter(i=>state.owner[i]===pl);
+  for(const k of WORKORDER) for(const i of mine){
+    if(state.bld[i]!==k) continue;
+    if(workers>0){workers--; for(const r in BLD[k].prod) out[r]+=BLD[k].prod[r];
+      if(k==='farm'){ if(nb(i).some(j=>j>=0&&m.t[j]==='water')) out.food+=1; if(state.event==='harvest') out.food+=1; }}
+    else idle++;
+  }
+  return {out,idle};
+}
+function produce(pl){
+  const p=state.players[pl], {out,idle}=calcProd(pl,p.people-p.hungry);
+  RES.forEach(r=>p.res[r]+=out[r]);
+  p.lastProd={out,idle,hungry:p.hungry}; p.hungry=0;
+}
+function startTurn(){
+  produce(state.cur);
+  state.units.forEach(u=>{if(u.o===state.cur)u.moved=false;});
+  state.draft={give:zero(),want:zero()};
+  sel=null; selU=null; pend=null;
+  if(P().lastProd.idle>0) teach('workers');
+}
+function newRound(){
+  state.round++;
+  GOODS.forEach(r=>{const d=BASE[r]-state.idx[r]; state.idx[r]+=Math.abs(d)<=.5?d:Math.sign(d)*.5;});
+  const pool=['calm','calm','harvest','drought','caravan','castle'];
+  state.event=pool[Math.floor(Math.random()*pool.length)];
+  const e=state.event;
+  if(e==='drought'){state.idx.food+=2; state.players.forEach((p,pl)=>{if(!countBld(pl,'granary'))p.res.food=Math.floor(p.res.food/2)});}
+  if(e==='harvest') state.idx.food-=1;
+  if(e==='caravan') state.idx.wood+=2;
+  if(e==='castle') state.idx.stone+=2;
+  GOODS.forEach(r=>state.start[r]=price(r));
+  if(EVENTS[e].tip) teach(EVENTS[e].tip); else state.tip=null;
+}
+function endTurn(){
+  const p=P(), eat=p.people;
+  if(p.res.food>=eat) p.res.food-=eat;
+  else {p.hungry=eat-p.res.food; p.res.food=0; teach('hunger');}
+  if(state.cur===0){state.cur=1; state.modal={type:'handoff'}; startTurn();}
+  else if(state.round>=YEARS){state.phase='end'; state.modal=null;}
+  else {newRound(); state.cur=0; state.modal={type:'handoff',newYear:true}; startTurn();}
+}
+function score(pl){
+  const p=state.players[pl];
+  const cities=myCities(pl).length*3;
+  const bld=Object.keys(state.bld).filter(i=>state.owner[i]===pl).length*2;
+  const land=Math.floor(ownedCount(pl)/4);
+  const coin=Math.floor(p.res.coin/3);
+  const goods=Math.floor((p.res.food+p.res.wood+p.res.stone)/5);
+  const br=state.bridgeDone?5:0;
+  return {cities,bld,people:p.people,land,coin,goods,br,total:cities+bld+p.people+land+coin+goods+br};
+}
+
+/* ---------- actions ---------- */
+const selectedUnit=()=>selU!=null?state.units.find(u=>u.id===selU):null;
+const act={
+  move(t){const u=selectedUnit(); t=+t; if(!u||u.o!==state.cur||u.moved)return; if(reach(u)[t]===undefined)return;
+    u.i=t; u.moved=true; reveal(u.o); sel=t; if(u.type==='explorer'&&!state.learned.includes('explore')) teach('explore');},
+  found(){const u=selectedUnit(); if(!u||u.type!=='settler'||u.o!==state.cur||canFound(u))return;
+    state.units=state.units.filter(x=>x!==u); foundCity(u.o,u.i); P().people+=1; selU=null; teach('city');},
+  place(k){const i=sel; if(!canPlace(i,k))return; const p=P(); pay(p,BLD[k].cost); state.bld[i]=k;
+    if(k==='house')p.people+=2;
+    if(k==='farm'&&nb(i).some(j=>j>=0&&M().t[j]==='water')) teach('location');
+    else teach(k==='granary'?'insurance':k==='house'?'workers':'invest');},
+  land(){const i=sel; if(!buyable(i))return; const c=landCost(state.cur); if(P().res.coin<c)return;
+    P().res.coin-=c; state.owner[i]=state.cur; reveal(state.cur); teach('land');},
+  train(type){const U=UNITS[type],p=P(); if(!canPay(p,U.cost)||(U.pop&&p.people<2))return;
+    const spot=spawnSpot(state.cur); if(spot<0)return;
+    pay(p,U.cost); if(U.pop)p.people-=U.pop;
+    const u={id:state.nextId++,o:state.cur,type,i:spot,moved:false}; state.units.push(u); reveal(state.cur);
+    sel=spot; selU=u.id; teach(type==='settler'?'opportunity':'explore');},
+  buy(r){const p=P(),c=price(r); if(p.res.coin<c)return; p.res.coin-=c; p.res[r]++; state.idx[r]+=.5; teach('demand');},
+  sell(r){const p=P(); if(p.res[r]<1)return; p.res[r]--; p.res.coin+=sellPrice(r); state.idx[r]-=.5;
+    teach(state.bridgeDone?'supply':(state.learned.includes('supply')?'spread':'supply'));},
+  gp(r){if(state.draft.give[r]<P().res[r])state.draft.give[r]++},
+  gm(r){if(state.draft.give[r]>0)state.draft.give[r]--},
+  wp(r){if(state.draft.want[r]<O().res[r])state.draft.want[r]++},
+  wm(r){if(state.draft.want[r]>0)state.draft.want[r]--},
+  ask(){
+    if(hasAI()){const ok=aiAccepts();
+      if(ok){act.accept(); state.modal={type:'traded',ok:true,ai:true}; return;}
+      state.modal={type:'traded',ok:false,ai:true}; return;}
+    state.modal={type:'trade'}},
+  accept(){const p=P(),o=O(),{give,want}=state.draft;
+    if(!canPay(p,give)||!canPay(o,want))return;
+    RES.forEach(r=>{p.res[r]-=give[r];o.res[r]+=give[r];o.res[r]-=want[r];p.res[r]+=want[r];});
+    state.draft={give:zero(),want:zero()}; state.modal={type:'traded',ok:true}; teach('trade');},
+  decline(){state.modal={type:'traded',ok:false}},
+  close(){state.modal=null},
+  give(r){const p=P(); if(state.bridgeDone||p.res[r]<1||state.bridge[r]>=BRIDGE[r])return;
+    p.res[r]--; state.bridge[r]++;
+    if(RES.every(x=>(state.bridge[x]||0)>=(BRIDGE[x]||0))){state.bridgeDone=true; teach('bridge'); state.modal={type:'bridge'};}},
+  end(){localModal='confirmEnd'},
+  nolocal(){localModal=null},
+  rules(){localModal='rules'},
+  endyes(){localModal=null; endTurn(); runAI();},
+  again(){state=null; shell=false;},
+  start(k){newGame(); state.ai=k==='ai-a'?1:k==='ai-b'?0:null; if(state.ai!=null) state.modal=null;
+    startTurn(); runAI(); commit();},
+  reset(){localModal='reset'},
+  resetyes(){localModal=null; state=null; shell=false;},
+  confirmmove(){const u=selectedUnit(); if(!u||pend==null)return; const t=pend;
+    if(reach(u)[t]===undefined){pend=null;return;}
+    const path=pathTo(u,t);
+    if(!window.matchMedia||!window.matchMedia('(prefers-reduced-motion: reduce)').matches) anim={id:u.id,path,t0:performance.now()};
+    act.move(t); pend=null;},
+  cancelmove(){pend=null},
+  tab(k){tab=k},
+  deselect(){sel=null; selU=null; pend=null},
+  advice(k){const a=ADVICE[+k]; if(!a||!a.go)return;
+    if(a.go.tab){tab=a.go.tab; scrollTarget='.tabs';}
+    if(a.go.sel!=null){sel=a.go.sel; const u=unitAt(sel); selU=(u&&u.o===state.cur&&canAct())?u.id:null; pend=null; scrollTarget='.focus';}},
+  seat(k){seat=k; try{localStorage.setItem('vc-seat',k)}catch(e){}},
+  unseat(){seat=null; try{localStorage.removeItem('vc-seat')}catch(e){}}
+};
+
+/* ---------- computer player ---------- */
+function aiAccepts(){
+  const {give,want}=state.draft, ai=O();
+  if(!canPay(ai,want)||!canPay(P(),give)) return false;
+  if(want.food&&ai.res.food-want.food<ai.people) return false;
+  const val=o=>RES.reduce((a,r)=>a+(o[r]||0)*(r==='coin'?1:price(r)),0);
+  return val(give)>=val(want);
+}
+function siteScore(i){
+  const m=M(); let s=0;
+  for(const j of nb(i)){if(j<0)continue; const t=m.t[j];
+    if(t==='water')s+=1; else if(t!=='mountain'&&state.owner[j]===-1)s+=1;}
+  return s;
+}
+function aiTurn(){
+  const pl=state.cur, p=P(), m=M(), log=[], tip=state.tip, learned=state.learned.slice();
+  const say=s=>log.push(s);
+  // settlers: found a city or walk to a good site
+  for(const u0 of state.units.filter(u=>u.o===pl&&u.type==='settler')){
+    let u=u0; selU=u.id; sel=u.i;
+    if(!canFound(u)&&siteScore(u.i)>=4){act.found(); say(`🏘️ Founded a new city: ${myCities(pl).slice(-1)[0].name}`); continue;}
+    const R=reach(u); let best=null,bs=-1;
+    for(const k in R){const i=+k; if(canFound({o:pl,i}))continue; const sc=siteScore(i)*2-R[k]; if(sc>bs){bs=sc;best=i;}}
+    if(best==null){for(const k in R){const i=+k; const d=Math.min(...state.cities.map(c=>dist(c.i,i))); if(d>bs){bs=d;best=i;}}}
+    if(best!=null){act.move(best); u=state.units.find(x=>x.id===u0.id);}
+    if(u&&!canFound(u)){selU=u.id; act.found(); say(`🏘️ Founded a new city: ${myCities(pl).slice(-1)[0].name}`);}
+    else if(best!=null) say('🏕️ The settler is looking for a good spot for a city');
+  }
+  // explorers: go where the most unknown tiles are
+  for(const u of state.units.filter(u=>u.o===pl&&u.type==='explorer')){
+    selU=u.id; const R=reach(u), ex=state.explored[pl]; let best=null,bs=-1;
+    for(const k in R){const i=+k; let s=Math.random()*.5; for(let j=0;j<N;j++) if(!ex[j]&&dist(i,j)<=2) s++; if(s>bs){bs=s;best=i;}}
+    if(best!=null){act.move(best); say('🧭 The explorer went to explore somewhere new');}
+  }
+  // food first: buy food if hungry soon
+  let n=0;
+  while(p.res.food<p.people&&p.res.coin>=price('food')&&n++<5) act.buy('food');
+  if(n) say(`🌾 Bought food at the market`);
+  // buildings
+  const income=()=>p.lastProd?p.lastProd.out:zero();
+  for(let k=0;k<2;k++){
+    const free=p.people-workersNeeded(pl);
+    const order=[];
+    if(free<=0) order.push('house');
+    if(income().food+ (k?2:0) <=p.people) order.push('farm');
+    if(income().wood<3) order.push('lumber');
+    if(p.res.stone<2) order.push('quarry');
+    if(state.round>=4&&!countBld(pl,'granary')) order.push('granary');
+    order.push('market','farm','lumber','quarry');
+    let done=false;
+    for(const b of order){
+      if(b!=='house'&&free<=0) continue;
+      const spots=[...Array(N).keys()].filter(i=>{sel=i;return canPlace(i,b);});
+      if(!spots.length) continue;
+      spots.sort((a,c)=>(b==='farm'?(nb(c).some(j=>j>=0&&m.t[j]==='water')-nb(a).some(j=>j>=0&&m.t[j]==='water')):0));
+      sel=spots[0]; act.place(b); say(`${BLD[b].i} Built a ${BLD[b].n.toLowerCase()}`); done=true; break;
+    }
+    if(!done) break;
+  }
+  // land
+  const emptyTiles=[...Array(N).keys()].filter(i=>state.owner[i]===pl&&!state.bld[i]&&!cityAt(i)&&['grass','forest','hill'].includes(m.t[i])).length;
+  if(emptyTiles<2&&p.res.coin>=landCost(pl)+2){
+    const c=[...Array(N).keys()].filter(i=>buyable(i)&&['grass','forest','hill'].includes(m.t[i]));
+    if(c.length){sel=c[Math.floor(Math.random()*c.length)]; act.land(); say('🗺️ Bought a new piece of land');}
+  }
+  // units
+  const hasSettler=state.units.some(u=>u.o===pl&&u.type==='settler');
+  if(!hasSettler&&myCities(pl).length<3&&p.people>=3&&p.res.food>=p.people+3&&canPay(p,UNITS.settler.cost)){act.train('settler'); say('🏕️ Trained a settler');}
+  if(!state.units.some(u=>u.o===pl&&u.type==='explorer')&&state.round<=6&&p.res.coin>=4){act.train('explorer'); say('🧭 Trained an explorer');}
+  // sell surplus
+  let sold=0; for(const r of GOODS){while(p.res[r]>9&&sold<4){act.sell(r);sold++;}}
+  if(sold) say(`🪙 Sold extra goods at the market`);
+  // bridge
+  if(!state.bridgeDone){let g=0;
+    if(p.res.wood>5){act.give('wood');g++;} if(p.res.stone>3){act.give('stone');g++;} if(p.res.coin>6){act.give('coin');g++;}
+    if(g) say('🌉 Gave materials to the bridge');}
+  const bridgeNow=state.bridgeDone&&state.modal&&state.modal.type==='bridge';
+  state.tip=tip; state.learned=learned; sel=null; selU=null;
+  if(bridgeNow){teach('bridge');}
+  if(!log.length) say('Rested this year and saved up');
+  const wasLast=state.cur===1;
+  endTurn();
+  if(state.phase==='play') state.modal={type:'ai',log,who:state.players[pl].name,newYear:wasLast,bridge:bridgeNow};
+}
+function runAI(){let g=0; while(state&&state.phase==='play'&&hasAI()&&state.cur===state.ai&&g++<3) aiTurn();}
+
+async function commit(){
+  if(!online||!ref||!state) return;
+  state.rev=Math.max((state.rev||0)+1,Date.now());
+  if(writing){dirty=true; return;}
+  writing=true;
+  try{ do{ dirty=false; await ref.set({state:JSON.parse(JSON.stringify(state))}); }while(dirty); syncErr=null; }
+  catch(e){ syncErr=(e&&e.code)||'unavailable'; render(); }
+  finally{ writing=false; }
+}
+
+/* ---------- optional artwork ---------- */
+// Drop PNGs into images/ (see ART.md). Anything missing falls back to the drawn version.
+const IMG={};
+const ART={
+  t_grass:'tiles/grass',t_forest:'tiles/forest',t_hill:'tiles/hill',t_mountain:'tiles/mountain',t_water:'tiles/water',
+  b_farm:'buildings/farm',b_lumber:'buildings/lumber',b_quarry:'buildings/quarry',b_market:'buildings/market',b_house:'buildings/house',b_granary:'buildings/granary',
+  u_explorer:'units/explorer',u_settler:'units/settler',city:'city',bridge:'bridge',
+  a_farmer:'advisors/farmer',a_builder:'advisors/builder',a_merchant:'advisors/merchant',a_scout:'advisors/scout',cover:'cover'
+};
+function loadArt(){
+  let pending=0;
+  for(const [k,p] of Object.entries(ART)){
+    const im=new Image(); pending++;
+    im.onload=()=>{IMG[k]=im; if(--pending===0||k.startsWith('t_')) refreshArt();};
+    im.onerror=()=>{if(--pending===0) refreshArt();};
+    im.src='images/'+p+'.png';
+  }
+}
+let artTimer=null;
+function refreshArt(){clearTimeout(artTimer); artTimer=setTimeout(()=>render(),60);}
+const artSrc=k=>IMG[k]?IMG[k].src:null;
+
+/* ---------- drawing ---------- */
+let geom=null;
+function hexPath(g,x,y,r){g.beginPath();for(let k=0;k<6;k++){const a=Math.PI/180*(60*k-30);const px=x+r*Math.cos(a),py=y+r*Math.sin(a);k?g.lineTo(px,py):g.moveTo(px,py);}g.closePath();}
+function vert(x,y,r,k){const a=Math.PI/180*(60*k-30);return[x+r*Math.cos(a),y+r*Math.sin(a)]}
+const TCOL={grass:'#94C25F',forest:'#6C9A4A',hill:'#C6AC6F',mountain:'#9C9F99',water:'#4E97BD'};
+
+function drawTile(g,i,x,y,s,m){
+  const t=m.t[i];
+  hexPath(g,x,y,s+.6); g.fillStyle=TCOL[t]; g.fill();
+  if(IMG['t_'+t]){
+    const im=IMG['t_'+t], w=Math.sqrt(3)*s+2, h=2*s+2, side=Math.max(w,h);
+    g.save(); hexPath(g,x,y,s+.6); g.clip();
+    const sx=(hr(i,5)*.2)*im.width, sy=(hr(i,6)*.2)*im.height, sw=im.width*.8, sh=im.height*.8;
+    g.drawImage(im,sx,sy,sw,sh,x-side/2,y-side/2,side,side); g.restore();
+  } else if(t==='grass'){
+    g.strokeStyle='#6F9F40'; g.lineWidth=Math.max(1,s*.06);
+    for(let k=0;k<3;k++){const px=x+(hr(i,k)-.5)*s,py=y+(hr(i,k+7)-.5)*s*.9;
+      g.beginPath();g.moveTo(px-s*.08,py+s*.08);g.lineTo(px,py-s*.08);g.lineTo(px+s*.08,py+s*.08);g.stroke();}
+  } else if(t==='forest'){
+    [[-.36,.18],[.32,.22],[-.02,-.24]].forEach(([dx,dy],k)=>{
+      const px=x+(dx+(hr(i,k)-.5)*.12)*s, py=y+(dy+(hr(i,k+3)-.5)*.1)*s, h=s*.5;
+      g.fillStyle='#5A3D22'; g.fillRect(px-s*.035,py+h*.32,s*.07,s*.14);
+      g.fillStyle='#2E5E27'; g.beginPath(); g.moveTo(px,py-h*.62); g.lineTo(px-s*.2,py+h*.36); g.lineTo(px+s*.2,py+h*.36); g.closePath(); g.fill();
+    });
+  } else if(t==='hill'){
+    g.strokeStyle='#97804C'; g.lineWidth=Math.max(1.2,s*.08);
+    g.beginPath(); g.arc(x-s*.22,y+s*.22,s*.3,Math.PI*1.08,Math.PI*1.92); g.stroke();
+    g.beginPath(); g.arc(x+s*.24,y+s*.02,s*.26,Math.PI*1.08,Math.PI*1.92); g.stroke();
+  } else if(t==='mountain'){
+    g.fillStyle='#6E716C'; g.beginPath(); g.moveTo(x-s*.58,y+s*.4); g.lineTo(x-s*.05,y-s*.55); g.lineTo(x+s*.5,y+s*.4); g.closePath(); g.fill();
+    g.fillStyle='#F2F3EF'; g.beginPath(); g.moveTo(x-s*.2,y-s*.28); g.lineTo(x-s*.05,y-s*.55); g.lineTo(x+s*.11,y-s*.28); g.closePath(); g.fill();
+  } else if(t==='water'){
+    g.strokeStyle='#A3D0E5'; g.lineWidth=Math.max(1,s*.06);
+    for(const dy of [-.18,.2]){g.beginPath(); g.moveTo(x-s*.42,y+dy*s);
+      g.quadraticCurveTo(x-s*.21,y+(dy-.12)*s,x,y+dy*s); g.quadraticCurveTo(x+s*.21,y+(dy+.12)*s,x+s*.42,y+dy*s); g.stroke();}
+  }
+  g.lineWidth=1; g.strokeStyle='rgba(0,0,0,.14)'; hexPath(g,x,y,s); g.stroke();
+  if(i===m.bridge){
+    if(state.bridgeDone&&IMG.bridge){
+      const sz=s*1.9; g.drawImage(IMG.bridge,x-sz/2,y-sz/2,sz,sz);
+    } else if(state.bridgeDone){
+      g.fillStyle='#8B5A2B'; g.fillRect(x-s*.95,y-s*.2,s*1.9,s*.4);
+      g.strokeStyle='#5E3B1A'; g.lineWidth=1.2;
+      for(let k=-3;k<=3;k++){g.beginPath(); g.moveTo(x+k*s*.26,y-s*.2); g.lineTo(x+k*s*.26,y+s*.2); g.stroke();}
+    } else {
+      g.setLineDash([4,3]); g.strokeStyle='#F6E7A8'; g.lineWidth=2; hexPath(g,x,y,s*.78); g.stroke(); g.setLineDash([]);
+    }
+  }
+}
+
+function drawUnitFace(g,type,x,y,s){
+  const im=IMG['u_'+type];
+  if(im){g.save(); g.beginPath(); g.arc(x,y,s*.42,0,Math.PI*2); g.clip(); const sz=s*.9; g.drawImage(im,x-sz/2,y-sz/2,sz,sz); g.restore();}
+  else {g.font=`${s*.55}px serif`; g.fillStyle='#000'; g.fillText(UNITS[type].i,x,y+1);}
+}
+function draw(){
+  const cv=document.getElementById('map'); if(!cv||!state||state.phase==='end') return;
+  const cw=cv.clientWidth; if(cw<=0) return;
+  const pad=4, hw=(cw-2*pad)/(W+.5), s=hw/Math.sqrt(3), ch=Math.ceil(pad*2+2*s+1.5*s*(H-1));
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.style.height=ch+'px'; cv.width=Math.round(cw*dpr); cv.height=Math.round(ch*dpr);
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  const ctr=i=>{const[c,r]=cr(i);return[pad+hw*(c+.5*(r&1))+hw/2,pad+s+1.5*s*r]};
+  geom={s,ctr};
+  const m=M(), ex=state.explored[viewer()];
+  g.fillStyle='#1B2420'; g.fillRect(0,0,cw,ch);
+  for(let i=0;i<N;i++){const[x,y]=ctr(i); drawTile(g,i,x,y,s,m);}
+  for(let i=0;i<N;i++){const o=state.owner[i]; if(o<0)continue; const[x,y]=ctr(i);
+    hexPath(g,x,y,s); g.fillStyle=o?'rgba(240,138,36,.22)':'rgba(43,123,224,.22)'; g.fill();}
+  const EDGE=[[0,1],[5,0],[4,5],[3,4],[2,3],[1,2]];
+  g.lineWidth=Math.max(2,s*.13); g.lineCap='round';
+  for(let i=0;i<N;i++){const o=state.owner[i]; if(o<0)continue; const[x,y]=ctr(i); g.strokeStyle=MAPC[o];
+    nb(i).forEach((j,d)=>{if(j>=0&&state.owner[j]===o)return; const[a,b]=EDGE[d];
+      const va=vert(x,y,s*.93,a), vb=vert(x,y,s*.93,b); g.beginPath(); g.moveTo(va[0],va[1]); g.lineTo(vb[0],vb[1]); g.stroke();});}
+  g.textAlign='center'; g.textBaseline='middle';
+  for(const k in state.bld){const[x,y]=ctr(+k), im=IMG['b_'+state.bld[k]];
+    if(im){const sz=s*1.45; g.drawImage(im,x-sz/2,y-sz/2,sz,sz);} else {g.font=`${s*.82}px serif`; g.fillText(BLD[state.bld[k]].i,x,y+1);}}
+  for(const c of state.cities){const[x,y]=ctr(c.i);
+    if(IMG.city){const sz=s*1.6; g.drawImage(IMG.city,x-sz/2,y-sz*.6,sz,sz);} else {g.font=`${s*1.05}px serif`; g.fillText('🏘️',x,y-s*.12);}
+    const fs=Math.max(10,s*.38); g.font=`700 ${fs}px "Nunito",sans-serif`;
+    const tw=g.measureText(c.name).width; g.fillStyle=MAPC[c.o];
+    g.fillRect(x-tw/2-5,y+s*.36,tw+10,fs+4); g.fillStyle='#fff'; g.fillText(c.name,x,y+s*.36+fs/2+2);}
+  let animating=false;
+  const unitPos=u=>{
+    if(anim&&anim.id===u.id){const per=220, el=performance.now()-anim.t0, steps=anim.path.length-1, f=Math.min(steps,el/per);
+      if(f<steps){animating=true; const k=Math.floor(f), t=f-k, a=ctr(anim.path[k]), b=ctr(anim.path[k+1]); return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}}
+    return ctr(u.i);};
+  const su=selectedUnit();
+  for(const u of state.units){const[x,y]=unitPos(u);
+    if(su&&su.id===u.id){g.beginPath(); g.arc(x,y,s*.62,0,Math.PI*2); g.fillStyle='rgba(255,210,63,.45)'; g.fill();}
+    g.globalAlpha=(u.moved&&u.o===state.cur)?.55:1;
+    g.beginPath(); g.arc(x,y,s*.47,0,Math.PI*2); g.fillStyle='#FBFAF5'; g.fill();
+    g.lineWidth=Math.max(2,s*.14); g.strokeStyle=(su&&su.id===u.id)?'#FFD23F':MAPC[u.o]; g.stroke();
+    drawUnitFace(g,u.type,x,y,s); g.globalAlpha=1;}
+  for(let i=0;i<N;i++){if(ex[i])continue; const[x,y]=ctr(i);
+    hexPath(g,x,y,s+.7); g.fillStyle='#1F2925'; g.fill();
+    g.fillStyle='rgba(255,255,255,.05)'; g.font=`${s*.6}px serif`; g.fillText('?',x,y);}
+  const u=su;
+  if(u&&canAct()&&u.o===state.cur&&!u.moved&&!animating){
+    const R=reach(u);
+    for(const k in R){const[x,y]=ctr(+k); const isP=pend===+k;
+      hexPath(g,x,y,s*.84); g.fillStyle=isP?'rgba(255,210,63,.65)':'rgba(255,236,150,.42)'; g.fill();
+      g.lineWidth=isP?4:2.5; g.strokeStyle=isP?'#FFFFFF':'rgba(255,214,70,1)'; g.stroke();
+      if(!isP){g.font=`700 ${Math.max(10,s*.42)}px "Nunito",sans-serif`; g.lineWidth=3; g.strokeStyle='rgba(0,0,0,.55)';
+        g.strokeText(R[k]+(R[k]>1?' steps':' step'),x,y+s*.48); g.fillStyle='#FFF6C8'; g.fillText(R[k]+(R[k]>1?' steps':' step'),x,y+s*.48);}}
+    if(pend!=null&&R[pend]!==undefined){
+      const pts=pathTo(u,pend).map(ctr);
+      g.lineCap='round'; g.lineJoin='round';
+      for(const [w,c] of [[s*.34,'rgba(0,0,0,.45)'],[s*.2,'#FFFFFF']]){
+        g.beginPath(); g.moveTo(pts[0][0],pts[0][1]); pts.slice(1).forEach(q=>g.lineTo(q[0],q[1])); g.lineWidth=w; g.strokeStyle=c; g.stroke();}
+      const [a,b]=[pts[pts.length-2],pts[pts.length-1]], ang=Math.atan2(b[1]-a[1],b[0]-a[0]);
+      g.save(); g.translate(b[0],b[1]); g.rotate(ang); g.beginPath(); g.moveTo(s*.05,0); g.lineTo(-s*.35,-s*.28); g.lineTo(-s*.35,s*.28); g.closePath();
+      g.fillStyle='#FFFFFF'; g.fill(); g.lineWidth=2; g.strokeStyle='rgba(0,0,0,.45)'; g.stroke(); g.restore();
+      const[x,y]=ctr(pend); g.globalAlpha=.75; g.beginPath(); g.arc(x,y,s*.47,0,Math.PI*2); g.fillStyle='#FBFAF5'; g.fill();
+      g.lineWidth=3; g.strokeStyle='#FFD23F'; g.setLineDash([4,3]); g.stroke(); g.setLineDash([]);
+      drawUnitFace(g,u.type,x,y,s); g.globalAlpha=1;
+    }
+  }
+  if(sel!=null){const[x,y]=ctr(sel); hexPath(g,x,y,s*.92); g.lineWidth=3.5; g.strokeStyle='#FFD23F'; g.stroke();}
+  if(animating) requestAnimationFrame(draw); else if(anim) anim=null;
+}
+function hit(e){
+  if(!geom) return -1;
+  const r=e.currentTarget.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+  let best=-1,bd=1e9;
+  for(let i=0;i<N;i++){const[cx,cy]=geom.ctr(i); const d=(cx-x)**2+(cy-y)**2; if(d<bd){bd=d;best=i;}}
+  return bd<(geom.s**2)?best:-1;
+}
+function onMapClick(e){
+  const t=hit(e); if(t<0) return;
+  const u=selectedUnit();
+  if(u&&canAct()&&u.o===state.cur&&!u.moved&&reach(u)[t]!==undefined){
+    if(pend===t){act.confirmmove(); commit();} else pend=t;
+    render(); return;
+  }
+  pend=null;
+  sel=(sel===t&&!unitAt(t))?null:t;
+  const here=unitAt(t); selU=(here&&here.o===state.cur&&canAct())?here.id:null;
+  render();
+}
+function mapbarHTML(){
+  const u=selectedUnit();
+  if(!u||!canAct()||u.o!==state.cur||u.moved) return '';
+  const U=UNITS[u.type];
+  if(pend==null) return `<span>${U.i} <b>${U.n}</b> selected: tap a glowing tile to pick where to go</span><button class="no" data-act="deselect">Unselect</button>`;
+  const m=M(), t=pend===m.bridge?'the bridge':TER[m.t[pend]].n, cost=reach(u)[pend];
+  return `<span>Move the ${U.i} ${U.n.toLowerCase()} to <b>${t}</b> (${cost} ${cost>1?'steps':'step'})?</span><button class="ok" data-act="confirmmove">✔ Move here</button><button class="no" data-act="cancelmove">Cancel</button>`;
+}
+const ro=new ResizeObserver(()=>draw());
+
+
+/* ---------- advisors ---------- */
+const ADV={
+  farmer:{n:'Farmer Hana',r:'In charge of food',i:'🧑‍🌾',c:'#5E9B3A'},
+  builder:{n:'Builder Rocco',r:'In charge of buildings and workers',i:'👷',c:'#B7792A'},
+  merchant:{n:'Merchant Goldie',r:'In charge of coins and trading',i:'🧑‍💼',c:'#C2941A'},
+  scout:{n:'Scout Hawk',r:'In charge of exploring and new cities',i:'🦅',c:'#2F80A8'}
+};
+let ADVICE=[], scrollTarget=null;
+function freeTile(pl,k){
+  const m=M(); let best=-1,bs=-1;
+  for(let i=0;i<N;i++){
+    if(state.owner[i]!==pl||state.bld[i]!=null||cityAt(i)||i===m.bridge||!BLD[k].on.includes(m.t[i])) continue;
+    const sc=(k==='farm'&&nb(i).some(j=>j>=0&&m.t[j]==='water'))?2:1;
+    if(sc>bs){bs=sc;best=i;}
+  }
+  return best;
+}
+function buyTile(pl,terr){
+  const m=M();
+  for(let i=0;i<N;i++) if(state.owner[i]===-1&&terr.includes(m.t[i])&&i!==m.bridge&&state.explored[pl][i]&&nb(i).some(j=>j>=0&&state.owner[j]===pl)) return i;
+  return -1;
+}
+function advice(){
+  const pl=state.cur, p=P(), o=O(), c=[];
+  const est=calcProd(pl,p.people), need=workersNeeded(pl);
+  const add=(who,prio,say,go,label)=>{if(go&&go.sel!=null&&go.sel<0)go=null; c.push({who,prio,say,go,label});};
+  // farmer
+  const ft=freeTile(pl,'farm');
+  if(p.res.food<p.people) add('farmer',95,`At the end of the year everyone needs ${p.people} food, and we only have ${p.res.food}! Buy food at the market, or someone will go hungry.`,{tab:'market'},'Go to market');
+  if(est.out.food<=p.people) add('farmer',80,ft>=0?'We barely grow enough food each year. Build another farm. Farms next to water grow the most!':'We barely grow enough food, but there is no empty grassland in our land. Buy some grassland first!',{sel:ft>=0?ft:buyTile(pl,['grass'])},'Show me');
+  if(state.event==='drought'&&!countBld(pl,'granary')) add('farmer',85,'A drought is here! Without a granary we lose half our food. Build a granary to protect it.',{sel:freeTile(pl,'granary')},'Show me');
+  else if(state.round>=3&&!countBld(pl,'granary')) add('farmer',30,'I hear droughts happen sometimes. Build a granary, just in case.',{sel:freeTile(pl,'granary')},'Show me');
+  if(price('food')>=BASE.food+2&&p.res.food>p.people+2) add('farmer',48,'Food keeps everyone alive! Even if the price is high, don\'t sell too much.',null);
+  add('farmer',10,'When there is enough food, save some. Then we can feed more people later.',null);
+  // builder
+  const ht=freeTile(pl,'house');
+  if(need>p.people) add('builder',90,`${need-p.people} ${need-p.people>1?'buildings have':'building has'} nobody working! Build a house for +2 people and get them going.`,{sel:ht},'Show me');
+  else if(need===p.people) add('builder',42,'All our workers are busy. Before you build more farms or lumber camps, build a house to get more hands.',{sel:ht},'Show me');
+  if(p.people-need>=1){const k=p.res.wood<4?'lumber':p.res.stone<2?'quarry':'farm', t=freeTile(pl,k);
+    if(t>=0) add('builder',60,`${p.people-need} ${p.people-need>1?'workers are':'worker is'} doing nothing. Build a ${BLD[k].n.toLowerCase()} and put them to work!`,{sel:t},'Show me');}
+  if(p.res.wood<3){const t=freeTile(pl,'lumber');
+    add('builder',50,t>=0?'We don\'t have enough wood to build anything. Build a lumber camp in the forest!':'We don\'t have enough wood to build anything. Trade with our neighbor for some!',t>=0?{sel:t}:{tab:'trade'},t>=0?'Show me':'Go to trade');}
+  add('builder',12,'More buildings means more goods every year. Look for empty tiles in our land.',null);
+  // merchant
+  for(const r of GOODS) if(price(r)>BASE[r]&&p.res[r]>=(r==='food'?p.people+3:4))
+    add('merchant',r==='food'?62:66,`${NM[r]} is expensive right now. Each one sells for ${sellPrice(r)} coins! Sell some while the price is high.`,{tab:'market'},'Go to market');
+  const lack=GOODS.find(r=>p.res[r]<2&&o.res[r]>=5);
+  if(lack) add('merchant',55,`We have very little ${NM[lack].toLowerCase()}, but ${o.name} has ${o.res[lack]}. Trade them something we have plenty of!`,{tab:'trade'},'Go to trade');
+  if(p.res.coin>=landCost(pl)+1&&ft<0&&ht<0) add('merchant',50,`We are running out of empty land. Spend ${landCost(pl)} coins on a new tile!`,{sel:buyTile(pl,['grass','hill','forest'])},'Show me');
+  if(!state.bridgeDone&&p.res.coin>=4) add('merchant',25,'Let\'s help build the bridge! Once it is done, the trader stops keeping 1 coin when we sell.',{tab:'bridge'},'See the bridge');
+  add('merchant',10,'Keep some coins saved, so we can buy things at the market when we need them.',null);
+  // scout
+  const st=state.units.find(u=>u.o===pl&&u.type==='settler'&&!u.moved);
+  if(st) add('scout',70,'The settler is waiting for you! Take them somewhere with lots of grassland near water and found a new city.',{sel:st.i},'Find the settler');
+  const ex=state.units.find(u=>u.o===pl&&u.type==='explorer'&&!u.moved), unk=state.explored[pl].filter(x=>!x).length;
+  if(ex&&unk>20) add('scout',45,'Much of the map is still dark. Send the explorer to look. There might be a great spot out there.',{sel:ex.i},'Find the explorer');
+  if(!state.units.some(u=>u.o===pl&&u.type==='settler')&&myCities(pl).length<3&&p.res.food>=p.people+3)
+    add('scout',40,'We have plenty of food! Train a settler and found a new city.',{tab:'city'},'Go to training');
+  const best={};
+  for(const a of c) if(!best[a.who]||a.prio>best[a.who].prio) best[a.who]=a;
+  return Object.values(best).sort((a,b)=>b.prio-a.prio).slice(0,3);
+}
+function advisorsHTML(){
+  if(!canAct()){ADVICE=[]; return `<div class="panel"><p class="note">Waiting for ${P().name}…</p></div>`;}
+  ADVICE=advice();
+  return `<div class="advhead"><h3>Your advisors</h3><small>They don't always agree, and they aren't always right. Think before you choose who to follow.</small></div>
+  <div class="advisors">${ADVICE.map((a,k)=>{const A=ADV[a.who];
+    return `<div class="adv" style="--advc:${A.c}"><div class="who"><span class="face" aria-hidden="true">${artSrc('a_'+a.who)?`<img src="${artSrc('a_'+a.who)}" alt="">`:A.i}</span><span><b>${A.n}</b><small>${A.r}</small></span></div>
+      <p class="say">${a.say}</p>${a.go?`<button data-act="advice" data-k="${k}">${a.label}</button>`:''}</div>`}).join('')}</div>`;
+}
+
+/* ---------- render ---------- */
+const chip=(cost,p)=>Object.keys(cost).map(r=>`<span class="${p&&p.res[r]<cost[r]?'short':''}">${IC[r]}${cost[r]}</span>`).join('');
+const bundle=o=>RES.filter(r=>o[r]).map(r=>`${IC[r]}×${o[r]}`).join('  ')||'(nothing)';
+function arrow(r){const now=price(r),was=state.start[r];
+  if(now>was)return `<span class="arrow up">⬆ pricier</span>`;
+  if(now<was)return `<span class="arrow down">⬇ cheaper</span>`;
+  return `<span class="arrow flat">— same</span>`;}
+
+function seatBar(){
+  if(!online) return '';
+  const ok=!syncErr;
+  return `<div class="seatbar"><span><i class="dot ${ok?'':'bad'}"></i>${ok?'Connected':'Sync failed. Please reload the page.'}</span>
+    ${hasAI()?`<span>You are <b>${state.players[1-state.ai].name}</b>, the computer is ${state.players[state.ai].name}</span>`:seat?`<span>This device: <b>${seatName(seat)}</b></span><button data-act="unseat">Switch</button>`:''}
+    ${state?`<button data-act="reset">New game</button>`:''}</div>`;
+}
+
+function selHTML(){
+  const me=canAct(), vp=viewer();
+  if(sel==null) return `<h3>Map</h3><p class="note">Tap a tile to see what it is. Tap your 🧭 explorer or 🏕️ settler, then a glowing tile to move. Tap an empty tile in your land to build.</p>`;
+  if(!state.explored[vp][sel]) return `<h3>Unknown land</h3><p class="note">Nobody has explored here yet. Send an explorer to take a look!</p>`;
+  const m=M(), isB=sel===m.bridge, t=m.t[sel], o=state.owner[sel], c=cityAt(sel), u=unitAt(sel), b=state.bld[sel];
+  const title=c?c.name:isB?(state.bridgeDone?'Bridge':'Bridge site'):TER[t].n;
+  let h=`<h3>${title} <small>${o>=0?state.players[o].name+'\'s land':'Nobody\'s land'}</small></h3>`;
+  h+=`<p class="note">${isB?(state.bridgeDone?'Everyone can walk across the river now.':'When both villages finish the bridge, units can cross the river. Give materials on the Bridge tab.'):c?'A city brings +1 🌾 and +1 🪙 every year.':TER[t].hint}</p>`;
+  if(b) h+=`<p><b>${BLD[b].i} ${BLD[b].n}</b>　${BLD[b].d}</p>`;
+  if(u){const U=UNITS[u.type], own=me&&u.o===state.cur;
+    h+=`<p><b>${U.i} ${state.players[u.o].name}'s ${U.n.toLowerCase()}</b>  ${own?(u.moved?'Already moved this year. It can go again next year.':`Can walk ${U.mp} steps. Tap a glowing tile to move.`):''}</p>`;
+    if(own&&u.type==='settler'){const why=canFound(u);
+      h+=`<button data-act="found" ${why?'disabled':''}>🏘️ Found a city here</button>${why?`<p class="note">${why}</p>`:''}`;}
+  }
+  if(me&&o===state.cur&&!b&&!c&&!isB&&TER[t].mv>0){
+    const opts=ORDER.filter(k=>BLD[k].on.includes(t));
+    if(opts.length) h+=`<div class="blds">${opts.map(k=>{const B=BLD[k],full=B.max&&countBld(state.cur,k)>=B.max;
+      return `<div class="bld"><b>${B.i} ${B.n}</b><p>${B.d}</p><div class="cost">${chip(B.cost,P())}</div>
+      <button data-act="place" data-k="${k}" ${canPlace(sel,k)?'':'disabled'}>${full?'Already built':'Build here'}</button></div>`}).join('')}</div>`;
+  }
+  if(me&&o===-1&&!isB&&t!=='water'){
+    const cost=landCost(state.cur);
+    h+=buyable(sel)?`<button data-act="land" ${P().res.coin<cost?'disabled':''}>Buy this tile  🪙${cost}</button><p class="note">The more land you own, the more the next tile costs.</p>`
+      :`<p class="note">You can only buy land that touches your territory.</p>`;
+  }
+  return h;
+}
+
+function tabHTML(){
+  const p=P(),o=O(),me=canAct();
+  if(tab==='city'){
+    const cs=myCities(state.cur);
+    return `<h3>Cities and units <small>${cs.length} / 4 cities</small></h3>
+      <div class="cities">${cs.map(c=>`<span>🏘️ ${c.name}</span>`).join('')}</div>
+      <div class="blds">${['explorer','settler'].map(k=>{const U=UNITS[k],ok=canPay(p,U.cost)&&(!U.pop||p.people>=2)&&me&&spawnSpot(state.cur)>=0;
+        return `<div class="bld"><b>${U.i} ${U.n}</b><p>${U.d}</p><div class="cost">${chip(U.cost,p)}${U.pop?'<span>👥1</span>':''}</div>
+        <button data-act="train" data-k="${k}" ${ok?'':'disabled'}>Train</button></div>`}).join('')}</div>
+      <p class="note">New units appear next to a city.</p>`;
+  }
+  if(tab==='market') return `<h3>Market <small>You have 🪙 ${p.res.coin}</small></h3>
+    <table class="mkt"><thead><tr><th>Goods</th><th>Buy</th><th>Sell</th><th>Since spring</th><th></th></tr></thead><tbody>
+    ${GOODS.map(r=>`<tr><td>${IC[r]} ${NM[r]}</td><td class="p num">${price(r)}</td><td class="num">${sellPrice(r)}</td><td>${arrow(r)}</td>
+      <td style="white-space:nowrap"><button data-act="buy" data-r="${r}" ${p.res.coin<price(r)?'disabled':''}>Buy 1</button> <button data-act="sell" data-r="${r}" ${p.res[r]<1?'disabled':''}>Sell 1</button></td></tr>`).join('')}
+    </tbody></table>
+    <p class="note">Each purchase nudges the price up, and each sale nudges it down. ${state.bridgeDone?'The bridge is done, so selling pays the full price!':'Selling pays 1 coin less than buying. That is the trader\'s cut.'}</p>`;
+  if(tab==='trade'){const d=state.draft, canAsk=RES.some(r=>d.give[r])&&RES.some(r=>d.want[r]);
+    return `<h3>Trade with ${o.name}</h3>
+    <div class="neigh"><span>${o.name} has:</span>${RES.map(r=>`<span>${IC[r]}${o.res[r]}</span>`).join('')}</div>
+    <div class="trade">
+      <div><h4>I give</h4>${RES.map(r=>`<div class="step"><span>${IC[r]}</span><button data-act="gm" data-r="${r}" aria-label="Give less ${NM[r]}">−</button><b class="num">${d.give[r]}</b><button data-act="gp" data-r="${r}" aria-label="Give more ${NM[r]}">＋</button></div>`).join('')}</div>
+      <div><h4>I want</h4>${RES.map(r=>`<div class="step"><span>${IC[r]}</span><button data-act="wm" data-r="${r}" aria-label="Ask for less ${NM[r]}">−</button><b class="num">${d.want[r]}</b><button data-act="wp" data-r="${r}" aria-label="Ask for more ${NM[r]}">＋</button></div>`).join('')}</div>
+    </div>
+    <button data-act="ask" ${canAsk?'':'disabled'}>Offer this to ${o.name}</button>`;}
+  const sum=RES.reduce((a,r)=>a+(state.bridge[r]||0),0), all=RES.reduce((a,r)=>a+(BRIDGE[r]||0),0);
+  return `<h3>Build the bridge together <small>${state.bridgeDone?'Done! +5 points each':`${sum} / ${all}`}</small></h3>
+    <div class="bar"><i style="width:${Math.round(sum/all*100)}%"></i></div>
+    ${state.bridgeDone?'<p class="note">Units can cross the river now, and selling pays the full price.</p>':
+    `<p class="note">The dashed tile in the middle of the river is where the bridge goes.</p>`+['wood','stone','coin'].map(r=>`<div class="bridgerow"><span>${IC[r]} ${NM[r]}</span><div class="bar"><i style="width:${Math.round(state.bridge[r]/BRIDGE[r]*100)}%"></i></div><span class="num">${state.bridge[r]}/${BRIDGE[r]}</span><button data-act="give" data-r="${r}" ${p.res[r]<1||state.bridge[r]>=BRIDGE[r]?'disabled':''}>Give 1</button></div>`).join('')}`;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  const head=`<header><h1>Village Chief</h1></header>`;
+  if(online&&!loaded){shell=false; app.innerHTML=head+`<section class="panel"><p>Connecting…</p></section>`; return;}
+  if(!state){shell=false; app.innerHTML=head+seatBar()+`<section class="panel">${artSrc('cover')?`<img class="cover" src="${artSrc('cover')}" alt="Two villages on either side of a river">`:''}<h3>Start a new game</h3>
+    <p>Riverside sits west of the river and is good at growing food. Woodland sits to the east and is good at cutting wood. Send explorers to uncover the map, found new cities with settlers, build and trade. After ${YEARS} years, the most prosperous village wins.</p>
+    <div class="seats"><button data-act="start" data-k="pvp">Two players<small>${online?'Two devices online, or take turns on one':'Take turns on this device'}</small></button>
+    <button class="pa" data-act="start" data-k="ai-a">Play the computer as Riverside<small>The computer plays Woodland</small></button>
+    <button class="pb" data-act="start" data-k="ai-b">Play the computer as Woodland<small>The computer plays Riverside</small></button></div>
+    ${online?'<p class="note">Once the game starts, open this page on the other device to join.</p>':''}</section>`; return;}
+  if(online&&!seat&&!hasAI()){shell=false; app.innerHTML=head+seatBar()+`<section class="panel"><h3>Who is playing on this device?</h3>
+    <div class="seats"><button class="pa" data-act="seat" data-k="a">Riverside<small>Good at growing food</small></button>
+    <button class="pb" data-act="seat" data-k="b">Woodland<small>Good at cutting wood</small></button>
+    <button data-act="seat" data-k="both">Both of us<small>Take turns on this device</small></button></div></section>`; return;}
+  if(state.phase==='end'){shell=false; app.innerHTML=renderEnd()+seatBar()+renderModal(); return;}
+
+  if(!shell){
+    app.innerHTML=`<div id="top"></div><div class="grid"><div class="col"><div class="mapwrap"><canvas id="map" role="img" aria-label="Game map"></canvas><div class="mapbar" id="mapbar"></div>
+      <div class="legend"><span><b style="background:${MAPC[0]}"></b>Riverside land</span><span><b style="background:${MAPC[1]}"></b>Woodland land</span>
+      <span>🧭 Explorer</span><span>🏕️ Settler</span><span>🏘️ City</span><span>Glowing tile = can move there</span></div></div><section id="advisors" class="col"></section></div>
+      <div class="col" id="side"></div></div><div id="modal"></div>`;
+    const cv=document.getElementById('map'); cv.addEventListener('click',onMapClick);
+    ro.disconnect(); ro.observe(cv); shell=true;
+  }
+  const p=P(), e=EVENTS[state.event], me=canAct(), lp=p.lastProd||{out:zero(),idle:0};
+  document.documentElement.style.setProperty('--tint',p.key==='a'?'var(--pa)':'var(--pb)');
+  const dots=Array.from({length:YEARS},(_,i)=>`<i class="${i+1<state.round?'done':i+1===state.round?'now':''}"></i>`).join('');
+  document.getElementById('top').innerHTML=`
+    <header><h1>Village Chief</h1><div class="year">${dots}<span>Year ${state.round} of ${YEARS}</span><button data-act="rules" style="margin-left:8px;min-height:34px;padding:2px 10px;font-size:.85rem">How to play</button></div></header>
+    ${seatBar()}
+    <div class="banner p${p.key}">
+      <div><h2>${(hasAI()||online&&seat!=='both')&&me?'Your turn! ':''}${p.name}${hasAI()&&!me?' (computer)':''} is playing</h2><div class="ev">This year: <b>${e.n}.</b> ${e.d}</div></div>
+      ${me?`<button data-act="end">End ${p.name}'s year →</button>`:`<div class="wait">Waiting for ${p.name}…</div>`}
+    </div>`;
+  const need=workersNeeded(state.cur);
+  document.getElementById('side').innerHTML=`
+    <section class="panel focus p${p.key}">${selHTML()}</section>
+    <section class="panel village p${p.key}">
+      <h3>${p.name}'s storehouse <small>This year's harvest is in</small></h3>
+      <div class="res">${RES.map(r=>`<div><b class="num">${p.res[r]}</b><small>${IC[r]} ${NM[r]}</small>${lp.out[r]?`<div class="gain num">+${lp.out[r]}</div>`:''}</div>`).join('')}</div>
+      <div class="people"><span>👥 People (workers) <b class="num">${p.people}</b></span><span>🏭 Jobs in buildings <b class="num">${need}</b></span><span>🍚 Food eaten at year end <b class="num">${p.people}</b></span></div>
+    </section>
+    <div class="tabs p${p.key}">${[['city','Cities'],['market','Market'],['trade','Trade'],['bridge','Bridge']].map(([k,n])=>`<button class="${tab===k?'on':''}" data-act="tab" data-k="${k}">${n}</button>`).join('')}</div>
+    <section class="panel p${p.key}" ${me?'':'style="opacity:.6"'}>${tabHTML()}</section>`;
+  document.getElementById('advisors').innerHTML=advisorsHTML();
+  document.getElementById('modal').innerHTML=renderModal();
+  const mb=document.getElementById('mapbar'), mh=mapbarHTML(); mb.innerHTML=mh||(me?'<span>Tap your 🧭 explorer or 🏕️ settler to move. Tap an empty tile in your land to build.</span>':`<span>Waiting for ${p.name}…</span>`); mb.classList.toggle('live',!!mh);
+  draw();
+}
+
+function rulesCard(){
+  return `<div class="card"><h2>How to play</h2><ul>
+    <li>The two villages take turns for ${YEARS} years.</li>
+    <li>Tap your 🧭 explorer or 🏕️ settler, then a glowing tile, then confirm the move. Each unit moves once a year.</li>
+    <li>When a settler reaches a good spot, it can found a new city.</li>
+    <li>Tap an empty tile in your land to build: farms on grassland, lumber camps in forests, quarries on hills.</li>
+    <li>You can buy tiles next to your land with coins.</li>
+    <li>Farms, lumber camps, quarries and shops each need 1 worker. Your people are your workers: a 🏠 house adds 2.</li>
+    <li>Each person eats 1 food a year. If there isn't enough, fewer people can work next year.</li>
+    <li>Buy and sell at the market, trade with your neighbor, and build the bridge together. The most prosperous village wins.</li></ul>
+    <div class="row"><button class="go" data-act="nolocal">Got it</button></div></div>`;
+}
+
+function renderModal(){
+  const wrap=x=>`<div class="modal" role="dialog" aria-modal="true">${x}</div>`;
+  if(localModal==='rules') return wrap(rulesCard());
+  if(localModal==='reset') return wrap(`<div class="card"><h2>Start a new game?</h2><p>This game will end and you'll go back to the start screen.</p>
+      <div class="row"><button class="go" data-act="resetyes">New game</button><button data-act="nolocal">Cancel</button></div></div>`);
+  if(state.phase==='end') return '';
+  const p=P(),o=O(),e=EVENTS[state.event], pass=!hasAI()&&(!online||seat==='both');
+  if(localModal==='confirmEnd'){
+    const idleU=state.units.filter(u=>u.o===state.cur&&!u.moved).length;
+    return wrap(`<div class="card p${p.key}"><h2>End ${p.name}'s year?</h2>
+      <p>At year end your people eat ${p.people} food. You have ${p.res.food}.</p>
+      ${idleU?`<p class="note">${idleU} ${idleU>1?'units have':'unit has'} not moved this year.</p>`:''}
+      <div class="row"><button class="go" data-act="endyes">End the year</button><button data-act="nolocal">Not yet</button></div></div>`);
+  }
+  const m=state.modal; if(!m) return '';
+  if(m.type==='handoff'){
+    if(!canAct()) return '';
+    return wrap(`<div class="card p${p.key}">
+      ${m.first?`<h2>Welcome to Village Chief</h2><p>Riverside sits west of the river and is good at growing food. Woodland sits to the east and is good at cutting wood. Explore the map, found new cities, build and trade to make your village thrive!</p>`:''}
+      ${m.newYear?`<p class="big">Year ${state.round}: <b>${e.n}</b></p><p>${e.d}</p>`:''}
+      <p class="big">${pass?`Please hand the tablet to <b>${p.name}</b>`:`It's <b>${p.name}</b>'s turn`}</p>
+      <div class="row"><button class="go" data-act="close">${pass?`I'm ${p.name}. Let's go!`:'Start'}</button>${m.first?'<button data-act="rules">How to play</button>':''}</div></div>`);
+  }
+  if(m.type==='trade'){
+    if(oppSeat()){const ok=canPay(o,state.draft.want);
+      return wrap(`<div class="card p${o.key}"><h2>${o.name}, you have a trade offer!</h2>
+        <p class="big">${p.name} gives you: ${bundle(state.draft.give)}</p><p class="big">In return for your: ${bundle(state.draft.want)}</p>
+        ${ok?'':`<p class="warn">You don't have enough to accept.</p>`}
+        <div class="row"><button class="go" data-act="accept" ${ok?'':'disabled'}>Deal!</button><button data-act="decline">No thanks</button></div></div>`);}
+    if(canAct()) return wrap(`<div class="card p${p.key}"><h2>Offer sent</h2>
+        <p class="big">Give: ${bundle(state.draft.give)}<br>Get: ${bundle(state.draft.want)}</p><p>Waiting for ${o.name} to answer…</p></div>`);
+    return '';
+  }
+  if(m.type==='ai'){ if(!canAct()) return '';
+    return wrap(`<div class="card p${p.key}"><h2>What the computer (${m.who}) did this year</h2>
+      <ul class="ailog">${m.log.map(x=>`<li>${x}</li>`).join('')}</ul>
+      ${m.bridge?`<p class="big">The bridge is finished! Units can cross the river now.</p>`:''}
+      ${m.newYear?`<p class="big">Year ${state.round}: <b>${e.n}</b></p><p>${e.d}</p>`:''}
+      <p class="note">You can see where the computer's units moved on the map.</p>
+      <div class="row"><button class="go" data-act="close">My turn!</button></div></div>`);}
+  if(m.type==='traded'){ if(!canAct()) return '';
+    return wrap(`<div class="card p${p.key}"><h2>${m.ok?'It\'s a deal!':'They said no'}</h2>
+      <p>${m.ai?(m.ok?'The computer thought this trade was fair, so it said yes.':'The computer thought it wasn\'t a good deal, or it needs those goods itself. Try offering a bit more, or something else.'):(m.ok?'Both villages got what they needed more.':'Try a different offer, or use the market.')}</p>
+      ${pass&&!m.ai?`<p class="big">Please hand the tablet back to <b>${p.name}</b></p>`:''}
+      <div class="row"><button class="go" data-act="close">Continue</button></div></div>`);}
+  if(m.type==='bridge'){ if(!canAct()) return '';
+    return wrap(`<div class="card p${p.key}"><h2>The bridge is finished!</h2><p>${TIPS.bridge.b}</p><p>Units can cross the river now, and both villages get +5 points at the end.</p>
+      <div class="row"><button class="go" data-act="close">Hooray!</button></div></div>`);}
+  return '';
+}
+
+function renderEnd(){
+  const [a,b]=state.players, sa=score(0), sb=score(1);
+  const rows=[['Cities (3 points each)','cities'],['Buildings (2 points each)','bld'],['People (1 point each)','people'],['Land (1 point per 4 tiles)','land'],['Coins (1 point per 3)','coin'],['Leftover goods (1 point per 5)','goods'],['The bridge','br']];
+  const winner=sa.total===sb.total?'Both villages are equally prosperous!':`${sa.total>sb.total?a.name:b.name} is the most prosperous!`;
+  return `<header><h1>Village Chief</h1><div class="year"><span>${YEARS} years have passed</span></div></header>
+  <section class="panel end"><h3>${winner}</h3>
+    <table><thead><tr><th></th><th>${a.name}</th><th>${b.name}</th></tr></thead><tbody>
+    ${rows.map(([n,k])=>`<tr><td>${n}</td><td class="num">${sa[k]}</td><td class="num">${sb[k]}</td></tr>`).join('')}
+    <tr><td><b>Total</b></td><td class="num"><b>${sa.total}</b></td><td class="num"><b>${sb.total}</b></td></tr></tbody></table>
+    <p class="note">${state.bridgeDone?'You built the bridge together. That is what teamwork between villages looks like.':'The bridge was not finished. Try working together more next time?'}</p>
+  </section>
+  <section class="panel"><h3>Economics ideas you met this game</h3>
+    <ul>${state.learned.map(k=>`<li><b>${TIPS[k].t}</b>: ${TIPS[k].b}</li>`).join('')||'<li>Trade more next time to discover more ideas!</li>'}</ul>
+    <button data-act="again">Play again</button>
+  </section>`;
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener('click',ev=>{
+  const el=ev.target.closest('[data-act]'); if(!el||el.disabled) return;
+  const name=el.dataset.act, f=act[name]; if(!f) return;
+  const shared=!LOCAL_ACTS.has(name);
+  if(shared){
+    if(!state) return;
+    const ok=(name==='accept'||name==='decline')?oppSeat():canAct();
+    if(!ok) return;
+  }
+  f(el.dataset.k||el.dataset.r);
+  if(shared) commit();
+  render();
+  if(scrollTarget){const t=document.querySelector(scrollTarget); scrollTarget=null;
+    if(t) t.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+});
+
+function boot(data){
+  if(online) return;
+  state=(data&&data.state)||null;
+  render();
+}
+loadArt();
+window.claude?.hot?.snapshot?.(()=>({state:online?null:state}));
+window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+
+(async()=>{
+  let db=null;
+  try{ db=window.claude?.use ? await window.claude.use('db') : null; }catch(e){ db=null; }
+  if(!db) return;
+  online=true; state=null; localModal=null; shell=false;
+  try{ seat=localStorage.getItem('vc-seat'); }catch(e){ seat=null; }
+  ref=db.doc('games/current');
+  render();
+  ref.onSnapshot(snap=>{
+    loaded=true;
+    if(!snap.exists){ if(!writing) state=null; render(); return; }
+    const s=snap.data()&&snap.data().state; if(!s) return;
+    if(!s.seed||!s.owner){ state=null; render(); return; }
+    if(state&&(s.rev||0)<(state.rev||0)) return;
+    state=JSON.parse(JSON.stringify(s)); render();
+  }, e=>{ loaded=true; syncErr=(e&&e.code)||'unavailable'; render(); });
+})();
+</script>
+
+</body>
+</html>

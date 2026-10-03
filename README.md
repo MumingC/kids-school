@@ -11,11 +11,12 @@ A small collection of static learning websites I build for my kids.
 | 02 | [`ww2/`](ww2/) | 小小歷史家 · WWII | 二次世界大戰互動教材：會動的戰爭地圖、1931–1945 歷史大軸線、老照片、武器圖鑑、臺灣篇與小測驗。另有[國小中低年級簡單版](ww2/kids.html)。 |
 | 03 | [`fission/`](fission/) | 核分裂實驗室 · Fission Lab | 8 站，從原子結構、同位素、半衰期，到 U-235 分裂、連鎖反應與臨界質量，最後談反應爐與核彈的分岔。 |
 | 04 | [`ai-history/`](ai-history/) | AI 是怎麼長大的？ | 給國小三至六年級的 AI 發展史：AlphaGo、圖靈、感知器、ELIZA，以及持續增加的後續篇章。 |
+| 05 | [`village-chief/`](village-chief/) | Village Chief · 小小村長 | 英文介面的六角格經濟策略遊戲：探索、建城、供需與價格、交換與合作。可跟電腦玩或兩人輪流。圖片清單見 [`ART.md`](village-chief/ART.md)。 |
 
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.
-- Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`).
+- Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`; `village-chief/` loads optional artwork from its `images/`).
 - Progress is stored in the browser's `localStorage`, so it never leaves the device.
 
 ## Local preview
@@ -35,3 +36,4 @@ Settings → Pages → Source: `Deploy from a branch` → Branch `main` / `(root
 - WWII: `https://mumingc.github.io/kids-school/ww2/` (easy version: `.../ww2/kids.html`)
 - Fission Lab: `https://mumingc.github.io/kids-school/fission/`
 - AI History: `https://mumingc.github.io/kids-school/ai-history/`
+- Village Chief: `https://mumingc.github.io/kids-school/village-chief/`
