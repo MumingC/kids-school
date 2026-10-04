@@ -75,6 +75,9 @@ header h1{font-size:2rem;letter-spacing:.04em}
 .adv button{min-height:40px;font-size:.92rem;align-self:flex-start}
 .ailog{text-align:left;margin:0;padding-left:1.2em;font-size:.98rem;max-height:40vh;overflow:auto}
 #map{display:block;width:100%;touch-action:manipulation;cursor:pointer;border-radius:10px}
+.mapview{position:relative}
+.zoomtgl{position:absolute;right:10px;top:10px;min-height:38px;padding:4px 12px;font-size:.88rem;font-weight:700;background:rgba(20,28,24,.82);color:#F3F6F2;border:1px solid rgba(255,255,255,.25)}
+.zoomtgl:hover:not(:disabled){border-color:#FFD23F}
 .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.8rem;color:#C9D6CD;padding:0 4px 2px}
 .legend b{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
 
@@ -244,13 +247,13 @@ function genMap(seed){
   ['forest','forest','grass','hill','forest','grass'].forEach((k,j)=>t[nbB[j]]=k);
   return {t,bridge:id(riverX[5],5),capA:A,capB:B,farmA:na[3],lumberB:nbB[0]};
 }
-let MAP=null,MAPSEED=null;
+let MAP=null,MAPSEED=null,cam=null,camSeed=null,wholeMap=false,rafOn=false;
 function M(){if(MAPSEED!==state.seed){MAP=genMap(state.seed);MAPSEED=state.seed;}return MAP}
 
 /* ---------- state ---------- */
 let state, online=false, loaded=false, ref=null, seat=null, localModal=null, writing=false, dirty=false, syncErr=null;
 let sel=null, selU=null, tab='city', shell=false, pend=null, anim=null;
-const LOCAL_ACTS=new Set(['advice','end','nolocal','seat','unseat','reset','resetyes','start','again','tab','deselect','rules','cancelmove']);
+const LOCAL_ACTS=new Set(['whole','advice','end','nolocal','seat','unseat','reset','resetyes','start','again','tab','deselect','rules','cancelmove']);
 const P=()=>state.players[state.cur];
 const O=()=>state.players[1-state.cur];
 const hasAI=()=>state&&state.ai!=null;
@@ -456,6 +459,7 @@ const act={
     act.move(t); pend=null;},
   cancelmove(){pend=null},
   tab(k){tab=k},
+  whole(){wholeMap=!wholeMap},
   deselect(){sel=null; selU=null; pend=null},
   advice(k){const a=ADVICE[+k]; if(!a||!a.go)return;
     if(a.go.tab){tab=a.go.tab; scrollTarget='.tabs';}
@@ -632,21 +636,61 @@ function drawTile(g,i,x,y,s,m){
   }
 }
 
-function drawUnitFace(g,type,x,y,s){
-  const im=IMG['u_'+type];
-  if(im){g.save(); g.beginPath(); g.arc(x,y,s*.42,0,Math.PI*2); g.clip(); const sz=s*.9; g.drawImage(im,x-sz/2,y-sz/2,sz,sz); g.restore();}
-  else {g.font=`${s*.55}px serif`; g.fillStyle='#000'; g.fillText(UNITS[type].i,x,y+1);}
+function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+function drawStandee(g,type,owner,x,y,s,o={}){
+  // a cardboard figure: base on the tile, portrait card rising above the hex
+  const w=s*1.12, h=s*1.42, footY=y+s*.42, lift=o.bob?Math.sin(performance.now()/260)*s*.04:0;
+  const top=footY-h-lift, left=x-w/2, team=MAPC[owner], r=s*.16;
+  g.save();
+  if(o.ghost){g.globalAlpha=.6;} else if(o.dim){g.globalAlpha=.62;}
+  // base
+  g.beginPath(); g.ellipse(x,footY+s*.02,w*.5,s*.17,0,0,Math.PI*2); g.fillStyle='rgba(0,0,0,.35)'; g.fill();
+  g.beginPath(); g.ellipse(x,footY-s*.02,w*.44,s*.14,0,0,Math.PI*2); g.fillStyle=team; g.fill();
+  g.lineWidth=Math.max(1.5,s*.04); g.strokeStyle='rgba(255,255,255,.75)'; g.stroke();
+  // selection glow
+  if(o.selected){rrect(g,left-s*.08,top-s*.08,w+s*.16,h+s*.16,r*1.4); g.fillStyle='rgba(255,210,63,.55)'; g.fill();}
+  // card
+  rrect(g,left,top,w,h,r); g.fillStyle='#FBFAF5'; g.fill();
+  const im=IMG['u_'+type], inset=s*.07;
+  g.save(); rrect(g,left+inset,top+inset,w-2*inset,h-2*inset,r*.7); g.clip();
+  if(im){const ih=h-2*inset, iw=ih*im.width/im.height; g.drawImage(im,x-iw/2,top+inset,iw,ih);}
+  else {g.fillStyle='#E8EEE6'; g.fillRect(left,top,w,h); g.font=`${s*.75}px serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#000'; g.fillText(UNITS[type].i,x,top+h/2);}
+  g.restore();
+  rrect(g,left,top,w,h,r); g.lineWidth=Math.max(2.5,s*.1); g.strokeStyle=o.selected||o.ghost?'#FFD23F':team;
+  if(o.ghost) g.setLineDash([5,4]); g.stroke(); g.setLineDash([]);
+  // role badge
+  const br=s*.24, bx=left+w-br*.55, by=top+h-br*.55;
+  g.beginPath(); g.arc(bx,by,br,0,Math.PI*2); g.fillStyle=team; g.fill(); g.lineWidth=2; g.strokeStyle='#fff'; g.stroke();
+  g.font=`${br*1.15}px serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#000'; g.fillText(UNITS[type].i,bx,by+1);
+  g.restore();
 }
 function draw(){
   const cv=document.getElementById('map'); if(!cv||!state||state.phase==='end') return;
   const cw=cv.clientWidth; if(cw<=0) return;
-  const pad=4, hw=(cw-2*pad)/(W+.5), s=hw/Math.sqrt(3), ch=Math.ceil(pad*2+2*s+1.5*s*(H-1));
+  const ch=Math.round(Math.max(340,Math.min(cw*0.72,720)));
   const dpr=Math.min(window.devicePixelRatio||1,2);
-  cv.style.height=ch+'px'; cv.width=Math.round(cw*dpr); cv.height=Math.round(ch*dpr);
+  if(cv.width!==Math.round(cw*dpr)||cv.height!==Math.round(ch*dpr)){cv.style.height=ch+'px'; cv.width=Math.round(cw*dpr); cv.height=Math.round(ch*dpr);}
   const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
-  const ctr=i=>{const[c,r]=cr(i);return[pad+hw*(c+.5*(r&1))+hw/2,pad+s+1.5*s*r]};
-  geom={s,ctr};
   const m=M(), ex=state.explored[viewer()];
+  // camera: frame the explored land (plus one ring), or the whole map
+  const S3=Math.sqrt(3), wx=i=>{const[c,r]=cr(i);return S3*(c+.5*(r&1))+S3/2}, wy=i=>1+1.5*cr(i)[1];
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  for(let i=0;i<N;i++){
+    let show=wholeMap||ex[i]; if(!show) for(const j of nb(i)) if(j>=0&&ex[j]){show=true;break;}
+    if(!show) continue; x0=Math.min(x0,wx(i)); x1=Math.max(x1,wx(i)); y0=Math.min(y0,wy(i)); y1=Math.max(y1,wy(i));
+  }
+  const minW=S3*7, minH=1.5*5; let bw=x1-x0+S3, bh=y1-y0+2;
+  const mx=(x0+x1)/2, my=(y0+y1)/2; bw=Math.max(bw,minW); bh=Math.max(bh,minH);
+  const tk=Math.min((cw-12)/bw,(ch-12)/bh,72);
+  const tgt={x:mx,y:my,k:tk};
+  if(!cam||camSeed!==state.seed){cam={...tgt}; camSeed=state.seed;}
+  let moving=false;
+  if(!window.matchMedia||!matchMedia('(prefers-reduced-motion: reduce)').matches){
+    for(const key of ['x','y','k']){const d=tgt[key]-cam[key]; if(Math.abs(d)>(key==='k'?.05:.01)){cam[key]+=d*.18; moving=true;} else cam[key]=tgt[key];}
+  } else Object.assign(cam,tgt);
+  const s=cam.k, ox=cw/2-cam.x*s, oy=ch/2-cam.y*s;
+  const ctr=i=>[ox+wx(i)*s, oy+wy(i)*s];
+  geom={s,ctr};
   g.fillStyle='#1B2420'; g.fillRect(0,0,cw,ch);
   for(let i=0;i<N;i++){const[x,y]=ctr(i); drawTile(g,i,x,y,s,m);}
   for(let i=0;i<N;i++){const o=state.owner[i]; if(o<0)continue; const[x,y]=ctr(i);
@@ -670,23 +714,18 @@ function draw(){
       if(f<steps){animating=true; const k=Math.floor(f), t=f-k, a=ctr(anim.path[k]), b=ctr(anim.path[k+1]); return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];}}
     return ctr(u.i);};
   const su=selectedUnit();
-  for(const u of state.units){const[x,y]=unitPos(u);
-    if(su&&su.id===u.id){g.beginPath(); g.arc(x,y,s*.62,0,Math.PI*2); g.fillStyle='rgba(255,210,63,.45)'; g.fill();}
-    g.globalAlpha=(u.moved&&u.o===state.cur)?.55:1;
-    g.beginPath(); g.arc(x,y,s*.47,0,Math.PI*2); g.fillStyle='#FBFAF5'; g.fill();
-    g.lineWidth=Math.max(2,s*.14); g.strokeStyle=(su&&su.id===u.id)?'#FFD23F':MAPC[u.o]; g.stroke();
-    drawUnitFace(g,u.type,x,y,s); g.globalAlpha=1;}
+  // fog first, so standees can rise above the hex tops without being covered
   for(let i=0;i<N;i++){if(ex[i])continue; const[x,y]=ctr(i);
     hexPath(g,x,y,s+.7); g.fillStyle='#1F2925'; g.fill();
     g.fillStyle='rgba(255,255,255,.05)'; g.font=`${s*.6}px serif`; g.fillText('?',x,y);}
-  const u=su;
-  if(u&&canAct()&&u.o===state.cur&&!u.moved&&!animating){
-    const R=reach(u);
+  if(sel!=null){const[x,y]=ctr(sel); hexPath(g,x,y,s*.92); g.lineWidth=3.5; g.strokeStyle='#FFD23F'; g.stroke();}
+  const u=su, showReach=u&&canAct()&&u.o===state.cur&&!u.moved&&!animating, R=showReach?reach(u):{};
+  if(showReach){
     for(const k in R){const[x,y]=ctr(+k); const isP=pend===+k;
       hexPath(g,x,y,s*.84); g.fillStyle=isP?'rgba(255,210,63,.65)':'rgba(255,236,150,.42)'; g.fill();
       g.lineWidth=isP?4:2.5; g.strokeStyle=isP?'#FFFFFF':'rgba(255,214,70,1)'; g.stroke();
-      if(!isP){g.font=`700 ${Math.max(10,s*.42)}px "Nunito",sans-serif`; g.lineWidth=3; g.strokeStyle='rgba(0,0,0,.55)';
-        g.strokeText(R[k]+(R[k]>1?' steps':' step'),x,y+s*.48); g.fillStyle='#FFF6C8'; g.fillText(R[k]+(R[k]>1?' steps':' step'),x,y+s*.48);}}
+      if(!isP){const br=Math.max(9,s*.2), by=y-s*.5; g.beginPath(); g.arc(x,by,br,0,Math.PI*2); g.fillStyle='rgba(30,42,36,.85)'; g.fill();
+        g.lineWidth=2; g.strokeStyle='#FFD23F'; g.stroke(); g.font=`800 ${br*1.2}px "Nunito",sans-serif`; g.fillStyle='#FFF6C8'; g.fillText(R[k],x,by+1);}}
     if(pend!=null&&R[pend]!==undefined){
       const pts=pathTo(u,pend).map(ctr);
       g.lineCap='round'; g.lineJoin='round';
@@ -695,20 +734,29 @@ function draw(){
       const [a,b]=[pts[pts.length-2],pts[pts.length-1]], ang=Math.atan2(b[1]-a[1],b[0]-a[0]);
       g.save(); g.translate(b[0],b[1]); g.rotate(ang); g.beginPath(); g.moveTo(s*.05,0); g.lineTo(-s*.35,-s*.28); g.lineTo(-s*.35,s*.28); g.closePath();
       g.fillStyle='#FFFFFF'; g.fill(); g.lineWidth=2; g.strokeStyle='rgba(0,0,0,.45)'; g.stroke(); g.restore();
-      const[x,y]=ctr(pend); g.globalAlpha=.75; g.beginPath(); g.arc(x,y,s*.47,0,Math.PI*2); g.fillStyle='#FBFAF5'; g.fill();
-      g.lineWidth=3; g.strokeStyle='#FFD23F'; g.setLineDash([4,3]); g.stroke(); g.setLineDash([]);
-      drawUnitFace(g,u.type,x,y,s); g.globalAlpha=1;
     }
   }
-  if(sel!=null){const[x,y]=ctr(sel); hexPath(g,x,y,s*.92); g.lineWidth=3.5; g.strokeStyle='#FFD23F'; g.stroke();}
-  if(animating) requestAnimationFrame(draw); else if(anim) anim=null;
+  // units as standing figures, drawn back to front so nearer ones overlap
+  const list=state.units.map(un=>({un,p:unitPos(un)})).sort((A,B)=>A.p[1]-B.p[1]);
+  for(const {un,p} of list){
+    drawStandee(g,un.type,un.o,p[0],p[1],s,{selected:su&&su.id===un.id,dim:un.moved&&un.o===state.cur});
+  }
+  if(showReach&&pend!=null&&R[pend]!==undefined){const[x,y]=ctr(pend); drawStandee(g,u.type,u.o,x,y,s,{ghost:true});}
+  if(!animating&&anim) anim=null;
+  if((animating||moving)&&!rafOn){rafOn=true; requestAnimationFrame(()=>{rafOn=false; draw();});}
 }
 function hit(e){
   if(!geom) return -1;
   const r=e.currentTarget.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
   let best=-1,bd=1e9;
   for(let i=0;i<N;i++){const[cx,cy]=geom.ctr(i); const d=(cx-x)**2+(cy-y)**2; if(d<bd){bd=d;best=i;}}
-  return bd<(geom.s**2)?best:-1;
+  const tile=bd<(geom.s**2)?best:-1, s=geom.s, su=selectedUnit();
+  if(su&&tile>=0&&canAct()&&su.o===state.cur&&!su.moved&&reach(su)[tile]!==undefined) return tile;
+  // a tap on a standing figure selects that unit's tile
+  const cards=state.units.map(u=>{const[cx,cy]=geom.ctr(u.i);return{i:u.i,cx,cy}}).sort((a,b)=>b.cy-a.cy);
+  for(const c of cards){const w=s*1.12,h=s*1.42,foot=c.cy+s*.42;
+    if(x>=c.cx-w/2&&x<=c.cx+w/2&&y>=foot-h&&y<=foot+s*.15) return c.i;}
+  return tile;
 }
 function onMapClick(e){
   const t=hit(e); if(t<0) return;
@@ -897,9 +945,9 @@ function render(){
   if(state.phase==='end'){shell=false; app.innerHTML=renderEnd()+seatBar()+renderModal(); return;}
 
   if(!shell){
-    app.innerHTML=`<div id="top"></div><div class="grid"><div class="col"><div class="mapwrap"><canvas id="map" role="img" aria-label="Game map"></canvas><div class="mapbar" id="mapbar"></div>
+    app.innerHTML=`<div id="top"></div><div class="grid"><div class="col"><div class="mapwrap"><div class="mapview"><canvas id="map" role="img" aria-label="Game map"></canvas><button class="zoomtgl" id="zoomtgl" data-act="whole"></button></div><div class="mapbar" id="mapbar"></div>
       <div class="legend"><span><b style="background:${MAPC[0]}"></b>Riverside land</span><span><b style="background:${MAPC[1]}"></b>Woodland land</span>
-      <span>🧭 Explorer</span><span>🏕️ Settler</span><span>🏘️ City</span><span>Glowing tile = can move there</span></div></div><section id="advisors" class="col"></section></div>
+      <span>🧭 Explorer</span><span>🏕️ Settler</span><span>🏘️ City</span><span>Number = steps to get there</span></div></div><section id="advisors" class="col"></section></div>
       <div class="col" id="side"></div></div><div id="modal"></div>`;
     const cv=document.getElementById('map'); cv.addEventListener('click',onMapClick);
     ro.disconnect(); ro.observe(cv); shell=true;
@@ -926,6 +974,7 @@ function render(){
     <section class="panel p${p.key}" ${me?'':'style="opacity:.6"'}>${tabHTML()}</section>`;
   document.getElementById('advisors').innerHTML=advisorsHTML();
   document.getElementById('modal').innerHTML=renderModal();
+  document.getElementById('zoomtgl').textContent=wholeMap?'🔍 Zoom in':'🗺️ Whole map';
   const mb=document.getElementById('mapbar'), mh=mapbarHTML(); mb.innerHTML=mh||(me?'<span>Tap your 🧭 explorer or 🏕️ settler to move. Tap an empty tile in your land to build.</span>':`<span>Waiting for ${p.name}…</span>`); mb.classList.toggle('live',!!mh);
   draw();
 }

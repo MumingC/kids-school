@@ -59,7 +59,7 @@ Square portraits, head and shoulders, facing forward, plain soft background. The
 
 | File | Size | Prompt |
 |---|---|---|
-| `images/cover.png` | 1600 × 900 | Wide landscape of two small villages on either side of a winding river, fields on the left bank, a forest village on the right, an unfinished wooden bridge in the middle, morning light. |
+| `images/cover.png` | 1600 × 900 (the repo keeps a compressed 1280 × 720 copy) | Wide landscape of two small villages on either side of a winding river, fields on the left bank, a forest village on the right, an unfinished wooden bridge in the middle, morning light. |
 
 ## Checklist
 
