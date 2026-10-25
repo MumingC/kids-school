@@ -458,6 +458,34 @@ aside.wrap { margin: 0; width: 100% }
 .toast { font-weight: 700; color: var(--accent); min-height: 1.6em; margin: 8px 0 0 }
 .foot { font-size: 13px; color: var(--muted); text-align: center }
 @media (prefers-reduced-motion: no-preference) { .speech, .fact { animation: pop .25s ease-out } @keyframes pop { from { transform: translateY(4px); opacity: .4 } to { transform: none; opacity: 1 } } }
+/* thief's postcard */
+.pcclosed { width: 100%; display: flex; gap: 12px; align-items: center; text-align: left; margin: 4px 0 16px; padding: 12px 14px; border: 2px dashed var(--accent); border-radius: 14px; background: var(--paper); color: var(--ink); font: inherit; cursor: pointer }
+.pcclosed:hover { background: var(--chip) }
+.pcclosed small { display: block; color: var(--muted); font-size: 13px }
+.pcicon { font-size: 30px; line-height: 1 }
+.pcwrap { margin: 4px 0 18px }
+.pcwrap h3 { margin: 0 0 8px }
+.postcard { position: relative; background: var(--paper); color: var(--ink); padding: 16px 18px; border: 7px solid transparent; border-radius: 6px;
+  border-image: repeating-linear-gradient(45deg, #e8632b 0 10px, transparent 10px 20px, #2d6cdf 20px 30px, transparent 30px 40px) 7;
+  box-shadow: 0 8px 18px -14px rgba(0,0,0,.6); line-height: 1.75 }
+.postcard p { margin: 0 0 8px; overflow-wrap: anywhere }
+.pcstamp { float: right; margin: 0 0 8px 12px; width: 76px; min-height: 72px; border: 2px dashed var(--stamp); color: var(--stamp); display: grid; place-content: center; text-align: center; transform: rotate(5deg); line-height: 1.2; padding: 4px }
+.pcstamp b { font-size: 12px; overflow-wrap: anywhere }
+.pcstamp small { font-size: 9px; letter-spacing: .08em; font-weight: 700 }
+.pchi { font-weight: 700 }
+.pcclue { font-weight: 700; color: var(--accent) }
+.pcclue.stain { font-weight: 400; color: var(--muted); background: radial-gradient(ellipse at 40% 50%, rgba(140,90,40,.28), rgba(140,90,40,.12) 70%, transparent 72%); padding: 10px 14px; border-radius: 40% 60% 55% 45% / 55% 45% 60% 40% }
+.pcsign { text-align: right; color: var(--muted); font-size: 14px; margin-bottom: 0 !important; clear: both }
+.pcquiz { margin-top: 12px }
+.pcquiz > p { margin: 0 0 8px }
+.pcopts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+@media (max-width: 520px) { .pcopts { grid-template-columns: minmax(0, 1fr) } .postcard { padding: 12px 12px } .pcstamp { width: 64px; min-height: 60px } }
+.pcopt { border: 2px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 10px; padding: 8px 12px; text-align: left; font: inherit; cursor: pointer }
+.pcopt:hover:not([disabled]) { border-color: var(--accent) }
+.pcopt.right { border-color: var(--ok); font-weight: 700 }
+.pcopt.wrong { border-color: var(--stamp); text-decoration: line-through }
+.pcopt.dim { opacity: .5 }
+.pcopt[disabled] { cursor: default }
 </style>
 
 </head>
@@ -825,7 +853,7 @@ const CULTURE = {
     ["飲食", "越冬泡菜", "每年秋天，韓國家庭會一起醃大量泡菜準備過冬，叫做「김장（越冬泡菜）」，已被列入聯合國非物質文化遺產。"],
     ["節慶", "秋夕", "中秋節在韓國叫「秋夕」，家人會一起包半月形的松餅（송편），並祭拜祖先。"],
     ["禮儀", "尊敬長輩", "和長輩一起喝東西時，韓國人會把頭轉向旁邊再喝；遞東西給長輩時要用雙手。"],
-    ["生活", "暖炕", "韓國傳統房子有「暖炕（온돌）」，讓熱氣從地板下面流過，冬天坐在地上也暖呼呼的。"]],
+    ["生活", "溫突", "韓國傳統房子有「溫突（온돌，ondol）」，讓熱氣從地板下面流過，冬天坐在地上也暖呼呼的。"]],
   bangkok: [
     ["宗教", "清晨托缽", "大部分泰國人信佛教。清晨可以看到穿橘色袈裟的僧侶出來托缽，人們會把食物放進他們的缽裡。"],
     ["節慶", "潑水節", "4 月的潑水節（宋干節）是泰國新年。大家在街上互相潑水，代表洗去壞運氣、送上祝福。"],
@@ -1045,7 +1073,7 @@ Object.assign(CITIES, {
     quiz: ["摩洛哥用尖帽子形狀陶鍋燉煮的料理叫什麼？", ["塔吉鍋", "壽喜燒", "麻辣鍋", "焗烤"], 0] },
   athens: { name: "雅典", country: "希臘", lat: 37.971, lng: 23.727, sv: [37.9708, 23.7262, 30],
     places: ["衛城山腳", "橄欖油店", "古市集"],
-    clues: ["那個人說要去奧運會的故鄉。", "那個人想看山丘上用大理石柱子蓋的神殿。", "那個人帶的國旗是藍白條紋，角落有個白色十字。", "那個人在讀希臘神話，像宙斯和雅典娜的故事。", "那個人要用歐元買希臘優格和橄欖。"],
+    clues: ["那個人說要去舉辦第一屆現代奧運會的城市。", "那個人想看山丘上用大理石柱子蓋的神殿。", "那個人帶的國旗是藍白條紋，角落有個白色十字。", "那個人在讀希臘神話，像宙斯和雅典娜的故事。", "那個人要用歐元買希臘優格和橄欖。"],
     stolen: "帕德嫩神殿的一根柱子", treasure: "帕德嫩神殿",
     fact: "帕德嫩神殿大約 2400 多年前蓋好，是獻給智慧女神雅典娜的神殿，雅典這個城市的名字也和她有關。",
     quiz: ["雅典這個城市的名字和哪一位女神有關？", ["雅典娜", "維納斯", "媽祖", "嫦娥"], 0] },
@@ -1127,7 +1155,7 @@ Object.assign(CULTURE, {
     ["藝術", "手工拼磁磚", "摩洛哥建築常用小塊彩色磁磚拼出幾何圖案，叫做「zellige」，每一小塊都是手工切出來的。"],
     ["歷史", "撒哈拉商隊", "以前的駱駝商隊會穿越撒哈拉沙漠，把鹽、黃金和布料帶到馬拉喀什交易。"]],
   athens: [
-    ["歷史", "民主的起源", "古代雅典的公民會聚在一起投票決定城市大事，「民主」這個詞就來自希臘文。"],
+    ["歷史", "民主的起源", "古代雅典的成年男性公民會聚在一起投票決定城市大事，「民主」這個詞就來自希臘文。"],
     ["飲食", "橄欖樹", "希臘到處都種著橄欖樹，橄欖油幾乎每道菜都會用到。"],
     ["語言", "字母的祖先", "很多英文字母是從希臘字母演變來的，數學裡的 π（派）就是一個希臘字母。"],
     ["節慶", "碰紅蛋", "希臘最重要的節日是復活節。大家把雞蛋染成紅色，互相碰蛋，看誰的蛋最後沒破。"]],
@@ -1147,7 +1175,7 @@ Object.assign(CULTURE, {
     ["飲食", "地爐料理", "毛利人的「hāngī」是把食物放進地下的洞裡，用燒熱的石頭慢慢悶熟。"],
     ["自然", "奇異鳥", "奇異鳥只住在紐西蘭，不會飛、晚上才出來活動。紐西蘭人也自稱「Kiwi」。"]],
   buenos: [
-    ["傳統", "探戈的故鄉", "探戈在一百多年前誕生於布宜諾斯艾利斯的港口區，已被列入聯合國非物質文化遺產。"],
+    ["傳統", "探戈的故鄉", "探戈在一百多年前誕生於布宜諾斯艾利斯和對岸蒙特維多的港口區，已被列入聯合國非物質文化遺產。"],
     ["飲食", "阿薩多烤肉", "阿根廷人最愛「asado」烤肉。週末全家人圍著烤架慢慢烤牛肉，可以吃上好幾個小時。"],
     ["生活", "瑪黛茶", "瑪黛茶裝在葫蘆杯裡，用金屬吸管喝。朋友之間會輪流傳著喝，表示友好。"],
     ["自然", "會打雷的冰川", "阿根廷南邊的巴塔哥尼亞有巨大的冰川，冰塊崩落掉進湖裡時，會發出像打雷一樣的巨響。"]]
@@ -1899,15 +1927,18 @@ function buildPlans(route, suspect, level, relax = false) {
     if (i === route.length - 1) return null;
     const trait = traitOrder[i % 3], tv = SUSPECTS[suspect][trait];
     const traitLine = level === "medium" ? TRAIT_LINES_MED[trait][tv] : TRAIT_LINES[trait](tv);
-    let lines, notes, dests;
+    let lines, notes, dests, pc = { order: shuffle([0, 1, 2, 3]) };
     if (level === "medium") {
       const mp = mediumPlan(id, route[i + 1], route.slice(0, i + 1)) || (relax ? mediumPlan(id, route[i + 1], route.slice(0, i + 1), true) : null);
       if (!mp) return undefined;                                       // caller retries with a new route
       dests = mp.dests;
       // three witnesses share 2–4 clues: the first two get one each, extras go to the trait witness, then round again
+      // one clue is written on the thief's postcard; the witnesses share the rest
+      const pcAt = rnd(mp.clues.length), defs = CLUES.concat(tripClues(id));
+      pc.s = mp.clues[pcAt]; pc.k = defs.find(d => d.s === pc.s).k;
       notes = [[], [], []];
-      mp.clues.forEach((c, k) => notes[k < 2 ? k : (k === 2 ? 2 : 0)].push(c));
-      lines = [notes[0].join(""), notes[1].join(""), notes[2].length ? `${traitLine}對了，${notes[2].join("")}` : traitLine];
+      mp.clues.filter((c, k) => k !== pcAt).forEach((c, k) => notes[k < 2 ? k : (k === 2 ? 2 : 0)].push(c));
+      lines = [notes[0].join("") || PC_HINT, notes[1].join("") || PC_HINT, notes[2].length ? `${traitLine}對了，${notes[2].join("")}` : traitLine];
     } else {
       const next = CITIES[route[i + 1]];
       const cl = shuffle(next.clues).slice(0, 2);
@@ -1927,7 +1958,7 @@ function buildPlans(route, suspect, level, relax = false) {
     }
     // shuffle which witness says what, keeping lines and notes together
     const order = shuffle([0, 1, 2]);
-    return { lines: order.map(j => lines[j]), notes: order.map(j => notes[j]), traitAt: order.indexOf(2), trait, dests };
+    return { lines: order.map(j => lines[j]), notes: order.map(j => notes[j]), traitAt: order.indexOf(2), trait, dests, pc };
   });
 }
 
@@ -2076,7 +2107,7 @@ Object.assign(CULTURE, {
   manila: [
     ["交通", "吉普尼", "二戰後，菲律賓人把美軍留下的吉普車改裝成公車，再畫滿鮮豔的圖案，這就是吉普尼。"],
     ["節慶", "最長的聖誕節", "菲律賓的聖誕季從 9 月就開始，一直到 1 月，是全世界最長的聖誕季之一。"],
-    ["飲食", "哈囉哈囉", "哈囉哈囉（halo-halo）是菲律賓的冰品，意思是「混在一起」，裡面有刨冰、煉乳、水果和紫山藥冰淇淋。"],
+    ["飲食", "哈囉哈囉", "哈囉哈囉（halo-halo）是菲律賓的冰品，意思是「混在一起」，裡面有刨冰、牛奶、水果和紫山藥冰淇淋。"],
     ["歷史", "聖奧斯定教堂", "王城裡的聖奧斯定教堂在 1607 年完工，是菲律賓最古老的石造教堂，經歷好幾次大地震都沒有倒。"]],
   toronto: [
     ["自然", "尼加拉瀑布", "從多倫多開車大約一個半小時，就能到尼加拉瀑布。瀑布橫跨加拿大和美國的邊界。"],
@@ -2271,6 +2302,212 @@ Object.assign(SCENES, {
       [12, 40, "紅色的峭壁", "兩邊的高牆是砂岩峭壁，岩石裡含有鐵，所以呈現紅色和粉紅色，佩特拉也被叫做「玫瑰城」。"]] }
 });
 
+// ---------- story: the thief's postcards ----------
+// Left at every stop. brag: what the thief did in THIS city (from its culture cards); q: reading check on
+// the brag, first answer is the right one; riddle: easy-level hint about this city when it is the NEXT stop.
+const POSTCARDS = {
+  tokyo: { brag: "東京真好玩！我到人家家裡，乖乖在玄關脫了鞋，吃飯前還學會說「いただきます」。聽說這座城市以前叫「江戶」，1868 年才改名——你現在才知道，太慢啦！",
+    q: "嫌犯在東京哪一件事做得很「乖」？", a: ["進門先脫鞋", "見人就鞠躬", "走路靠左邊", "吃完把碗疊好"],
+    riddle: "下一站的人搭超快的子彈列車，還能遠遠看見一座戴著白雪帽子的火山。" },
+  paris: { brag: "我在巴黎吃了一頓超長的晚餐：前菜、主菜、起司、甜點，一道一道上，吃了快三個小時！走的時候，朋友還輕碰我的臉頰說再見，這叫「貼面禮」。",
+    q: "嫌犯在巴黎吃的晚餐，哪一樣「沒有」寫在明信片上？", a: ["湯", "前菜", "起司", "甜點"],
+    riddle: "下一站有一座 1889 年蓋好的鐵塔，那裡的人早餐愛吃可頌麵包。" },
+  giza: { brag: "開羅的早餐叫「富爾」，把蠶豆燉成泥，配圓圓的大餅，好吃！我還去看了尼羅河。以前這條河每年夏天會氾濫，帶來肥沃的黑土，所以埃及被叫做「尼羅河的禮物」。",
+    q: "為什麼埃及被叫做「尼羅河的禮物」？", a: ["河水氾濫帶來肥沃的黑土", "河裡可以撈到黃金", "法老把寶物丟進河裡", "河水冬天會結冰"],
+    riddle: "下一站有一隻獅子身體、人頭的巨大石像，守著古代法老王的陵墓。" },
+  rome: { brag: "我在羅馬吃了蝴蝶麵和螺旋麵，聽說義大利麵有好幾百種形狀！然後我散步走進全世界最小的國家——梵蒂岡，它就藏在羅馬城裡。一天逛兩個國家，厲害吧？",
+    q: "嫌犯說他「一天逛了兩個國家」，是怎麼辦到的？", a: ["梵蒂岡就在羅馬城裡", "他搭了超快的飛機", "義大利和法國連在一起", "他在國界上跳來跳去"],
+    riddle: "下一站有一座古代鬥士比武的大競技場，那個國家的形狀像一隻靴子。" },
+  sydney: { brag: "雪梨的公園裡有免費的公共烤肉台，大家輪流用，我也烤了香腸！這裡的人把烤肉叫「barbie」。聽說 12 月是夏天，很多人穿著泳衣在海灘過聖誕節。",
+    q: "為什麼雪梨有很多人在海灘過聖誕節？", a: ["因為 12 月是夏天", "因為聖誕老人住在海邊", "因為家裡放不下聖誕樹", "因為那天規定要游泳"],
+    riddle: "下一站有一座屋頂像白色帆船的歌劇院，那個國家還住著袋鼠和無尾熊。" },
+  rio: { brag: "我在里約吃了巴西的國民料理「feijoada」，黑豆和豬肉慢慢燉，配白飯。這裡的人說葡萄牙語，因為巴西以前是葡萄牙的殖民地，它是南美洲唯一說葡萄牙語的國家喔。",
+    q: "巴西人為什麼說葡萄牙語？", a: ["巴西以前是葡萄牙的殖民地", "葡萄牙語最容易學", "鄰近的國家都說葡萄牙語", "足球隊規定要說"],
+    riddle: "下一站的山頂上有一座張開雙臂的大雕像，每年還有跳一整晚的森巴嘉年華。" },
+  nyc: { brag: "紐約的地鐵 24 小時都在跑，難怪這裡叫「不夜城」，我半夜還在逛街！我吃了一個貝果，它是移民帶來、再變成紐約味道的食物。在這裡可以聽到好幾百種語言呢。",
+    q: "嫌犯半夜還能在紐約到處跑，是因為什麼？", a: ["地鐵 24 小時都在跑", "晚上太陽不會下山", "全城的燈都不准關", "大家都在白天睡覺"],
+    riddle: "下一站有一座手舉火炬的大雕像，是法國送的禮物，街上還跑滿黃色計程車。" },
+  london: { brag: "我搭了倫敦的地鐵「The Tube」，它 1863 年就通車了，是全世界第一條地下鐵路！我還邊走邊吃炸魚薯條，以前這裡的人常用報紙把它包起來。",
+    q: "倫敦的地鐵有什麼特別的地方？", a: ["是全世界第一條地下鐵路", "是全世界最長的地鐵", "車廂全部都是雙層的", "只有晚上才開"],
+    riddle: "下一站有一口大鐘會準時報時，街上跑著紅色的雙層巴士。" },
+  seoul: { brag: "首爾的冬天好冷，還好傳統房子有「溫突」（ondol），熱氣從地板下面流過，我坐在地上也暖呼呼的。我還學會一個禮貌：遞東西給長輩的時候，要用雙手。",
+    q: "「溫突」是讓房子的哪裡變暖？", a: ["地板", "屋頂", "窗戶", "棉被"],
+    riddle: "下一站的人每一餐都配泡菜，寫的是世宗大王發明的文字。" },
+  bangkok: { brag: "我一大早就起床，看見穿橘色袈裟的僧侶出來托缽，大家把食物放進他們的缽裡。我還學到：在泰國不要摸別人的頭，因為頭被認為是身體最神聖的地方。",
+    q: "在泰國，為什麼不要摸別人的頭？", a: ["頭被認為是身體最神聖的地方", "會把別人的頭髮弄亂", "當地人很怕癢", "只有僧侶才可以摸"],
+    riddle: "下一站可以搭三輪的「嘟嘟車」，去看金光閃閃的大皇宮和玉佛寺。" },
+  agra: { brag: "我在阿格拉學當地人用右手吃飯，用手指把咖哩和烤餅拌在一起，好好玩！街上還有牛悠閒地走來走去，因為很多印度教徒把牛看成神聖的動物。",
+    q: "為什麼阿格拉的街上常常看到牛？", a: ["很多印度教徒把牛看成神聖的動物", "牛是那裡的計程車", "牛是政府養來當路標的", "那裡規定要騎牛上學"],
+    riddle: "下一站有一座皇帝為了紀念妻子而蓋的白色陵墓，那裡的人吃咖哩配烤餅。" },
+  mexico: { brag: "你知道嗎？墨西哥城蓋在阿茲特克帝國的首都上面，那裡原本是一座建在湖中央的城市！我還吃了玉米餅，墨西哥人已經吃了好幾千年囉。",
+    q: "墨西哥城的所在地，原本是什麼樣子？", a: ["一座建在湖中央的城市", "一大片沙漠", "一座火山的山頂", "一片海邊的沙灘"],
+    riddle: "下一站的國旗上，有一隻老鷹叼著蛇、站在仙人掌上，還能吃到真正的塔可餅。" },
+  machu: { brag: "馬丘比丘好高，我爬得好喘！印加人不用紙筆寫字，而是用打了很多結的繩子「奇普」記錄數字，聰明吧？我還吃了紫色的馬鈴薯，安地斯山就是馬鈴薯的故鄉。",
+    q: "印加人用什麼來記錄數字？", a: ["打了很多結的繩子", "刻在石頭上的字", "畫在樹葉上的圖", "寫在紙上的數字"],
+    riddle: "下一站是一座藏在安地斯山雲端的古城，還能看到毛茸茸的駱馬和羊駝。" },
+  capetown: { brag: "我在開普敦搭船去看外海的羅本島，曼德拉曾經在那裡被關了 18 年，出獄後當選南非第一位黑人總統。南非住著很多民族，有 12 種官方語言，所以叫做「彩虹之國」。",
+    q: "南非為什麼被叫做「彩虹之國」？", a: ["住著很多民族、有 12 種官方語言", "每天下雨後都會出現彩虹", "房子都漆成七種顏色", "國旗上畫著一道彩虹"],
+    riddle: "下一站有一座山頂平平、像桌子一樣的山，海灘上還有非洲企鵝。" },
+  taipei: { brag: "我在台北的便利商店繳了費、寄了包裹，還買到車票，什麼事都辦得到！我也喝了珍珠奶茶，它是 1980 年代在台灣發明的，現在全世界都喝得到。",
+    q: "嫌犯在台北的便利商店，「沒有」做哪一件事？", a: ["看醫生", "繳費", "寄包裹", "買車票"],
+    riddle: "下一站有一棟 101 層樓的大樓，夜市裡還能喝到珍珠奶茶。" },
+  singapore: { brag: "我在新加坡的小販中心吃午餐，一大區擺滿各族群的小吃攤，選到眼花！這裡有四種官方語言：英語、華語、馬來語和淡米爾語，很多標示會同時寫好幾種。",
+    q: "下面哪一種「不是」新加坡的官方語言？", a: ["日語", "英語", "馬來語", "淡米爾語"],
+    riddle: "下一站有一座獅子頭、魚身體的雕像，那裡很靠近赤道，一年到頭都很熱。" },
+  siemreap: { brag: "吳哥窟的牆上刻了一千多位跳舞的仙女「阿普莎拉」，我一位一位看，據說每一位的髮型和表情都不一樣！我還去了洞里薩湖的水上村莊，房子蓋在高高的柱子上。",
+    q: "根據明信片，吳哥窟牆上的仙女有什麼特別？", a: ["每一位的髮型和表情都不一樣", "每一位都長得一模一樣", "她們全都在睡覺", "她們是用金子做的"],
+    riddle: "下一站有世界上最大的宗教建築，日出時五座塔會倒映在水池裡。" },
+  dubai: { brag: "我到杜拜人家裡作客，主人端出阿拉伯咖啡和椰棗招待我。聽說以前這裡的人靠捕魚和潛水採珍珠生活，1960 年代發現石油以後，城市才變成現在的樣子。",
+    q: "杜拜在發現石油以前，人們靠什麼生活？", a: ["捕魚和潛水採珍珠", "挖金礦", "種稻米", "養企鵝"],
+    riddle: "下一站有全世界最高的大樓，還能坐吉普車衝沙丘、騎駱駝。" },
+  istanbul: { brag: "伊斯坦堡的人超愛喝紅茶，用鬱金香形狀的小玻璃杯裝，我一天喝了五杯！我還去逛了大市集，它有 500 多年歷史、好幾千家店，我差點迷路。",
+    q: "伊斯坦堡的人用什麼裝紅茶？", a: ["鬱金香形狀的小玻璃杯", "大大的馬克杯", "葫蘆做的杯子", "竹子做的杯子"],
+    riddle: "下一站是一座橫跨歐洲和亞洲的城市，可以搭渡輪穿過博斯普魯斯海峽。" },
+  nairobi: { brag: "我在奈洛比學了一句史瓦希里語「Hakuna matata」，意思是「沒問題、別擔心」！我還吃了玉米粉煮的「ugali」，用手捏一小塊沾菜吃。抓不到我？Hakuna matata！",
+    q: "「Hakuna matata」是什麼意思？", a: ["沒問題、別擔心", "你好嗎", "謝謝你", "再見"],
+    riddle: "下一站的國家剛好在赤道上，城市旁邊的國家公園裡有長頸鹿在散步。" },
+  marrakech: { brag: "馬拉喀什的舊城巷子彎彎曲曲，像迷宮一樣，賣地毯、燈籠和香料的小店一間接一間。店主從好高的地方把薄荷茶倒進小杯子，倒出一層泡泡，這是熱情招待客人喔。",
+    q: "店主從高處倒薄荷茶給嫌犯，表示什麼？", a: ["熱情招待客人", "要嫌犯快點離開", "茶太燙了", "在表演魔術"],
+    riddle: "下一站的城牆和房子都是紅色的，晚上有一座廣場會變成大夜市。" },
+  athens: { brag: "我在雅典學到，古代雅典的成年男性公民會聚在一起投票，決定城市的大事，「民主」這個詞就是從希臘文來的。我還發現，數學裡的 π 是一個希臘字母！",
+    q: "根據明信片，「民主」這個詞是從哪一種語言來的？", a: ["希臘文", "拉丁文", "英文", "阿拉伯文"],
+    riddle: "下一站在 1896 年舉辦了第一屆現代奧運會，山丘上有用大理石柱子蓋的神殿。" },
+  barcelona: { brag: "我在巴塞隆納看到「疊人塔」，大家一層一層站上去，最上面站的是小孩！晚餐我等到晚上 9 點以後才吃，因為西班牙人吃飯的時間比較晚，餓死我了。",
+    q: "疊人塔最上面站的是誰？", a: ["小孩", "最高的大人", "教練", "一隻狗"],
+    riddle: "下一站到處都是建築師高第設計的奇特房子，那裡的人除了西班牙語，還說加泰隆尼亞語。" },
+  reykjavik: { brag: "雷克雅維克的地底下很熱，大部分房子用地熱溫泉水供暖，有些人行道下面還埋了熱水管，雪會自己融化！我還發現冰島人大多沒有姓氏，名字後面接的是爸爸或媽媽的名字。",
+    q: "有些人行道下面為什麼埋著熱水管？", a: ["讓雪融化", "給路人洗腳", "養溫泉魚", "讓路邊的花長得快"],
+    riddle: "下一站到處都是火山和溫泉，冬天的夜裡還可能看到綠色的極光。" },
+  auckland: { brag: "我在奧克蘭學毛利人打招呼，叫做「hongi」：兩個人的鼻子和額頭輕輕相碰，代表分享呼吸。我還去找奇異鳥，可惜牠晚上才出來，而且不會飛。",
+    q: "毛利人用「hongi」打招呼時，會碰哪裡？", a: ["鼻子和額頭", "手掌", "肩膀", "臉頰"],
+    riddle: "下一站可以看毛利人的戰舞「哈卡」，那個國家的羊比人還多。" },
+  buenos: { brag: "我在布宜諾斯艾利斯喝了瑪黛茶：裝在葫蘆杯裡，用金屬吸管喝，朋友之間還會輪流傳著喝。我也學了探戈，它一百多年前就誕生在這一帶的港口區。",
+    q: "瑪黛茶是用什麼杯子裝的？", a: ["葫蘆杯", "鬱金香形狀的玻璃杯", "竹筒", "椰子殼"],
+    riddle: "下一站是探戈的故鄉，有一條非常寬的大馬路叫「七月九日大道」。" },
+  lisbon: { brag: "我在里斯本吃了剛烤好的葡式蛋塔，它最早是貝倫區修道院的修士做的！這裡很多房子的外牆貼滿彩繪磁磚，葡萄牙語叫 azulejo，有的還拼成整面牆的故事畫。",
+    q: "葡式蛋塔最早是誰做的？", a: ["修道院的修士", "國王的廚師", "船上的水手", "一位小學生"],
+    riddle: "下一站可以搭黃色的老式路面電車爬坡，還能聽到帶著思念的法朵歌。" },
+  amsterdam: { brag: "阿姆斯特丹的腳踏車多到數不完，路上還有腳踏車專用的紅綠燈！我還學到，荷蘭大約四分之一的土地比海平面還低，要靠堤防和風車把水排出去。",
+    q: "荷蘭為什麼要靠堤防和風車把水排出去？", a: ["很多土地比海平面還低", "那裡每天都下大雨", "為了讓運河變多", "河水太乾淨了"],
+    riddle: "下一站的人都愛沿著運河騎腳踏車，國王節那天全國都穿上橘色。" },
+  vienna: { brag: "我在維也納的老咖啡館點了一杯咖啡，坐了一整個下午看報紙，都沒人趕我走！我還吃了薩赫蛋糕，這塊巧克力蛋糕中間夾著杏桃果醬，是 1832 年一位 16 歲的學徒做的。",
+    q: "薩赫蛋糕中間夾著什麼？", a: ["杏桃果醬", "草莓果醬", "花生醬", "鮮奶油"],
+    riddle: "下一站是莫札特住過的城市，還有一座一千多個房間的皇宮。" },
+  prague: { brag: "我在布拉格的舊城廣場等天文鐘報時，整點一到，十二門徒的人偶就一一出現！這座鐘大約 1410 年做好，到現在還在走。晚餐我吃了麵包丸子沾肉汁。",
+    q: "布拉格的天文鐘整點時，會發生什麼事？", a: ["十二門徒的人偶一一出現", "鐘會飛起來", "鐘塔會噴水", "廣場的燈全部熄滅"],
+    riddle: "下一站有一座整點會有人偶出來的天文鐘，還有一座兩旁站滿石像的古老石橋。" },
+  hanoi: { brag: "我在河內吃了一碗河粉當早餐，牛骨熬的湯配上香草和檸檬。我還看了水上木偶戲：表演者躲在竹簾後面、站在水裡操控木偶，這種戲一千年前就有了。",
+    q: "水上木偶戲的表演者站在哪裡？", a: ["站在水裡，躲在竹簾後面", "站在舞台上方的屋頂", "站在觀眾席中間", "坐在小船上，面對觀眾"],
+    riddle: "下一站的街上滿滿都是摩托車，傳說那裡的湖裡有一隻神龜，拿回了國王的寶劍。" },
+  kualalumpur: { brag: "我一早就吃了椰漿飯，用椰奶煮的飯，配上辣椒醬、小魚乾、花生和雞蛋。然後我去爬黑風洞的 272 級彩虹階梯，爬到腳都軟了！",
+    q: "椰漿飯是用什麼煮的？", a: ["椰奶", "牛奶", "雞湯", "紅茶"],
+    riddle: "下一站有兩棟一模一樣、中間有天橋連著的高樓，早餐可以吃椰漿飯。" },
+  manila: { brag: "我在馬尼拉搭了吉普尼，它是用美軍留下的吉普車改裝成的公車，畫滿鮮豔的圖案。下車後吃一碗哈囉哈囉，意思是「混在一起」，刨冰、牛奶、水果全部拌一拌！",
+    q: "「哈囉哈囉」這個名字是什麼意思？", a: ["混在一起", "你好你好", "冰冰涼涼", "快點快點"],
+    riddle: "下一站的國家有七千多座島，可以搭五顏六色的吉普尼。" },
+  toronto: { brag: "我從多倫多開車大約一個半小時，就到了尼加拉瀑布，它橫跨加拿大和美國的邊界！我還買了楓糖漿，全世界大部分的楓糖漿都產自加拿大。",
+    q: "尼加拉瀑布橫跨哪兩個國家的邊界？", a: ["加拿大和美國", "加拿大和墨西哥", "美國和墨西哥", "加拿大和英國"],
+    riddle: "下一站有一座 553 公尺高的電視塔，國旗中間有一片紅色的楓葉。" },
+  havana: { brag: "我在哈瓦那坐了一台 1950 年代的美國老爺車兜風，車主自己動手修車，讓它一直開到今天！傍晚我坐在濱海大道的堤防上看夕陽，這條路沿著海邊長約 8 公里。",
+    q: "哈瓦那的老爺車為什麼還能開？", a: ["車主自己動手修理", "它們其實是新做的", "政府每年發新車", "它們用太陽能"],
+    riddle: "下一站是加勒比海上最大的一座島，可以坐 1950 年代的老爺車兜風。" },
+  bogota: { brag: "星期天，波哥大封了一百多公里的大馬路，我跟大家一起騎腳踏車、溜直排輪！我還去了黃金博物館，裡面有三萬多件古代黃金工藝品，可惜一件都不能帶走。",
+    q: "星期天，波哥大的大馬路上可以做什麼？", a: ["騎腳踏車、溜直排輪", "開賽車", "放風箏比賽", "划船"],
+    riddle: "下一站是一座海拔 2,600 多公尺的高原城市，有一間收藏幾萬件黃金寶物的博物館。" },
+  santiago: { brag: "聖地牙哥的國慶日一定要吃恩潘納達，這種烤餡餅包著牛肉、洋蔥、橄欖和水煮蛋。我還聽說，智利北部的阿塔卡馬沙漠有些地方好幾年都不下雨，很適合看星星。",
+    q: "為什麼阿塔卡馬沙漠很適合看星星？", a: ["非常乾燥，有些地方好幾年不下雨", "那裡晚上有很多路燈", "那裡的星星會自己變大", "那裡看不到月亮"],
+    riddle: "下一站的國家又細又長，還能去復活節島看摩艾石像。" },
+  petra: { brag: "佩特拉是兩千多年前的納巴泰人在沙漠裡建立的。他們挖水道、蓋蓄水池，把雨水和泉水存起來，在這麼乾的地方也有水喝。我還去死海躺著，結果整個人浮了起來！",
+    q: "納巴泰人怎麼在沙漠裡有水喝？", a: ["用水道和蓄水池把水存起來", "每天搭船去海邊運水", "挖到一條地下大河", "他們不需要喝水"],
+    riddle: "下一站有一座刻在玫瑰色岩壁上的古城，還能漂浮在死海上。" },
+};
+// medium: one of the leg's clues, in the thief's own words (keyed by clue k)
+const PC_CLUE = {
+  "南半球": "下一站我要去南半球，那裡的季節跟台灣剛好相反，記得帶對衣服喔！",
+  "北半球": "下一站跟台灣一樣在北半球，不用煩惱季節顛倒啦。",
+  "亞洲": "下一站嘛……我只透露一點點：在亞洲。", "歐洲": "下一站嘛……我只透露一點點：在歐洲。",
+  "非洲": "下一站嘛……我只透露一點點：在非洲。", "北美洲": "下一站嘛……我只透露一點點：在北美洲。",
+  "南美洲": "下一站嘛……我只透露一點點：在南美洲。", "大洋洲": "下一站嘛……我只透露一點點：在大洋洲。",
+  "靠左開": "下一站的車子靠左邊開，你過馬路時可要先看右邊！",
+  "靠右開": "下一站的車子跟台灣一樣靠右邊開，過馬路不用想太多。",
+  "首都": "下一站是一個國家的首都，政府就在那裡辦公。",
+  "不是首都": "下一站很有名，可惜不是那個國家的首都——別找錯城市啦。",
+  "島國": "下一站是一個四面都被海包圍的島國。",
+  "人口過億": "下一站的國家人口超過一億人，我混在人群裡，你一定找不到！",
+  "熱帶": "下一站在南北回歸線之間，是熱帶，我要多帶幾件短袖。",
+  "高原": "下一站在海拔 1,500 公尺以上，爬樓梯會有點喘。",
+  "沙漠": "下一站的國家有一大片乾燥的沙漠，我得多帶幾瓶水。",
+  "伊斯蘭教": "下一站大部分的人信伊斯蘭教，一天會聽到好幾次喚拜的聲音。",
+  "佛教": "下一站大部分的人信佛教，早上常看到穿橘色袈裟的僧侶。",
+  "筷子": "下一站的人吃飯用筷子，我正在加緊練習夾菜。",
+  "歐元": "我得先去換一些歐元，下一站要用。",
+  "西班牙語": "我正在練習西班牙語：¡Hola! 下一站用得上。",
+  "英語": "下一站的官方語言有英語，我終於不用比手畫腳了。",
+  "由右往左": "下一站的文字是從右邊往左邊寫的，我正在練習。",
+  "ABC 字母": "下一站的文字跟英文一樣，是用 ABC 這種字母寫的。",
+  "不用 ABC": "下一站的文字不是用 ABC 字母寫的，看起來超級不一樣。",
+  "比台灣快": "到了下一站，我得把手錶調得比台灣快。",
+  "比台灣慢": "到了下一站，我得把手錶調得比台灣慢。",
+  "同時區": "下一站跟台灣同一個時區，手錶都不用調。",
+  "往東": "下一站要從這裡往東邊飛。", "往西": "下一站要從這裡往西邊飛。",
+  "往南": "下一站在這裡南方很遠的地方。", "往北": "下一站在這裡北方很遠的地方。",
+  "長程": "下一段飛機要坐 10 個小時以上，我得帶三本漫畫。",
+  "短程": "下一段飛機不用坐太久，5 個小時以內就到了。",
+};
+const PC_SIGN = ["抓得到就來抓我吧～", "下次見囉，慢吞吞的小偵探！", "別追太緊，我會害羞的～", "加油喔，我在下一站等你！"];
+const PC_PENALTY = 1;   // hours lost on a wrong reading-check answer (medium)
+
+// postcard below the photo at every stop the thief left from; state per stop in S.pc[step] = { open, ans }
+const PC_HINT = "我沒聽清楚那個人說了什麼，不過他好像在這裡掉了一張明信片，你找找看！";
+function pcState() { S.pc = S.pc || {}; return S.pc[S.step] || (S.pc[S.step] = {}); }
+function pcLine() {
+  const p = S.plans[S.step];
+  return S.level === "medium" ? PC_CLUE[p.pc.k] : POSTCARDS[S.route[S.step + 1]].riddle;
+}
+function pcNote() {
+  const t = "明信片：「" + pcLine() + "」";
+  if (!S.heard.includes(t)) S.heard.push(t);
+}
+function pcOpen() {
+  pcState().open = true;
+  if (S.level !== "medium") pcNote();
+  render();
+}
+function pcAnswer(j) {
+  const st = pcState();
+  if (st.ans !== undefined) return;
+  st.ans = j;
+  if (j !== 0) { S.hours -= PC_PENALTY; S.t += PC_PENALTY; }
+  pcNote();
+  if (S.hours <= 0) S.mode = "timeout";
+  render();
+}
+function postcardPanel() {
+  if (S.mode !== "city" || S.at !== S.route[S.step]) return "";
+  const p = S.plans[S.step], id = S.at, P = POSTCARDS[id];
+  if (!p || !p.pc || !P) return "";                                  // games saved before postcards existed
+  const st = (S.pc || {})[S.step] || {}, med = S.level === "medium";
+  if (!st.open) return `<button class="pcclosed" onclick="pcOpen()"><span class="pcicon" aria-hidden="true">📮</span>
+    <span><b>嫌犯在這裡掉了一張明信片！</b><small>點開來讀讀看，裡面藏著下一站的${med ? "線索" : "謎語"}。</small></span></button>`;
+  const shown = !med || st.ans !== undefined;
+  const sign = PC_SIGN[(S.step + id.length) % PC_SIGN.length];
+  let quiz = "";
+  if (med) {
+    const opts = p.pc.order.map(j => {
+      const cls = st.ans === undefined ? "" : j === 0 ? "right" : st.ans === j ? "wrong" : "dim";
+      return `<button class="pcopt ${cls}" ${st.ans !== undefined ? "disabled" : ""} onclick="pcAnswer(${j})">${esc(P.a[j])}</button>`;
+    }).join("");
+    quiz = `<div class="pcquiz"><p><b>閱讀檢查：</b>${esc(P.q)}</p><div class="pcopts">${opts}</div>
+      ${st.ans === undefined ? `<p class="hint" style="margin:8px 0 0">答錯要扣 ${PC_PENALTY} 小時，不過咖啡漬一樣會擦掉。</p>`
+        : `<p class="toast">${st.ans === 0 ? "答對了！你讀得很仔細。" : `答錯了，扣 ${PC_PENALTY} 小時。正確答案是「${esc(P.a[0])}」。`}</p>`}</div>`;
+  }
+  return `<section class="pcwrap"><h3>📮 嫌犯留下的明信片</h3>
+    <div class="postcard"><div class="pcstamp" aria-hidden="true"><b>${esc(NAMES[id][0])}</b><small>AIR MAIL</small></div>
+      <p class="pchi">親愛的小偵探：</p><p>${esc(P.brag)}</p>
+      <p class="pcclue ${shown ? "" : "stain"}">${shown ? esc(pcLine()) : "☕ 這一行被咖啡漬蓋住了……先回答下面的閱讀檢查，就能把咖啡漬擦掉。"}</p>
+      <p class="pcsign">${esc(sign)}<br>—— 影子貓的神秘成員</p></div>${quiz}</section>`;
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
@@ -2373,6 +2610,7 @@ function cityPanel(c, onRoute) {
       <button class="wbtn ${S.asked[S.at + ":" + i] ? "done" : ""} ${S.said && S.said.i === i ? "talking" : ""}" onclick="ask(${i})">${avatar(witnessLook(S.at, i), "sm")}<span class="wtxt"><small>${S.asked[S.at + ":" + i] ? "問過了" : "去問問"}</small><span>${esc(p)}</span></span></button>`).join("")}
     </div>`}
     ${sc ? "" : chatPanel()}
+    ${postcardPanel()}
     ` + regionPanel(S.at) + profilePanel(S.at) + culturePanel(S.at) + challengePanel(S.at);
 }
 
@@ -2416,6 +2654,7 @@ function render() {
         <li>問路人：聽聽嫌犯說了什麼。錢幣、國旗、食物、語言、地標都是線索。</li>
         <li>想看更多？按「打開街景」，就能用 Google 街景在那座城市裡走走看。</li>
         <li>尋寶挑戰：每座城市的關卡都不一樣，有拼圖、說你好、換錢、找洲、是非題和文化問答。過關就能在護照蓋一個印章。</li>
+        <li>嫌犯每一站都會掉一張明信片，裡面藏著下一站的${S.level === "medium" ? "線索。有一行被咖啡漬蓋住，要先通過閱讀檢查才看得到，答錯扣 1 小時" : "謎語"}。</li>
         <li>記下嫌犯的帽子、興趣和寵物，最後才抓得到對的人。</li>
         ${S.level === "medium" ? `<li><span><b>中級：</b>每一條線索都只能排除一部分城市，要把同一站問到的線索合起來，才知道嫌犯去了哪裡。</span></li>
         <li><span><b>中級：</b>嫌犯會逃 ${S.route.length - 1} 段。在抵達最後一站之前，記得打開偵探筆記本開好逮捕令，不然抓到人也沒用。</span></li>` : ""}
