@@ -3,3 +3,6 @@ desktop.ini
 .DS_Store
 .vercel
 .env*
+
+# Command Center project state: private, never deployed
+_cc/
