@@ -221,6 +221,11 @@ aside.wrap { margin: 0; width: 100% }
 .qopts.two .qopt { text-align: center; font-size: 22px; font-weight: 900; padding: 14px }
 .hint { margin: 10px 0 0; font-size: 15px; color: var(--muted) }
 .hint.good { color: var(--ok); font-weight: 700 }
+.puzzlerow { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start }
+.puzzlerow .puzzle { flex: 1 1 320px }
+.peek { margin: 0; flex: 0 1 200px; min-width: 140px }
+.peek div { aspect-ratio: 16 / 9; background-size: 100% 100%; border-radius: 8px; border: 2px solid var(--line) }
+.peek figcaption { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px }
 .puzzle { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; max-width: 520px; border-radius: 10px; overflow: hidden; background: var(--line) }
 .puzzle.solved { gap: 0 }
 .tile { aspect-ratio: 16 / 9; border: 0; padding: 0; background-size: 300% 300%; background-repeat: no-repeat; max-width: 100% }
@@ -726,10 +731,14 @@ function distract(id, get, n = 3) {
   return shuffle([{ t: right, ok: true }, ...out.map(t => ({ t, ok: false }))]);
 }
 
+// photos with no clear shapes to line up (all bushes, a dark silhouette) make an unfair jigsaw
+const NO_PUZZLE = new Set(["nairobi", "dubai"]);
+let PEEK = false;   // jigsaw hint: show the finished photo next to the tiles
+
 function buildChallenge(id) {
   const c = CITIES[id], x = EXTRA[id];
   let kind = S.kinds[id];
-  if (kind === "puzzle" && !PHOTOS[id]) kind = "quiz";
+  if (kind === "puzzle" && (!PHOTOS[id] || NO_PUZZLE.has(id))) kind = "quiz";
   if (kind === "quiz") return { kind, q: c.quiz[0], opts: shuffle(c.quiz[1].map((t, i) => ({ t, ok: i === c.quiz[2] }))) };
   if (kind === "culture") {
     const mine = CULTURE[id][rnd(CULTURE[id].length)];
@@ -802,10 +811,14 @@ function challengePanel(id) {
   if (ch.kind === "puzzle") {
     const src = PHOTOS[id].src;
     body = `<h3>${ch.done ? "拼好了！" : "照片被怪盜弄亂了！點兩塊交換位置，把它拼回來。"}</h3>
-      <div class="puzzle ${ch.done ? "solved" : ""}">${ch.order.map((t, k) =>
+      <div class="puzzlerow">
+        <div class="puzzle ${ch.done ? "solved" : ""}">${ch.order.map((t, k) =>
         `<button class="tile ${ch.sel === k ? "sel" : ""}" onclick="tile(${k})" aria-label="拼圖第 ${k + 1} 格"
           style="background-image:url('${src}');background-position:${(t % 3) * 50}% ${Math.floor(t / 3) * 50}%"></button>`).join("")}</div>
-      <p class="hint">已經交換 ${ch.moves} 次${ch.done ? `，蓋章成功！` : "。提示：先找天空在哪裡。"}</p>`;
+        ${PEEK && !ch.done ? `<figure class="peek"><div style="background-image:url('${src}')" role="img" aria-label="拼好的樣子"></div><figcaption>拼好的樣子</figcaption></figure>` : ""}
+      </div>
+      <div class="actions" style="margin-top:10px">${ch.done ? "" : `<button class="btn ghost" onclick="PEEK = !PEEK; render()" aria-pressed="${PEEK}">${PEEK ? "收起原圖" : "看原圖提示"}</button>`}
+        <p class="hint" style="margin:0;align-self:center">已經交換 ${ch.moves} 次${ch.done ? "，蓋章成功！" : "。提示：先找天空、地面或最明顯的建築。"}</p></div>`;
   } else {
     const done = ch.picked !== undefined;
     const right = done && ch.opts[ch.picked].ok;
@@ -1608,7 +1621,11 @@ function loadSaved() {
 }
 const boot = d => {
   const saved = d && d.S && d.S.budget ? d.S : loadSaved();
-  if (saved) { S = saved; render(); } else newCase();
+  if (saved) {
+    S = saved;
+    for (const id of NO_PUZZLE) if (S.ch && S.ch[id] && S.ch[id].kind === "puzzle" && !S.ch[id].done) delete S.ch[id];
+    render();
+  } else newCase();
 };
 window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
 </script>
