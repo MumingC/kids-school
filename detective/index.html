@@ -73,6 +73,26 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .cnote p { margin: 0; font-size: 15px; line-height: 1.65 }
 .ctag { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent) }
 .k-culture { background: #b0477e }
+/* bubble on the photo: white card with a tail pointing at the tapped spot or person */
+.pop { position: absolute; z-index: 6; width: max-content; max-width: min(300px, 78%); text-align: left; cursor: pointer;
+  background: #fffdf8; color: #15304a; border: 0; border-radius: 14px; padding: 9px 13px 10px; display: grid; gap: 2px;
+  box-shadow: 0 8px 22px -6px rgba(0,0,0,.45), 0 0 0 2px rgba(232,99,43,.9) }
+.pop b { font-size: 13px; color: #c0470f; letter-spacing: .04em }
+.pop span { font-size: 15px; line-height: 1.5 }
+.pop.talkpop span { font-family: var(--f-voice); font-size: 17px }
+.pop::after { content: ""; position: absolute; left: var(--tail, 50%); width: 14px; height: 14px; background: #fffdf8;
+  transform: translateX(-50%) rotate(45deg); box-shadow: 2px 2px 0 0 rgba(232,99,43,.9) }
+.pop.above::after { bottom: -6px }
+.pop.below::after { top: -6px; box-shadow: -2px -2px 0 0 rgba(232,99,43,.9) }
+.stage.clean .pop { display: none }
+@media (max-width: 520px) { .pop { max-width: 86%; padding: 7px 11px } .pop span { font-size: 14px } .pop.talkpop span { font-size: 15px } }
+@media (prefers-reduced-motion: no-preference) {
+  .pop { animation: popin .22s ease-out }
+  .pop.leaving { opacity: 0; transform: translateY(4px); transition: opacity .3s, transform .3s }
+  @keyframes popin { from { opacity: 0; transform: translateY(6px) scale(.96) } to { opacity: 1; transform: none } }
+}
+.pop.leaving { opacity: 0 }
+
 /* pinned toolbar: the four things a detective reaches for, always one tap away */
 .toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 8px; box-shadow: 0 6px 16px -12px rgba(0,0,0,.45) }
@@ -1163,6 +1183,8 @@ function spot(k) {
   if (!f.includes(k)) f.push(k);
   S.spot = k;
   render();
+  const sp = SCENES[S.at] && SCENES[S.at].spots[k];
+  if (sp && document.querySelector) showPop(document.querySelectorAll(".stage .spotbtn")[k], sp[2], sp[3], "spotpop");
 }
 
 function scenePanel(id) {
@@ -1636,6 +1658,39 @@ function profilePanel(id) {
     </div></div>`;
 }
 
+// ---------- speech bubble on the photo itself, pointing at what was tapped; fades out on its own ----------
+let POP_TIMER = null;
+function showPop(anchorEl, title, text, kind) {
+  const stage = document.querySelector(".stage");
+  if (!stage || !anchorEl) return;
+  clearTimeout(POP_TIMER);
+  stage.querySelectorAll(".pop").forEach(p => p.remove());
+  const sr = stage.getBoundingClientRect(), ar = anchorEl.getBoundingClientRect();
+  const ax = ar.left + ar.width / 2 - sr.left;                      // anchor centre, in stage pixels
+  const top = ar.top - sr.top, bottom = ar.bottom - sr.top;
+  const pop = document.createElement("button");
+  pop.type = "button";
+  pop.className = "pop " + kind;
+  pop.setAttribute("aria-label", "關閉說明");
+  pop.innerHTML = `<b>${esc(title)}</b><span>${esc(text)}</span>`;
+  pop.onclick = e => { e.stopPropagation(); hidePop(pop); };
+  stage.appendChild(pop);
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  const below = top - h - 14 < 0;                                   // no room above: open downwards
+  const left = Math.max(8, Math.min(sr.width - w - 8, ax - w / 2));
+  pop.style.left = left + "px";
+  pop.style.top = (below ? Math.min(bottom + 12, sr.height - h - 4) : top - h - 12) + "px";
+  pop.style.setProperty("--tail", Math.max(16, Math.min(w - 16, ax - left)) + "px");
+  pop.classList.add(below ? "below" : "above");
+  const ms = Math.min(9000, Math.max(4000, 2500 + text.length * 80));
+  POP_TIMER = setTimeout(() => hidePop(pop), ms);
+}
+function hidePop(pop) {
+  if (!pop.isConnected) return;
+  pop.classList.add("leaving");
+  setTimeout(() => pop.remove(), 300);
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
@@ -1687,6 +1742,10 @@ function ask(i) {
   if (!S.chat.some(m => !m.me && m.i === i)) S.chat.push({ me: true, text: ASKS[S.chat.length / 2 % ASKS.length | 0] }, { i, text, flag });
   if (S.hours <= 0) S.mode = "timeout";
   render();
+  if (SCENES[S.at] && S.mode !== "timeout" && document.querySelector) {
+    const person = document.querySelectorAll(".stage .person")[i];
+    showPop(person && (person.querySelector(".tag") || person), whoName(S.at, i), text, "talkpop");
+  }
 }
 
 function fly(to) {
