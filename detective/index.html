@@ -1590,7 +1590,7 @@ let MAP_OPEN = false, MAP_FIT = true;
 function toggleMap() { MAP_OPEN = !MAP_OPEN; MAP_FIT = true; render(); }
 // frame the current city and every destination on offer
 function fitOptions() {
-  const ids = [S.at, ...((S.mode === "city" && S.at === S.route[S.step]) ? S.plans[S.step].dests : [S.route[S.step]])];
+  const ids = [S.at, ...(gateOptions().length ? gateOptions() : [S.route[S.step]])];
   const pts = ids.map(id => P(CITIES[id])), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const bw = Math.max(...xs) - Math.min(...xs), bh = Math.max(...ys) - Math.min(...ys);
   const w = Math.max(60, bw * 1.3, bh * 1.3 / mapRatio());
@@ -1785,7 +1785,8 @@ function hidePop(pop) {
 let FLIGHT_OPEN = false, SEL = null;
 function gateOptions() {
   if (S.mode !== "city") return [];
-  return S.at === S.route[S.step] ? S.plans[S.step].dests : [S.route[S.step]];
+  if (S.at === S.route[S.step]) return S.plans[S.step].dests;
+  return [S.route[S.step], ...S.plans[S.step].dests.filter(id => id !== S.at && id !== S.route[S.step])];
 }
 function openFlight(on) {
   if (on && !gateOptions().length) return;
@@ -1813,8 +1814,9 @@ function flightSide() {
     : `<p class="hint" style="margin:0">還沒問到去向線索。先關掉登機門，去問問照片裡的人吧！</p>`;
   const sel = SEL && CITIES[SEL];
   return `<p class="flfrom">從 <b>${esc(here.name)}</b> 出發・剩 <b>${fmtH(Math.max(0, S.hours))}</b> 小時</p>
-    ${onRoute ? `<div class="flbox"><h3>筆記本裡的去向線索</h3>${clues}</div>` : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯，只能飛回${esc(CITIES[S.route[S.step]].name)}再問一次。</p></div>`}
-    <h3>${onRoute ? "選一個目的地" : "回程航班"}</h3>
+    ${onRoute ? "" : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯。可以飛回${esc(CITIES[S.route[S.step]].name)}再問一次，也可以根據筆記本裡的線索，直接飛去另一個城市。</p></div>`}
+    <div class="flbox"><h3>筆記本裡的去向線索</h3>${clues}</div>
+    <h3>選一個目的地</h3>
     ${opts.length > 4 ? `<p class="hint" style="margin:0">嫌犯一次最遠飛 ${MAX_HOP_KM.toLocaleString()} 公里，也不會回到去過的城市。地圖上的橘色圓圈都是他可能去的地方；灰色的點太遠或已經去過了。</p>` : ""}
     <div class="fldests ${opts.length > 4 ? "many" : ""}">${opts.slice().sort((x, y) => km(S.at, x) - km(S.at, y)).map(id => { const c = CITIES[id]; return `
       <button class="fldest ${SEL === id ? "on" : ""}" onclick="selectDest('${id}')" aria-pressed="${SEL === id}"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
@@ -2537,7 +2539,7 @@ function ask(i) {
   const onRoute = S.at === S.route[S.step];
   if (!S.asked[key]) { S.hours -= ASK; S.t += ASK; S.asked[key] = true; }
   let text, flag = null;
-  if (!onRoute) text = ["沒有耶，我今天沒看到什麼奇怪的人。", "嗯……這裡很平靜，你是不是走錯城市了？", "可疑人物？沒看到。也許你該回上一站再問問看。"][i];
+  if (!onRoute) text = ["沒有耶，我今天沒看到什麼奇怪的人。", "嗯……這裡很平靜，你是不是走錯城市了？", "可疑人物？沒看到。也許你該回上一站，或是再看看筆記本裡的線索。"][i];
   else if (S.step === S.route.length - 1) text = ["剛剛有個鬼鬼祟祟的人跑過去，手上抱著好大一包東西！", "快！那個人就躲在附近！", "我看到那個人往轉角跑了，現在去還追得到！"][i];
   else {
     const p = S.plans[S.step];
@@ -2567,7 +2569,7 @@ function fly(to) {
   S.hours -= h; S.t += h;
   S.said = null; S.msg = ""; S.chat = []; S.spot = null;
   if (S.hours <= 0) { S.mode = "timeout"; render(); return; }
-  if (to === S.route[S.step + 1] && S.at === S.route[S.step]) { S.step++; S.heard = []; }
+  if (to === S.route[S.step + 1]) { S.step++; S.heard = []; }
   S.at = to; S.path.push(to);
   if (S.step === S.route.length - 1 && S.at === S.route[S.step]) S.mode = "final"; else S.mode = "city";
   render();
@@ -2618,8 +2620,8 @@ function flyPanel() {
   const onRoute = S.at === S.route[S.step];
   const n = gateOptions().length;
   return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p>
-    <h3>${onRoute ? "根據線索，嫌犯飛去哪裡了？" : "線索斷了……要回去嗎？"}</h3>
-    <p class="hint" style="margin:0 0 10px">${onRoute ? `有 ${n} 個城市可以飛。打開登機門，在世界地圖上對照線索，選好再起飛。` : `只能飛回${esc(CITIES[S.route[S.step]].name)}再問一次。`}</p>
+    <h3>${onRoute ? "根據線索，嫌犯飛去哪裡了？" : "線索斷了……要換個地方嗎？"}</h3>
+    <p class="hint" style="margin:0 0 10px">${onRoute ? `有 ${n} 個城市可以飛。打開登機門，在世界地圖上對照線索，選好再起飛。` : `可以飛回${esc(CITIES[S.route[S.step]].name)}再問一次，也可以根據線索直接飛去另一個城市。`}</p>
     <button class="btn takeoff gateopen" onclick="openFlight(true)">打開登機門・看世界地圖選下一站</button></div>`;
 }
 const shuffleStable = a => a;
@@ -2639,7 +2641,7 @@ function render() {
   renderWarrant();
   const canFly = S.mode === "city";
   $("gateBtn").disabled = !canFly;
-  $("gateLabel").textContent = canFly ? (S.at === S.route[S.step] ? "選下一站" : "飛回上一站") : (S.mode === "final" ? "嫌犯就在這裡" : "還不能出發");
+  $("gateLabel").textContent = canFly ? (S.at === S.route[S.step] ? "選下一站" : "重新選目的地") : (S.mode === "final" ? "嫌犯就在這裡" : "還不能出發");
   $("clock").classList.toggle("low", h <= 12);
 
   let html = "";
