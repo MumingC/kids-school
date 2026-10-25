@@ -1260,8 +1260,7 @@ function scenePanel(id) {
         <button class="cleanbtn" onclick="CLEAN_PHOTO = !CLEAN_PHOTO; render()" aria-pressed="${CLEAN_PHOTO}">${CLEAN_PHOTO ? "顯示人物和放大鏡" : "看清楚照片"}</button></div>
       <figcaption>${esc(c.treasure)}・攝影：${esc(p.artist)}・<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>・<a href="${p.page}" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>
     </figure>
-    <p class="hint" style="margin:0 0 12px">點照片裡的人問問看，點閃閃發亮的放大鏡找出藏在照片裡的秘密。</p>
-    ${open ? `<div class="discover"><b>${MAG}${esc(open[2])}</b><p>${esc(open[3])}</p></div>` : ""}
+    <p class="hint" style="margin:0 0 12px">點照片裡的人問問看，點閃閃發亮的放大鏡找出藏在照片裡的秘密。說過的話會出現在照片上，線索會自動記進偵探筆記本；想再看一次，再點一下就好。</p>
     ${found.length === sc.spots.length ? `<p class="hint good">你找到了這張照片裡所有的秘密，真是觀察高手！</p>` : ""}`;
 }
 
@@ -2037,7 +2036,7 @@ function cityPanel(c, onRoute) {
     ${sc ? scenePanel(S.at) : `<div class="witnesses">${c.places.map((p, i) => `
       <button class="wbtn ${S.asked[S.at + ":" + i] ? "done" : ""} ${S.said && S.said.i === i ? "talking" : ""}" onclick="ask(${i})">${avatar(witnessLook(S.at, i), "sm")}<span class="wtxt"><small>${S.asked[S.at + ":" + i] ? "問過了" : "去問問"}</small><span>${esc(p)}</span></span></button>`).join("")}
     </div>`}
-    ${chatPanel()}
+    ${sc ? "" : chatPanel()}
     ` + regionPanel(S.at) + profilePanel(S.at) + culturePanel(S.at) + challengePanel(S.at);
 }
 
