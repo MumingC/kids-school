@@ -73,6 +73,34 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .cnote p { margin: 0; font-size: 15px; line-height: 1.65 }
 .ctag { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent) }
 .k-culture { background: #b0477e }
+/* boarding gate screen */
+.flight .sheet { width: min(1240px, 100%); gap: 12px }
+.flgrid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start }
+@media (max-width: 860px) { .flgrid { grid-template-columns: 1fr } }
+#flightMap .mapcard { border: 0; padding: 0; background: transparent; border-radius: 0 }
+.flside { display: grid; gap: 10px; min-width: 0 }
+.flside h3 { margin: 4px 0 0 }
+.flfrom { margin: 0; font-size: 15px }
+.flbox { background: var(--chip); border-radius: 12px; padding: 10px 12px }
+.flbox h3 { margin: 0 0 6px; font-size: 15px }
+.flbox .notes { font-size: 14px }
+.fldests { display: grid; gap: 8px }
+.fldest { border: 2px solid var(--line); background: var(--paper); border-radius: 12px; padding: 8px 12px; text-align: left; display: flex; justify-content: space-between; gap: 8px; align-items: center }
+.fldest:hover { border-color: var(--accent) }
+.fldest.on { border-color: var(--accent); background: var(--chip); box-shadow: inset 4px 0 0 var(--accent) }
+.fldest b { font-size: 16px }
+.fldest small { color: var(--muted); font-size: 12px }
+.fldest .gate { display: grid; text-align: right; line-height: 1.3 }
+.fldest .gate b { font-family: var(--f-data); font-size: 14px; color: var(--accent) }
+.fldest .gate small { font-family: var(--f-data) }
+.btn.takeoff { background: var(--accent); color: #fff; padding: 13px 18px; font-size: 16px; width: 100% }
+.btn.takeoff:disabled { background: var(--line); color: var(--muted); opacity: 1 }
+.btn.gateopen { width: auto }
+svg.map .selroute { stroke: var(--accent); stroke-width: 3; vector-effect: non-scaling-stroke; stroke-linecap: round }
+svg.map .opt.sel { fill: var(--accent) }
+svg.map .opt { cursor: pointer }
+svg.map text.seldist { fill: var(--accent); font-weight: 900 }
+
 /* bubble on the photo: white card with a tail pointing at the tapped spot or person */
 .pop { position: absolute; z-index: 6; width: max-content; max-width: min(300px, 78%); text-align: left; cursor: pointer;
   background: #fffdf8; color: #15304a; border: 0; border-radius: 14px; padding: 9px 13px 10px; display: grid; gap: 2px;
@@ -450,6 +478,13 @@ aside.wrap { margin: 0; width: 100% }
       <img id="lbImg" alt="">
       <p id="lbText"></p>
       <small id="lbCredit"></small>
+    </div>
+  </div>
+  <div class="modal flight" id="flightModal" hidden onclick="if (event.target === this) openFlight(false)">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="flTitle">
+      <div class="sheethead"><div><p class="eyebrow" style="margin:0">BOARDING GATE</p><h2 id="flTitle">登機門</h2></div>
+        <button class="btn ghost" onclick="openFlight(false)">關閉</button></div>
+      <div class="flgrid"><div id="flightMap"></div><aside class="flside" id="flSide"></aside></div>
     </div>
   </div>
   <div id="ovlFlag" hidden></div>
@@ -1153,6 +1188,7 @@ function armed(el, action) {
   el.dataset.armed = setTimeout(() => { delete el.dataset.armed; el.classList.remove("arming"); label.textContent = el.dataset.label; }, 4000);
 }
 function goGate() {
+  if (gateOptions().length) return openFlight(true);
   const g = $("gate");
   if (!g) return;
   const bar = document.querySelector(".toolbar").getBoundingClientRect().height;
@@ -1484,20 +1520,24 @@ function regionPanel(id) {
 // ---------- zoomable world map ----------
 const MAP_FULL = { x: 0, y: 14, w: 360, h: 138 };
 let MV = { ...MAP_FULL };
+// The map now only lives on the boarding-gate screen, beside a tall sidebar, so it is drawn taller
+// than the whole-world strip (squarer still on phones). Fully zoomed out it shows as much width as fits.
+const mapRatio = () => matchMedia("(max-width: 860px)").matches ? 0.8 : 0.6;
+const mapMaxW = () => Math.min(MAP_FULL.w, 166 / mapRatio());
 function setView(v) {
-  const w = Math.max(30, Math.min(MAP_FULL.w, v.w)), h = w * MAP_FULL.h / MAP_FULL.w;
-  const x = Math.max(0, Math.min(360 - w, v.x)), y = Math.max(0, Math.min(180 - h, w === MAP_FULL.w ? MAP_FULL.y : v.y));
+  const r = mapRatio(), w = Math.max(30, Math.min(mapMaxW(), v.w)), h = w * r;
+  const x = Math.max(0, Math.min(360 - w, v.x)), y = Math.max(0, Math.min(170 - h, v.y));
   MV = { x, y, w, h };
 }
 function zoomMap(f, px, py) {             // px/py: focus point in map units (defaults to centre)
   const cx = px ?? MV.x + MV.w / 2, cy = py ?? MV.y + MV.h / 2;
-  const w = MV.w / f, h = w * MAP_FULL.h / MAP_FULL.w;
+  const w = MV.w / f, h = w * mapRatio();
   setView({ x: cx - (cx - MV.x) / f, y: cy - (cy - MV.y) / f, w, h });
   drawMap();
 }
 function focusHere() {
   const [x, y] = P(CITIES[S.at]);
-  const w = 90; setView({ x: x - w / 2, y: y - w * MAP_FULL.h / MAP_FULL.w / 2, w });
+  const w = 90; setView({ x: x - w / 2, y: y - w * mapRatio() / 2, w });
   drawMap();
 }
 let MAP_OPEN = false, MAP_FIT = true;
@@ -1507,17 +1547,17 @@ function fitOptions() {
   const ids = [S.at, ...((S.mode === "city" && S.at === S.route[S.step]) ? S.plans[S.step].dests : [S.route[S.step]])];
   const pts = ids.map(id => P(CITIES[id])), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
   const bw = Math.max(...xs) - Math.min(...xs), bh = Math.max(...ys) - Math.min(...ys);
-  const w = Math.max(60, bw * 1.35, bh * 1.35 * MAP_FULL.w / MAP_FULL.h);
-  setView({ x: (Math.max(...xs) + Math.min(...xs)) / 2 - w / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 - w * MAP_FULL.h / MAP_FULL.w / 2, w });
+  const w = Math.max(60, bw * 1.3, bh * 1.3 / mapRatio());
+  setView({ x: (Math.max(...xs) + Math.min(...xs)) / 2 - w / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 - w * mapRatio() / 2, w });
 }
 function placeMap() {
-  const slot = $("mapSlot");
-  if (slot && MAP_OPEN) {
+  const slot = FLIGHT_OPEN ? $("flightMap") : null;
+  if (slot) {
     slot.appendChild(MAP_CARD); MAP_CARD.hidden = false;
     if (MAP_FIT) { fitOptions(); MAP_FIT = false; drawMap(); }
   } else MAP_CARD.hidden = true;
 }
-function resetMap() { MV = { ...MAP_FULL }; drawMap(); }
+function resetMap() { const w = mapMaxW(); setView({ x: 180 - w / 2, y: 82 - w * mapRatio() / 2, w }); drawMap(); }
 function mapPoint(svg, e) {
   const r = svg.getBoundingClientRect();
   return [MV.x + (e.clientX - r.left) / r.width * MV.w, MV.y + (e.clientY - r.top) / r.height * MV.h];
@@ -1526,7 +1566,8 @@ function initMapGestures() {
   const svg = $("map"), ptrs = new Map();
   let last = null, pinch = null;
   svg.addEventListener("wheel", e => { e.preventDefault(); const [x, y] = mapPoint(svg, e); zoomMap(e.deltaY < 0 ? 1.25 : 0.8, x, y); }, { passive: false });
-  svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, e); last = e; });
+  let down = null;
+  svg.addEventListener("pointerdown", e => { svg.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, e); last = e; down = ptrs.size === 1 ? { x: e.clientX, y: e.clientY } : null; });
   svg.addEventListener("pointermove", e => {
     if (!ptrs.has(e.pointerId)) return;
     ptrs.set(e.pointerId, e);
@@ -1542,7 +1583,10 @@ function initMapGestures() {
     }
     last = e;
   });
-  const end = e => { ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) last = null; };
+  const end = e => {
+    if (e.type === "pointerup" && down && ptrs.size === 1 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8) tapSelect(svg, e);
+    ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null; if (!ptrs.size) { last = null; down = null; }
+  };
   svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end);
 }
 
@@ -1562,7 +1606,7 @@ function photoCredit(p) {
 }
 // every overlay toggles this one static element, which the shared feedback button watches (hideWhen)
 function syncOverlay() {
-  $("ovlFlag").hidden = ["passModal", "noteModal", "lightbox"].every(id => $(id).hidden);
+  $("ovlFlag").hidden = ["passModal", "noteModal", "lightbox", "flightModal"].every(id => $(id).hidden);
 }
 let LIGHT_RETURN = null;
 function openPhoto(key) {
@@ -1691,6 +1735,58 @@ function hidePop(pop) {
   setTimeout(() => pop.remove(), 300);
 }
 
+// ---------- boarding gate: a full-screen world map with a sidebar of clues and flights ----------
+let FLIGHT_OPEN = false, SEL = null;
+function gateOptions() {
+  if (S.mode !== "city") return [];
+  return S.at === S.route[S.step] ? S.plans[S.step].dests : [S.route[S.step]];
+}
+function openFlight(on) {
+  if (on && !gateOptions().length) return;
+  FLIGHT_OPEN = on; SEL = null; MAP_FIT = true;
+  $("flightModal").hidden = !on; syncOverlay();
+  render();
+  if (on) $("flightModal").querySelector(".btn").focus();
+  else if ($("gateBtn")) $("gateBtn").focus();
+}
+function selectDest(id) { if (gateOptions().includes(id)) { SEL = id; render(); } }
+function takeOff() {
+  if (!SEL) return;
+  const to = SEL;
+  FLIGHT_OPEN = false; SEL = null;
+  $("flightModal").hidden = true; syncOverlay();
+  fly(to);
+  window.scrollTo(0, 0);
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("flightModal").hidden) openFlight(false); });
+
+function flightSide() {
+  const opts = gateOptions(), onRoute = S.at === S.route[S.step], here = CITIES[S.at];
+  const clues = S.heard.length
+    ? `<ul class="notes">${S.heard.map(t => `<li><span>${esc(t)}${S.heardFlag && S.heardFlag[t] ? flagImg(S.heardFlag[t], "inline") : ""}</span></li>`).join("")}</ul>`
+    : `<p class="hint" style="margin:0">還沒問到去向線索。先關掉登機門，去問問照片裡的人吧！</p>`;
+  const sel = SEL && CITIES[SEL];
+  return `<p class="flfrom">從 <b>${esc(here.name)}</b> 出發・剩 <b>${fmtH(Math.max(0, S.hours))}</b> 小時</p>
+    ${onRoute ? `<div class="flbox"><h3>筆記本裡的去向線索</h3>${clues}</div>` : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯，只能飛回${esc(CITIES[S.route[S.step]].name)}再問一次。</p></div>`}
+    <h3>${onRoute ? "選一個目的地" : "回程航班"}</h3>
+    <div class="fldests">${opts.map(id => { const c = CITIES[id]; return `
+      <button class="fldest ${SEL === id ? "on" : ""}" onclick="selectDest('${id}')" aria-pressed="${SEL === id}"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
+    <button class="btn takeoff" onclick="takeOff()" ${sel ? "" : "disabled"}>${sel ? `起飛！飛往${esc(sel.name)}・約 ${fmtH(tripH(S.at, SEL))} 小時` : "先在地圖或上面選一個城市"}</button>
+    <p class="hint">也可以直接點地圖上的橘色圓圈。噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p>`;
+}
+
+// a tap (not a drag) on the map picks the nearest destination circle
+function tapSelect(svg, e) {
+  if (!FLIGHT_OPEN) return;
+  const [mx, my] = mapPoint(svg, e), kk = Math.max(MV.w / MAP_FULL.w, 0.3);
+  let best = null, bestD = 6 * kk;
+  for (const id of gateOptions()) {
+    const [x, y] = P(CITIES[id]), d = Math.hypot(x - mx, y - my);
+    if (d < bestD) { best = id; bestD = d; }
+  }
+  if (best) selectDest(best);
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
@@ -1796,18 +1892,11 @@ function cityPanel(c, onRoute) {
 
 function flyPanel() {
   const onRoute = S.at === S.route[S.step];
-  if (!onRoute) {
-    const back = CITIES[S.route[S.step]];
-    return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p><h3>線索斷了……要回去嗎？</h3>
-      <div class="dests"><button class="dest" onclick="fly('${S.route[S.step]}')"><span><b>飛回${esc(back.name)}</b><br><small>${esc(back.country)}</small></span>${gate(S.at, S.route[S.step])}</button></div>
-    <div class="gatemap"><button class="btn ghost" onclick="toggleMap()" aria-expanded="${MAP_OPEN}">${MAP_OPEN ? "收起地圖" : "看地圖：這些城市在哪裡？"}</button><div id="mapSlot"></div></div></div>`;
-  }
-  const opts = shuffleStable(S.plans[S.step].dests);
-  return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p><h3>根據線索，嫌犯飛去哪裡了？</h3>
-    <div class="dests">${opts.map(id => { const c = CITIES[id]; return `
-      <button class="dest" onclick="fly('${id}')"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
-    <p class="hint">噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p>
-    <div class="gatemap"><button class="btn ghost" onclick="toggleMap()" aria-expanded="${MAP_OPEN}">${MAP_OPEN ? "收起地圖" : "看地圖：這些城市在哪裡？"}</button><div id="mapSlot"></div></div></div>`;
+  const n = gateOptions().length;
+  return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p>
+    <h3>${onRoute ? "根據線索，嫌犯飛去哪裡了？" : "線索斷了……要回去嗎？"}</h3>
+    <p class="hint" style="margin:0 0 10px">${onRoute ? `有 ${n} 個城市可以飛。打開登機門，在世界地圖上對照線索，選好再起飛。` : `只能飛回${esc(CITIES[S.route[S.step]].name)}再問一次。`}</p>
+    <button class="btn takeoff gateopen" onclick="openFlight(true)">打開登機門・看世界地圖選下一站</button></div>`;
 }
 const shuffleStable = a => a;
 const gate = (a, b) => `<span class="gate"><b>${fmtH(tripH(a, b))} 小時</b><small>${km(a, b).toLocaleString()} 公里</small></span>`;
@@ -1890,7 +1979,9 @@ function render() {
   }).join("");
 
   drawMap();
+  if (FLIGHT_OPEN && !gateOptions().length) { FLIGHT_OPEN = false; SEL = null; $("flightModal").hidden = true; syncOverlay(); }
   placeMap();
+  if (FLIGHT_OPEN) $("flSide").innerHTML = flightSide();
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* private window: play without saving */ }
   $("credits").innerHTML = Object.keys(PHOTOS).map(id => { const p = PHOTOS[id];
     return `<li>${esc(CITIES[id].treasure)}：${esc(p.artist)}，<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>，<a href="${p.page}" target="_blank" rel="noopener">原圖</a></li>`; }).join("");
@@ -1904,12 +1995,17 @@ function drawMap() {
   for (let y = 0; y <= 180; y += 30) g += `<line class="grat" x1="0" y1="${y}" x2="360" y2="${y}"/>`;
   const pts = S.path.map(id => P(CITIES[id]));
   if (pts.length > 1) g += `<polyline class="route" points="${pts.map(p => p.join(",")).join(" ")}"/>`;
-  const optIds = (S.mode === "city" && S.at === S.route[S.step]) ? S.plans[S.step].dests : [];
+  const optIds = gateOptions();
+  if (SEL && optIds.includes(SEL)) {
+    const [hx0, hy0] = P(CITIES[S.at]), [sx, sy] = P(CITIES[SEL]);
+    g += `<line class="selroute" x1="${hx0}" y1="${hy0}" x2="${sx}" y2="${sy}"/>`;
+    g += `<text class="seldist" x="${(hx0 + sx) / 2}" y="${(hy0 + sy) / 2 - 2 * kk}" text-anchor="middle" style="font-size:${4 * kk}px">${km(S.at, SEL).toLocaleString()} 公里・約 ${fmtH(tripH(S.at, SEL))} 小時</text>`;
+  }
   const fs = `style="font-size:${4.6 * kk}px"`;
   for (const id of Object.keys(CITIES)) {
     const [x, y] = P(CITIES[id]);
     if (id === S.at) continue;
-    if (optIds.includes(id)) g += `<circle class="opt" cx="${x}" cy="${y}" r="${2 * kk}"/><text x="${x + 3 * kk}" y="${y + 1.5 * kk}" ${fs}>${esc(CITIES[id].name)}</text>`;
+    if (optIds.includes(id)) g += `<circle class="opt ${SEL === id ? "sel" : ""}" cx="${x}" cy="${y}" r="${(SEL === id ? 3 : 2.2) * kk}"/><text x="${x + 3 * kk}" y="${y + 1.5 * kk}" ${fs}>${esc(CITIES[id].name)}</text>`;
     else g += `<circle class="dot" cx="${x}" cy="${y}" r="${kk}"/>` + (zoomed ? `<text class="muted" x="${x + 2 * kk}" y="${y + 1.2 * kk}" ${fs}>${esc(CITIES[id].name)}</text>` : "");
   }
   const [hx, hy] = P(CITIES[S.at]);
