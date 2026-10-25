@@ -12,7 +12,7 @@ A small collection of static learning websites I build for my kids.
 | 03 | [`fission/`](fission/) | 核分裂實驗室 · Fission Lab | 8 站，從原子結構、同位素、半衰期，到 U-235 分裂、連鎖反應與臨界質量，最後談反應爐與核彈的分岔。 |
 | 04 | [`ai-history/`](ai-history/) | AI 是怎麼長大的？ | 給國小三至六年級的 AI 發展史：AlphaGo、圖靈、感知器、ELIZA，以及持續增加的後續篇章。 |
 | 05 | [`village-chief/`](village-chief/) | Village Chief · 小小村長 | 英文介面的六角格經濟策略遊戲：探索、建城、供需與價格、交換與合作。可跟電腦玩或兩人輪流。圖片清單見 [`ART.md`](village-chief/ART.md)。 |
-| 06 | [`detective/`](detective/) | 環球小偵探 · World Detective | 類似《Carmen Sandiego》的世界追緝遊戲：跟著線索追怪盜飛遍 26 座城市，點真實照片找秘密、讀文化圖鑑、認國旗；飛行時間照真實距離計算。照片授權見 [`CREDITS.md`](detective/CREDITS.md)。 |
+| 06 | [`detective/`](detective/) | 環球小偵探 · World Detective | 類似《Carmen Sandiego》的世界追緝遊戲：跟著線索追怪盜飛遍 38 座城市，點真實照片找秘密、讀文化圖鑑、認國旗；飛行時間照真實距離計算。照片授權見 [`CREDITS.md`](detective/CREDITS.md)。 |
 
 ## How it works
 
