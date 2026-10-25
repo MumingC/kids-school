@@ -73,6 +73,33 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .cnote p { margin: 0; font-size: 15px; line-height: 1.65 }
 .ctag { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent) }
 .k-culture { background: #b0477e }
+/* culture cards: two columns on wide screens, a swipeable row of cards on phones */
+.cnote.hasphoto { padding: 0; overflow: hidden; display: grid; grid-template-rows: auto 1fr }
+.cnote .ctext { padding: 10px 14px 12px; min-width: 0 }
+.cnote:not(.hasphoto) .ctext { padding: 0 }
+.cphoto { display: block; width: 100%; padding: 0; border: 0; background: var(--chip); cursor: zoom-in }
+.cphoto img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; max-width: 100% }
+.cphoto:hover img { filter: brightness(1.06) }
+.ccredit { display: block; margin-top: 6px; font-size: 11px; line-height: 1.4; color: var(--muted) }
+.ccredit a { color: inherit }
+.swipehint { display: none }
+@media (max-width: 640px) {
+  .culture { display: flex !important; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+    margin-inline: -4px; padding: 2px 4px 10px; scrollbar-width: thin }
+  .culture .cnote { flex: 0 0 82%; scroll-snap-align: center }
+  .swipehint { display: block; font-size: 12px; color: var(--muted); margin: -4px 0 8px }
+}
+.lightbox .sheet { width: min(960px, 100%); gap: 10px }
+.lightbox img { display: block; width: 100%; max-height: 70vh; object-fit: contain; background: #000; border-radius: 10px }
+.lightbox h2 { font-size: 22px }
+.lightbox p { margin: 0; font-size: 15px }
+.lightbox small { font-size: 12px; color: var(--muted) }
+.lightbox small a { color: inherit }
+.zoombtn { position: absolute; right: 10px; top: 44px; border: 0; border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; background: rgba(21,48,74,.82); color: #fff; cursor: zoom-in }
+.zoombtn:hover { background: #e8632b }
+.stage.clean .zoombtn { display: none }
+#ovlFlag { height: 0; overflow: hidden }
+
 .stub b { font-size: 11px; letter-spacing: .14em; color: var(--muted) }
 
 .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px }
@@ -341,6 +368,15 @@ aside.wrap { margin: 0; width: 100% }
   <div class="grid">
     <main id="scene" class="card" aria-live="polite"></main>
   </div>
+  <div class="modal lightbox" id="lightbox" hidden onclick="if (event.target === this) closePhoto()">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+      <div class="sheethead"><h2 id="lbTitle">照片</h2><button class="btn ghost" onclick="closePhoto()">關閉</button></div>
+      <img id="lbImg" alt="">
+      <p id="lbText"></p>
+      <small id="lbCredit"></small>
+    </div>
+  </div>
+  <div id="ovlFlag" hidden></div>
   <div class="modal" id="noteModal" hidden onclick="if (event.target === this) openNotes(false)">
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="noteTitle">
       <div class="sheethead"><div><p class="eyebrow" style="margin:0">CASE NOTES</p><h2 id="noteTitle">偵探筆記本</h2></div>
@@ -798,12 +834,6 @@ function tile(k) {
   render();
 }
 
-function culturePanel(id) {
-  return `<div class="quiz"><p class="eyebrow">文化圖鑑 · ${esc(CITIES[id].country)}</p>
-    <div class="culture">${CULTURE[id].map(([tag, title, text]) =>
-      `<article class="cnote"><span class="ctag">${esc(tag)}</span><h4>${esc(title)}</h4><p>${esc(text)}</p></article>`).join("")}</div></div>`;
-}
-
 function challengePanel(id) {
   const c = CITIES[id], ch = getChallenge(id);
   const had = S.stamps[id];
@@ -1036,7 +1066,7 @@ let CLEAN_PHOTO = false;   // "看清楚照片": hide every overlay so the photo
 function whoName(id, i) { return SCENES[id] ? SCENES[id].who[i] : CITIES[id].places[i] + "的目擊者"; }
 
 function openPass(on) {
-  $("passModal").hidden = !on;
+  $("passModal").hidden = !on; syncOverlay();
   if (on) $("passModal").querySelector(".btn").focus(); else $("passBtn").focus();
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("passModal").hidden) openPass(false); });
@@ -1063,6 +1093,7 @@ function scenePanel(id) {
   return `<figure class="scene ${sc.narrow ? "narrow" : ""}">
       <div class="stage ${CLEAN_PHOTO ? "clean" : ""}"><img src="${p.src}" alt="${esc(c.treasure)}的照片">${spots}${people}
         <span class="count">發現 ${found.length} / ${sc.spots.length}</span>
+        <button class="zoombtn" onclick="openPhoto('main:${id}')">放大照片</button>
         <button class="cleanbtn" onclick="CLEAN_PHOTO = !CLEAN_PHOTO; render()" aria-pressed="${CLEAN_PHOTO}">${CLEAN_PHOTO ? "顯示人物和放大鏡" : "看清楚照片"}</button></div>
       <figcaption>${esc(c.treasure)}・攝影：${esc(p.artist)}・<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>・<a href="${p.page}" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption>
     </figure>
@@ -1386,11 +1417,55 @@ function initMapGestures() {
 
 // ---------- notebook window ----------
 function openNotes(on) {
-  $("noteModal").hidden = !on;
+  $("noteModal").hidden = !on; syncOverlay();
   if (on) { S.notesSeen = S.heard.length + Object.keys(S.traits).length; $("noteModal").querySelector(".btn").focus(); render(); }
   else $("noteBtn").focus();
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("noteModal").hidden) openNotes(false); });
+
+const CULTURE_PHOTOS = {"tokyo-0": {"src": "culture/tokyo-0.jpg", "artist": "No machine-readable author provided. Sixgimic assumed (based on copyright claims).", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Oseti.jpg"}, "tokyo-1": {"src": "culture/tokyo-1.jpg", "artist": "Japanexperterna.se", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Shichigosan_boy.jpg"}, "tokyo-2": {"src": "culture/tokyo-2.jpg", "artist": "Fg2", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Genkan-M9778.jpg"}, "tokyo-3": {"src": "culture/tokyo-3.jpg", "artist": "", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Location_TokyoJapan.jpg"}, "paris-0": {"src": "culture/paris-0.jpg", "artist": "Jacques Lameloise - Editer par Arnaud 25", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Jacques_Lameloise,_escab%C3%A8che_d%27%C3%A9crevisses_sur_gaspacho_d%27asperge_et_cresson.jpg"}, "paris-3": {"src": "culture/paris-3.jpg", "artist": "Benh LIEU SONG (Flickr)", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Louvre_Museum_Wikimedia_Commons.jpg"}, "giza-0": {"src": "culture/giza-0.jpg", "artist": "Abdullah Geelah", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Ful_medames_(arabic_meal).jpg"}, "giza-1": {"src": "culture/giza-1.jpg", "artist": "Gabby Canonizado from Dubai, United Arab Emirates", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Breaking_the_Fast_(2)_(27351979537).jpg"}, "giza-2": {"src": "culture/giza-2.jpg", "artist": "Fiktube", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Beautiful_nature_along_Nile_River_01.jpg"}, "giza-3": {"src": "culture/giza-3.jpg", "artist": "Alyssa Bivins", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Ramses_I_Mummy.jpg"}, "rome-0": {"src": "culture/rome-0.jpg", "artist": "David Adam Kess", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:(Pasta)_by_David_Adam_Kess_(pic.2).jpg"}, "rome-1": {"src": "culture/rome-1.png", "artist": "Goran_tek-en", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Flag_of_Vatican_City_(2023%E2%80%93present).svg"}, "rome-3": {"src": "culture/rome-3.jpg", "artist": "Wdejager", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:The_Roman_Aquaduct_at_M%C3%B3ria_(Lesvos).ogv"}, "sydney-0": {"src": "culture/sydney-0.jpg", "artist": "Tilemahos Efthimiadis from Athens, Greece", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:%22Egyptian_boomerang%22_(3210654118).jpg"}, "sydney-2": {"src": "culture/sydney-2.jpg", "artist": "Nick Ang", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Bondi_from_above.jpg"}, "sydney-3": {"src": "culture/sydney-3.jpg", "artist": "Charles J. Sharp", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Duck-billed_platypus_(Ornithorhynchus_anatinus)_Scottsdale.jpg"}, "rio-0": {"src": "culture/rio-0.jpg", "artist": "Fernando Frazão/Agência Brasil", "license": "CC BY 3.0 br", "licenseUrl": "https://creativecommons.org/licenses/by/3.0/br/deed.en", "page": "https://commons.wikimedia.org/wiki/File:Desfile_Portela_2014_(906185).jpg"}, "rio-1": {"src": "culture/rio-1.jpg", "artist": "Adrião", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0", "page": "https://commons.wikimedia.org/wiki/File:Feijoada_%C3%A0_transmontada.jpg"}, "rio-3": {"src": "culture/rio-3.jpg", "artist": "CIAT", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:Amazon17_(5641020319).jpg"}, "nyc-0": {"src": "culture/nyc-0.jpg", "artist": "Carol M. Highsmith", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Ellis_Island,_Jersey_City,_New_Jersey_LCCN2011635626_-_cropped_balance.jpg"}, "nyc-1": {"src": "culture/nyc-1.jpg", "artist": "Shisma", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Bagel_with_sesame_3.jpg"}, "nyc-2": {"src": "culture/nyc-2.jpg", "artist": "cisc1970", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Macy%27s_Thanksgiving_Parade,_New_York_City,_2005_15.jpg"}, "nyc-3": {"src": "culture/nyc-3.jpg", "artist": "4300streetcar", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Downtown_1_train_approaching_125th_Street_station_June_2026_2_(cropped).jpg"}, "london-0": {"src": "culture/london-0.jpg", "artist": "ThatsTheBoss", "license": "CC0", "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en", "page": "https://commons.wikimedia.org/wiki/File:Palace_of_Westminster_as_seen_from_Westminster_Bridge.jpg"}, "london-1": {"src": "culture/london-1.jpg", "artist": "Matthias Meckel", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Fish_and_chips_blackpool.jpg"}, "london-2": {"src": "culture/london-2.png", "artist": "Edward Johnston", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Underground.svg"}, "london-3": {"src": "culture/london-3.jpg", "artist": "MaryG90", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Guard_of_Buckingham_Palace.JPG"}, "seoul-0": {"src": "culture/seoul-0.jpg", "artist": "by Caroline Knox at flickr", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Korean_cuisine-Gimjang-Preparation_for_making_kimchi-01.jpg"}, "seoul-1": {"src": "culture/seoul-1.jpg", "artist": "wizdata", "license": "CC0", "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en", "page": "https://commons.wikimedia.org/wiki/File:Songpyeon.jpg"}, "seoul-3": {"src": "culture/seoul-3.png", "artist": "Dzihi", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0", "page": "https://commons.wikimedia.org/wiki/File:Ondol.png"}, "bangkok-1": {"src": "culture/bangkok-1.jpg", "artist": "Khunmoohan", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Songkran_Day_@_Chiangmai_Wall.jpg"}, "bangkok-3": {"src": "culture/bangkok-3.jpg", "artist": "Takeaway", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Tom_yam_kung_maenam.jpg"}, "agra-0": {"src": "culture/agra-0.jpg", "artist": "Subharnab Majumdar", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:The_Rangoli_of_Lights.jpg"}, "agra-1": {"src": "culture/agra-1.jpg", "artist": "GracinhaMarco Abundo", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Vegetarian_Curry.jpeg"}, "agra-2": {"src": "culture/agra-2.jpg", "artist": "LACMA", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Cow_and_its_calf.jpg"}, "mexico-0": {"src": "culture/mexico-0.jpg", "artist": "thomas kole", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Vista_completa_de_Tenochtitl%C3%A1n.jpg"}, "mexico-1": {"src": "culture/mexico-1.jpg", "artist": "Vigilantcosmicpenguin", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Stacks_of_corn_tortillas_and_flour_tortillas,_with_the_top_one_rolled,_side_view_(2).jpg"}, "mexico-2": {"src": "culture/mexico-2.jpg", "artist": "", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Calavera.jpg"}, "machu-0": {"src": "culture/machu-0.jpg", "artist": "Claus Ableiter nur hochgeladen aus enWiki", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Inca_Quipu.jpg"}, "machu-1": {"src": "culture/machu-1.jpg", "artist": "Scott Bauer, USDA ARS", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Patates.jpg"}, "machu-2": {"src": "culture/machu-2.jpg", "artist": "Cyntia Motta", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Inti_Raymi.jpg"}, "capetown-0": {"src": "culture/capetown-0.jpg", "artist": "South African Tourism from South Africa", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Robben_Island_-_Cape_Town,_South_Africa_(3883849594).jpg"}, "capetown-2": {"src": "culture/capetown-2.jpg", "artist": "S Molteno", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Peninsula_Sandstone_Fynbos_-_KingProtea_-_Table_Mountain.JPG"}, "capetown-3": {"src": "culture/capetown-3.jpg", "artist": "No machine-readable author provided. Bree~commonswiki assumed (based on copyright claims).", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Barbecue_barbecook.JPG"}, "taipei-0": {"src": "culture/taipei-0.png", "artist": "Howief", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Bubble_Tea.png"}, "taipei-3": {"src": "culture/taipei-3.png", "artist": "Huang Chung Yu", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Yushan_main_east_peak%2BHuang_Chung_Yu%E9%BB%83%E4%B8%AD%E4%BD%91%2B9030.png"}, "singapore-0": {"src": "culture/singapore-0.jpg", "artist": "kallerna", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Lau_Pa_Sat_Singapore_1.jpg"}, "singapore-2": {"src": "culture/singapore-2.jpg", "artist": "Bob Tan", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Aerial_perspective_of_Singapore%27s_Chinatown.jpg"}, "singapore-3": {"src": "culture/singapore-3.jpg", "artist": "Shiny Things.", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Supertree_Grove,_Gardens_by_the_Bay,_Singapore_-_20120712-02.jpg"}, "siemreap-0": {"src": "culture/siemreap-0.jpg", "artist": "This Photo was taken by Supanut Arunoprayote.\n\nFeel free to use any of my images, but please mention me as the author an", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Angkor_Thom_(II).jpg"}, "siemreap-1": {"src": "culture/siemreap-1.jpg", "artist": "", "license": "CC0", "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en", "page": "https://commons.wikimedia.org/wiki/File:MET_DP-1062-001.jpg"}, "siemreap-2": {"src": "culture/siemreap-2.jpg", "artist": "Deror_avi", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Cambodia,_Tonle_Sap_IMG_3285.JPG"}, "siemreap-3": {"src": "culture/siemreap-3.jpg", "artist": "Chetra Skyline", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Cambodia_Water_Festival_1914.jpg"}, "dubai-0": {"src": "culture/dubai-0.jpg", "artist": "Fg2", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Ama2.jpg"}, "dubai-1": {"src": "culture/dubai-1.jpg", "artist": "Nepenthes", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Dates005.jpg"}, "dubai-2": {"src": "culture/dubai-2.jpg", "artist": "Mary Paulose from Muscat, Oman", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Dishdasha.jpg"}, "dubai-3": {"src": "culture/dubai-3.jpg", "artist": "Viceskeeni2", "license": "CC BY 4.0", "licenseUrl": "https://creativecommons.org/licenses/by/4.0", "page": "https://commons.wikimedia.org/wiki/File:Eid_al_fitr_photo.jpg"}, "istanbul-0": {"src": "culture/istanbul-0.jpg", "artist": "Quick fix", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:TurkishDelightDisplay.jpg"}, "istanbul-1": {"src": "culture/istanbul-1.jpg", "artist": "henribergius", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:Turkish_tea2.jpg"}, "istanbul-3": {"src": "culture/istanbul-3.jpg", "artist": "Pedro Szekely from Los Angeles, USA", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:Istanbul_(34223582516)_(cropped).jpg"}, "nairobi-0": {"src": "culture/nairobi-0.jpg", "artist": "", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Maasai_tribe.jpg"}, "nairobi-2": {"src": "culture/nairobi-2.jpg", "artist": "Paresh Jai from Nairobi, Kenya", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Ugali_%26_Sukuma_Wiki.jpg"}, "marrakech-0": {"src": "culture/marrakech-0.jpg", "artist": "sky#walker", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:Tunisian_Tea_with_pine_nuts.jpg"}, "marrakech-1": {"src": "culture/marrakech-1.jpg", "artist": "YoTuT from United States", "license": "CC BY 2.0", "licenseUrl": "https://creativecommons.org/licenses/by/2.0", "page": "https://commons.wikimedia.org/wiki/File:Marrakech,_Morocco_(5421595453)_(5).jpg"}, "marrakech-2": {"src": "culture/marrakech-2.jpg", "artist": "إيان", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:%D9%86%D8%B8%D8%B1%D8%A9_%D9%85%D9%82%D8%B1%D8%A8%D8%A9_%D9%84%D9%84%D8%B2%D9%84%D9%8A%D8%AC_%D9%81%D9%8A_%D9%85%D8%AF%D8%B1%D8%B3%D8%A9_%D8%A7%D8%A8%D9%86_%D9%8A%D9%88%D8%B3%D9%81.jpeg"}, "marrakech-3": {"src": "culture/marrakech-3.jpg", "artist": "Pierre Trémaux", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:French_language_map_of_Central_and_Eastern_Africa_1862.jpg"}, "athens-0": {"src": "culture/athens-0.png", "artist": "Philipp Foltz", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Discurso_funebre_pericles.PNG"}, "athens-1": {"src": "culture/athens-1.jpg", "artist": "en:User:Nickfraser", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Olivesfromjordan.jpg"}, "athens-3": {"src": "culture/athens-3.jpg", "artist": "Ikonact", "license": "CC BY-SA 3.0", "licenseUrl": "http://creativecommons.org/licenses/by-sa/3.0/", "page": "https://commons.wikimedia.org/wiki/File:Bg-easter-eggs.jpg"}, "barcelona-0": {"src": "culture/barcelona-0.jpg", "artist": "Colla Vella dels Xiquets de Valls", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:Colla_Vella_dels_Xiquets_de_Valls_-_Primer_2de9_amb_folre_i_manilles_descarregat_de_la_hist%C3%B2ria_-_Diada_de_Santa_%C3%9Arsula_1994.jpg"}, "barcelona-1": {"src": "culture/barcelona-1.jpg", "artist": "Elemaki", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0", "page": "https://commons.wikimedia.org/wiki/File:TapasenBarcelona.JPG"}, "barcelona-2": {"src": "culture/barcelona-2.jpg", "artist": "essetefano", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0", "page": "https://commons.wikimedia.org/wiki/File:Parc_guell_-_panoramio.jpg"}, "reykjavik-1": {"src": "culture/reykjavik-1.jpg", "artist": "Ivan Sabljak", "license": "CC BY-SA 3.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0", "page": "https://commons.wikimedia.org/wiki/File:%C3%9Eingvellir_from_the_information_centre.JPG"}, "reykjavik-3": {"src": "culture/reykjavik-3.jpg", "artist": "Andrii Gladii", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:%D2%90%D1%80%D1%96%D0%BB%D0%B0_(%D1%96%D1%81%D0%BB%D0%B0%D0%BD%D0%B4%D1%81%D1%8C%D0%BA%D0%B8%D0%B9_%D0%BF%D0%B5%D1%80%D1%81%D0%BE%D0%BD%D0%B0%D0%B6)_%D0%BD%D0%B0_%D0%BB%D0%B5%D1%82%D0%BE%D0%B2%D0%B8%D1%89%D1%96_%D0%9A%D0%B5%D0%BF%D0%BB%D0%B0%D0%B2%D1%96%D0%BA.jpg"}, "auckland-0": {"src": "culture/auckland-0.jpg", "artist": "Merrett, Joseph Jenner, 1816-1854.", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:MaoriWardanceKahuroa.jpg"}, "auckland-1": {"src": "culture/auckland-1.jpg", "artist": "U.S. Air Force photo/Tech. Sgt. Shane A. Cuomo", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:Powhiri,_USAF.jpg"}, "auckland-2": {"src": "culture/auckland-2.jpg", "artist": "Einalem", "license": "CC BY-SA 2.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0", "page": "https://commons.wikimedia.org/wiki/File:Hangi_prepare.jpg"}, "auckland-3": {"src": "culture/auckland-3.jpg", "artist": "Maungatautari Ecological Island Trust", "license": "Public domain", "licenseUrl": "", "page": "https://commons.wikimedia.org/wiki/File:TeTuatahianui.jpg"}, "buenos-0": {"src": "culture/buenos-0.png", "artist": "Coquimbo58", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Tango_dancers_in_Montevideo.png"}, "buenos-2": {"src": "culture/buenos-2.jpg", "artist": "No machine-readable author provided. Jorgealfonso assumed (based on copyright claims).", "license": "CC BY-SA 2.5", "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5", "page": "https://commons.wikimedia.org/wiki/File:Mate_en_calabaza.jpg"}, "buenos-3": {"src": "culture/buenos-3.jpg", "artist": "Fernando", "license": "CC BY-SA 4.0", "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0", "page": "https://commons.wikimedia.org/wiki/File:Perito_Moreno_Glacier_2023.jpg"}};
+// ---------- culture-card photos and a full-screen photo viewer ----------
+// CULTURE_PHOTOS["tokyo-1"] = { src, artist, license, licenseUrl, page }  (cards without a free photo stay text-only)
+function photoCredit(p) {
+  return `攝影：${esc(p.artist || "Wikimedia Commons")}・<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>・<a href="${p.page}" target="_blank" rel="noopener">原圖</a>`;
+}
+// every overlay toggles this one static element, which the shared feedback button watches (hideWhen)
+function syncOverlay() {
+  $("ovlFlag").hidden = ["passModal", "noteModal", "lightbox"].every(id => $(id).hidden);
+}
+let LIGHT_RETURN = null;
+function openPhoto(key) {
+  const [kind, id, i] = key.split(":");
+  const c = CITIES[id];
+  let p, title, text = "";
+  if (kind === "main") { p = PHOTOS[id]; title = c.treasure; text = c.fact; }
+  else { p = CULTURE_PHOTOS[id + "-" + i]; const n = CULTURE[id][+i]; title = n[1]; text = n[2]; }
+  $("lbImg").src = p.src; $("lbImg").alt = title + "的照片";
+  $("lbTitle").textContent = `${title}・${c.name}`;
+  $("lbText").textContent = text;
+  $("lbCredit").innerHTML = photoCredit(p);
+  LIGHT_RETURN = document.activeElement;
+  $("lightbox").hidden = false; syncOverlay();
+  $("lightbox").querySelector(".btn").focus();
+}
+function closePhoto() {
+  $("lightbox").hidden = true; $("lbImg").removeAttribute("src"); syncOverlay();
+  if (LIGHT_RETURN && LIGHT_RETURN.focus) LIGHT_RETURN.focus();
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("lightbox").hidden) closePhoto(); });
+
+function culturePanel(id) {
+  const shots = CULTURE[id].filter((_, i) => CULTURE_PHOTOS[id + "-" + i]).length;
+  return `<div class="quiz"><p class="eyebrow">文化圖鑑 · ${esc(CITIES[id].country)}${shots ? ` · ${shots} 張照片，點照片可以放大` : ""}</p>
+    <p class="swipehint">← 左右滑動，看下一張卡片 →</p>
+    <div class="culture">${CULTURE[id].map(([tag, title, text], i) => {
+      const p = CULTURE_PHOTOS[id + "-" + i];
+      return `<article class="cnote ${p ? "hasphoto" : ""}">
+        ${p ? `<button class="cphoto" onclick="openPhoto('c:${id}:${i}')" aria-label="放大照片：${esc(title)}"><img src="${p.src}" alt="${esc(title)}" loading="lazy"></button>` : ""}
+        <div class="ctext"><span class="ctag">${esc(tag)}</span><h4>${esc(title)}</h4><p>${esc(text)}</p>
+        ${p ? `<small class="ccredit">${photoCredit(p)}</small>` : ""}</div></article>`;
+    }).join("")}</div></div>`;
+}
 
 // ---------- state ----------
 let S;
@@ -1633,6 +1708,7 @@ window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.
 <script>
 window.KS_FEEDBACK = {
   course: '環球小偵探',
+  hideWhen: '#ovlFlag',
   resolve: function () {
     if (typeof S === 'undefined' || !S) return { title: '', anchor: '' };
     var c = CITIES[S.at];

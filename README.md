@@ -17,7 +17,7 @@ A small collection of static learning websites I build for my kids.
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.
-- Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`; `village-chief/` loads optional artwork from its `images/`; `detective/` ships `photos/` and `flags/`).
+- Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`; `village-chief/` loads optional artwork from its `images/`; `detective/` ships `photos/`, `culture/` and `flags/`).
 - Progress is stored in the browser's `localStorage`, so it never leaves the device.
 
 ## Local preview
