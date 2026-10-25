@@ -155,6 +155,9 @@ h3 { margin: 0 0 10px; font-size: 18px; font-weight: 700 }
 .lg.route { width: 18px; height: 0; border-radius: 0; border-top: 2px dashed var(--stamp) }
 
 .mapwrap { position: relative }
+.gatemap { margin-top: 14px; display: grid; gap: 10px }
+.gatemap > .btn { justify-self: start }
+#mapSlot .mapcard { border: 0; padding: 0; background: transparent; border-radius: 0 }
 .map { width: 100%; height: auto; display: block; border-radius: 10px; background: var(--sea); touch-action: none; cursor: grab }
 .map:active { cursor: grabbing }
 .map .countries path, .minimap .countries path { fill: var(--land); stroke: var(--paper); stroke-width: .6; vector-effect: non-scaling-stroke; stroke-linejoin: round }
@@ -363,13 +366,13 @@ aside.wrap { margin: 0; width: 100% }
     <div class="stub"><b>剩餘時間</b><div class="clock" id="clock">—</div><small class="clocksub" id="clockSub"></small></div>
   </header>
 
-  <section class="card mapcard">
+  <div id="mapHold"><section class="card mapcard" id="mapCard" hidden>
     <div class="maphead"><p class="eyebrow" style="margin:0">追蹤路線</p>
       <div class="legend"><span><i class="lg here"></i>你在這裡</span><span><i class="lg opt"></i>可以飛去</span><span><i class="lg route"></i>走過的路</span></div></div>
     <div class="mapwrap"><svg class="map" id="map" viewBox="0 14 360 138" role="img" aria-label="世界地圖，顯示你走過的路線。可以用滾輪、兩指或按鈕放大縮小，拖曳移動。"></svg>
       <div class="zoombar"><button onclick="zoomMap(1.6)" aria-label="放大">＋</button><button onclick="zoomMap(1 / 1.6)" aria-label="縮小">－</button>
         <button onclick="focusHere()">看我在哪</button><button onclick="resetMap()">整個世界</button><span id="zoomLevel">1×</span></div></div>
-  </section>
+  </section></div>
 
   <div class="grid">
     <main id="scene" class="card" aria-live="polite"></main>
@@ -1416,6 +1419,23 @@ function focusHere() {
   const w = 90; setView({ x: x - w / 2, y: y - w * MAP_FULL.h / MAP_FULL.w / 2, w });
   drawMap();
 }
+let MAP_OPEN = false, MAP_FIT = true;
+function toggleMap() { MAP_OPEN = !MAP_OPEN; MAP_FIT = true; render(); }
+// frame the current city and every destination on offer
+function fitOptions() {
+  const ids = [S.at, ...((S.mode === "city" && S.at === S.route[S.step]) ? S.plans[S.step].dests : [S.route[S.step]])];
+  const pts = ids.map(id => P(CITIES[id])), xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const bw = Math.max(...xs) - Math.min(...xs), bh = Math.max(...ys) - Math.min(...ys);
+  const w = Math.max(60, bw * 1.35, bh * 1.35 * MAP_FULL.w / MAP_FULL.h);
+  setView({ x: (Math.max(...xs) + Math.min(...xs)) / 2 - w / 2, y: (Math.max(...ys) + Math.min(...ys)) / 2 - w * MAP_FULL.h / MAP_FULL.w / 2, w });
+}
+function placeMap() {
+  const slot = $("mapSlot");
+  if (slot && MAP_OPEN) {
+    slot.appendChild(MAP_CARD); MAP_CARD.hidden = false;
+    if (MAP_FIT) { fitOptions(); MAP_FIT = false; drawMap(); }
+  } else MAP_CARD.hidden = true;
+}
 function resetMap() { MV = { ...MAP_FULL }; drawMap(); }
 function mapPoint(svg, e) {
   const r = svg.getBoundingClientRect();
@@ -1551,6 +1571,7 @@ function ask(i) {
 }
 
 function fly(to) {
+  MAP_FIT = true;
   const h = tripH(S.at, to);
   S.lastTrip = { from: S.at, to, h, km: km(S.at, to) };
   S.hours -= h; S.t += h;
@@ -1584,7 +1605,7 @@ function cityPanel(c, onRoute) {
     <div class="city-head">
       <div class="namebox">${flagImg(S.at, "head")}<div><p class="eyebrow">你現在在 · ${esc(c.country)}・${both(NAMES[S.at][2], NAMES[S.at][3])}</p><h2>${esc(c.name)}<span class="en">${both(NAMES[S.at][0], NAMES[S.at][1])}</span></h2><div class="coords">${coord(c)}</div></div></div>
       <div class="actions" style="margin:0"><a class="sv" href="${svUrl(c)}" target="_blank" rel="noopener">${PIN}打開街景</a>
-      <a class="btn ghost" style="text-decoration:none" href="${mapUrl(c)}" target="_blank" rel="noopener">看地圖</a></div>
+      <a class="btn ghost" style="text-decoration:none" href="${mapUrl(c)}" target="_blank" rel="noopener">Google 地圖</a></div>
     </div>
     ${S.lastTrip && S.lastTrip.to === S.at ? `<p class="trip">從${esc(CITIES[S.lastTrip.from].name)}飛了 <b>${S.lastTrip.km.toLocaleString()} 公里</b>，花了 <b>${fmtH(S.lastTrip.h)} 小時</b>${LAST_LEG[S.at] ? `（${LAST_LEG[S.at][1]}）` : ""}。現在是${clockText(S.t)}。</p>` : ""}
     <h3>問問看附近的人（每問一個人花 1 小時）</h3>
@@ -1600,13 +1621,15 @@ function flyPanel() {
   if (!onRoute) {
     const back = CITIES[S.route[S.step]];
     return `<div class="quiz"><p class="eyebrow">登機門</p><h3>線索斷了……要回去嗎？</h3>
-      <div class="dests"><button class="dest" onclick="fly('${S.route[S.step]}')"><span><b>飛回${esc(back.name)}</b><br><small>${esc(back.country)}</small></span>${gate(S.at, S.route[S.step])}</button></div></div>`;
+      <div class="dests"><button class="dest" onclick="fly('${S.route[S.step]}')"><span><b>飛回${esc(back.name)}</b><br><small>${esc(back.country)}</small></span>${gate(S.at, S.route[S.step])}</button></div>
+    <div class="gatemap"><button class="btn ghost" onclick="toggleMap()" aria-expanded="${MAP_OPEN}">${MAP_OPEN ? "收起地圖" : "看地圖：這些城市在哪裡？"}</button><div id="mapSlot"></div></div></div>`;
   }
   const opts = shuffleStable(S.plans[S.step].dests);
   return `<div class="quiz"><p class="eyebrow">登機門</p><h3>根據線索，嫌犯飛去哪裡了？</h3>
     <div class="dests">${opts.map(id => { const c = CITIES[id]; return `
       <button class="dest" onclick="fly('${id}')"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
-    <p class="hint">噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p></div>`;
+    <p class="hint">噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p>
+    <div class="gatemap"><button class="btn ghost" onclick="toggleMap()" aria-expanded="${MAP_OPEN}">${MAP_OPEN ? "收起地圖" : "看地圖：這些城市在哪裡？"}</button><div id="mapSlot"></div></div></div>`;
 }
 const shuffleStable = a => a;
 const gate = (a, b) => `<span class="gate"><b>${fmtH(tripH(a, b))} 小時</b><small>${km(a, b).toLocaleString()} 公里</small></span>`;
@@ -1657,6 +1680,7 @@ function render() {
       <p>這次你走過：${S.path.map(id => esc(CITIES[id].name)).join(" → ")}</p>
       <div class="actions" style="justify-content:center"><button class="btn" style="background:var(--accent);color:#fff" onclick="newCase(S)">接下一個案件</button></div></div>`;
   }
+  $("mapHold").appendChild(MAP_CARD);   // keep the map out of the way while the scene is rebuilt
   $("scene").innerHTML = html;
 
   // notebook
@@ -1684,6 +1708,7 @@ function render() {
   }).join("");
 
   drawMap();
+  placeMap();
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* private window: play without saving */ }
   $("credits").innerHTML = Object.keys(PHOTOS).map(id => { const p = PHOTOS[id];
     return `<li>${esc(CITIES[id].treasure)}：${esc(p.artist)}，<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>，<a href="${p.page}" target="_blank" rel="noopener">原圖</a></li>`; }).join("");
@@ -1718,6 +1743,7 @@ function drawMap() {
 
 // keep game state across live republishes
 window.claude?.hot?.snapshot?.(() => ({ S }));
+const MAP_CARD = $("mapCard");
 initMapGestures();
 // progress (case in hand, passport, discoveries) is kept in this browser only
 const SAVE_KEY = "worldDetective.v1";
