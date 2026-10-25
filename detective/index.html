@@ -1814,7 +1814,7 @@ function flightSide() {
     : `<p class="hint" style="margin:0">還沒問到去向線索。先關掉登機門，去問問照片裡的人吧！</p>`;
   const sel = SEL && CITIES[SEL];
   return `<p class="flfrom">從 <b>${esc(here.name)}</b> 出發・剩 <b>${fmtH(Math.max(0, S.hours))}</b> 小時</p>
-    ${onRoute ? "" : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯。可以飛回${esc(CITIES[S.route[S.step]].name)}再問一次，也可以根據筆記本裡的線索，直接飛去另一個城市。</p></div>`}
+    ${onRoute ? "" : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯。可以飛回${esc(CITIES[S.route[S.step]].name)}再問一次，也可以根據筆記本裡的線索，直接飛去另一個城市。還沒把握的話，先關掉登機門，打電話回偵探總部要一條新線索。</p></div>`}
     <div class="flbox"><h3>筆記本裡的去向線索</h3>${clues}</div>
     <h3>選一個目的地</h3>
     ${opts.length > 4 ? `<p class="hint" style="margin:0">嫌犯一次最遠飛 ${MAX_HOP_KM.toLocaleString()} 公里，也不會回到去過的城市。地圖上的橘色圓圈都是他可能去的地方；灰色的點太遠或已經去過了。</p>` : ""}
@@ -2510,6 +2510,53 @@ function postcardPanel() {
       <p class="pcsign">${esc(sign)}<br>—— 影子貓的神秘成員</p></div>${quiz}</section>`;
 }
 
+// off the trail: phone headquarters for one more clue about the thief's next stop (costs time, a few per leg)
+const HQ_MAX = 2;
+function hqNext(got) {
+  const p = S.plans[S.step], next = S.route[S.step + 1];
+  if (S.level !== "medium") {
+    const used = p.notes.flat();
+    const left = CITIES[next].clues.filter(c => !used.includes(c) && !got.some(g => g.c === c));
+    const c = left[rnd(left.length)];
+    return c ? { c, text: "總部查到新消息：" + c } : null;
+  }
+  // medium: a clue the witnesses and postcard did not give, true for the answer, never unclear for any city
+  // on the map, and false for the city the player is standing in; prefer the one that rules out the most
+  const known = p.notes.flat().concat(p.pc && p.pc.s ? [p.pc.s] : []);
+  const pool = CLUES.concat(tripClues(S.route[S.step])).filter(d => PC_CLUE[d.k] && d.t(next) === true
+    && !known.includes(d.s) && !got.some(g => g.c === d.k) && p.dests.every(o => d.t(o) !== null));
+  const here = pool.filter(d => d.t(S.at) === false), opts = here.length ? here : pool;
+  if (!opts.length) return null;
+  const out = d => p.dests.filter(o => d.t(o) === false).length;
+  const best = Math.max(...opts.map(out)), top = opts.filter(d => out(d) === best);
+  const d = top[rnd(top.length)];
+  return { c: d.k, text: "總部截聽到嫌犯講電話：「" + PC_CLUE[d.k] + "」" };
+}
+function callHQ() {
+  if (S.mode !== "city" || S.at === S.route[S.step]) return;
+  S.hq = S.hq || {};
+  const got = S.hq[S.step] || (S.hq[S.step] = []);
+  if (got.length >= HQ_MAX) return;
+  const h = hqNext(got);
+  S.hours -= ASK; S.t += ASK;
+  if (h) {
+    got.push(h);
+    if (!S.heard.includes(h.text)) S.heard.push(h.text);
+    if (h.text.includes("國旗")) (S.heardFlag || (S.heardFlag = {}))[h.text] = S.route[S.step + 1];
+  } else got.push({ c: null, text: "總部：目前沒有新消息，再看看筆記本裡的線索吧！" });
+  if (S.hours <= 0) S.mode = "timeout";
+  render();
+}
+function hqPanel() {
+  if (S.mode !== "city" || S.at === S.route[S.step]) return "";
+  const got = (S.hq || {})[S.step] || [], left = HQ_MAX - got.length;
+  const list = got.length ? `<ul class="notes">${got.map(h => `<li><span>${esc(h.text)}${S.heardFlag && S.heardFlag[h.text] ? flagImg(S.heardFlag[h.text], "inline") : ""}</span></li>`).join("")}</ul>` : "";
+  return `<section class="pcwrap"><h3>📞 打電話回偵探總部</h3>${list}
+    ${left > 0 ? `<button class="pcclosed" onclick="callHQ()"><span class="pcicon" aria-hidden="true">📞</span>
+      <span><b>${got.length ? "再問總部一次" : "飛錯了？請總部幫忙！"}</b><small>花 ${ASK} 小時，總部會再給你一條嫌犯去向的線索（這一段還能問 ${left} 次）。</small></span></button>`
+      : `<p class="hint" style="margin:0">這一段已經問過總部 ${HQ_MAX} 次了。對照筆記本裡的線索，打開登機門再選一次吧！</p>`}</section>`;
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
@@ -2539,7 +2586,7 @@ function ask(i) {
   const onRoute = S.at === S.route[S.step];
   if (!S.asked[key]) { S.hours -= ASK; S.t += ASK; S.asked[key] = true; }
   let text, flag = null;
-  if (!onRoute) text = ["沒有耶，我今天沒看到什麼奇怪的人。", "嗯……這裡很平靜，你是不是走錯城市了？", "可疑人物？沒看到。也許你該回上一站，或是再看看筆記本裡的線索。"][i];
+  if (!onRoute) text = ["沒有耶，我今天沒看到什麼奇怪的人。", "嗯……這裡很平靜，你是不是走錯城市了？", "可疑人物？沒看到。你要不要打電話回偵探總部問問看？"][i];
   else if (S.step === S.route.length - 1) text = ["剛剛有個鬼鬼祟祟的人跑過去，手上抱著好大一包東西！", "快！那個人就躲在附近！", "我看到那個人往轉角跑了，現在去還追得到！"][i];
   else {
     const p = S.plans[S.step];
@@ -2612,7 +2659,7 @@ function cityPanel(c, onRoute) {
       <button class="wbtn ${S.asked[S.at + ":" + i] ? "done" : ""} ${S.said && S.said.i === i ? "talking" : ""}" onclick="ask(${i})">${avatar(witnessLook(S.at, i), "sm")}<span class="wtxt"><small>${S.asked[S.at + ":" + i] ? "問過了" : "去問問"}</small><span>${esc(p)}</span></span></button>`).join("")}
     </div>`}
     ${sc ? "" : chatPanel()}
-    ${postcardPanel()}
+    ${postcardPanel()}${hqPanel()}
     ` + regionPanel(S.at) + profilePanel(S.at) + culturePanel(S.at) + challengePanel(S.at);
 }
 
