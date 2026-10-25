@@ -101,6 +101,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .flbox h3 { margin: 0 0 6px; font-size: 15px }
 .flbox .notes { font-size: 14px }
 .fldests { display: grid; gap: 8px }
+.fldests.many { max-height: 46vh; overflow-y: auto; padding-right: 4px }
+@media (max-width: 860px) { .fldests.many { max-height: none } }
 .fldest { border: 2px solid var(--line); background: var(--paper); border-radius: 12px; padding: 8px 12px; text-align: left; display: flex; justify-content: space-between; gap: 8px; align-items: center }
 .fldest:hover { border-color: var(--accent) }
 .fldest.on { border-color: var(--accent); background: var(--chip); box-shadow: inset 4px 0 0 var(--accent) }
@@ -1786,7 +1788,8 @@ function flightSide() {
   return `<p class="flfrom">從 <b>${esc(here.name)}</b> 出發・剩 <b>${fmtH(Math.max(0, S.hours))}</b> 小時</p>
     ${onRoute ? `<div class="flbox"><h3>筆記本裡的去向線索</h3>${clues}</div>` : `<div class="flbox"><h3>線索斷了</h3><p class="hint" style="margin:0">這裡沒有人看過嫌犯，只能飛回${esc(CITIES[S.route[S.step]].name)}再問一次。</p></div>`}
     <h3>${onRoute ? "選一個目的地" : "回程航班"}</h3>
-    <div class="fldests">${opts.map(id => { const c = CITIES[id]; return `
+    ${opts.length > 4 ? `<p class="hint" style="margin:0">嫌犯一次最遠飛 ${MAX_HOP_KM.toLocaleString()} 公里，也不會回到去過的城市。地圖上的橘色圓圈都是他可能去的地方；灰色的點太遠或已經去過了。</p>` : ""}
+    <div class="fldests ${opts.length > 4 ? "many" : ""}">${opts.slice().sort((x, y) => km(S.at, x) - km(S.at, y)).map(id => { const c = CITIES[id]; return `
       <button class="fldest ${SEL === id ? "on" : ""}" onclick="selectDest('${id}')" aria-pressed="${SEL === id}"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
     <button class="btn takeoff" onclick="takeOff()" ${sel ? "" : "disabled"}>${sel ? `起飛！飛往${esc(sel.name)}・約 ${fmtH(tripH(S.at, SEL))} 小時` : "先在地圖或上面選一個城市"}</button>
     <p class="hint">也可以直接點地圖上的橘色圓圈。噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p>`;
@@ -1851,33 +1854,31 @@ function tripClues(from) {
   ];
 }
 
-// Pick 3 decoys and 2–3 clues so that only the target fits every clue, and no single clue gives it away.
-function mediumPlan(from, target, prev) {
+// Free choice: every city the thief could reach in one flight (and has not already visited) is a
+// destination on the map. Pick 2–4 clues so that, of all of them, only the target fits every clue,
+// and no single clue gives it away on its own.
+function mediumPlan(from, target, visited) {
   const pool = CLUES.concat(tripClues(from));
-  const truthy = pool.filter(c => c.t(target) === true);
-  const near = reachable(from).filter(c => c !== target && c !== prev);
-  const sim = id => truthy.filter(c => c.t(id) === true).length;      // similar cities make better decoys
-  const ranked = near.sort((a, b) => sim(b) - sim(a));
-  for (let tries = 0; tries < 60; tries++) {
-    const decoys = shuffle(ranked.slice(0, Math.min(ranked.length, 7))).slice(0, 3);
-    if (decoys.length < 3) break;
-    const opts = [target, ...decoys];
-    const usable = truthy.filter(c => opts.every(o => c.t(o) !== null));
-    const fits = c => opts.filter(o => c.t(o) === true);
-    const soft = shuffle(usable.filter(c => fits(c).length >= 2));    // each clue alone still leaves a choice
-    for (const size of [2, 3]) {
-      const combos = [];
-      const pick = (start, chosen) => {
-        if (chosen.length === size) { combos.push(chosen.slice()); return; }
-        for (let i = start; i < soft.length; i++) { chosen.push(soft[i]); pick(i + 1, chosen); chosen.pop(); }
-      };
-      pick(0, []);
-      for (const combo of shuffle(combos)) {
-        if (new Set(combo.map(c => c.k)).size < combo.length) continue;
-        const left = opts.filter(o => combo.every(c => c.t(o) === true));
-        if (left.length === 1 && left[0] === target) return { clues: combo.map(c => c.s), keys: combo.map(c => c.k), dests: shuffle(opts) };
+  const opts = reachable(from).filter(c => !visited.includes(c));
+  if (!opts.includes(target)) return null;
+  const truthy = pool.filter(c => c.t(target) === true && opts.every(o => c.t(o) !== null));
+  const fits = c => opts.filter(o => c.t(o) === true);
+  const soft = shuffle(truthy.filter(c => fits(c).length >= 2));
+  // three clues is the target for this age: enough to read and cross-check, still one per witness
+  for (const size of [3, 2, 4]) {
+    const found = [];
+    const pick = (start, chosen, left) => {
+      if (found.length > 40) return;
+      if (chosen.length === size) { if (left.length === 1) found.push(chosen.slice()); return; }
+      for (let i = start; i < soft.length; i++) {
+        const next = left.filter(o => soft[i].t(o) === true);
+        if (next.length === left.length) continue;                    // a clue must rule something out
+        chosen.push(soft[i]); pick(i + 1, chosen, next); chosen.pop();
       }
-    }
+    };
+    pick(0, [], opts);
+    const ok = found.filter(cs => new Set(cs.map(c => c.k)).size === cs.length);
+    if (ok.length) { const cs = ok[rnd(ok.length)]; return { clues: shuffle(cs.map(c => c.s)), keys: cs.map(c => c.k), dests: opts }; }
   }
   return null;
 }
@@ -1897,13 +1898,13 @@ function buildPlans(route, suspect, level) {
     const traitLine = level === "medium" ? TRAIT_LINES_MED[trait][tv] : TRAIT_LINES[trait](tv);
     let lines, notes, dests;
     if (level === "medium") {
-      const mp = mediumPlan(id, route[i + 1], route[i - 1]);
+      const mp = mediumPlan(id, route[i + 1], route.slice(0, i + 1));
       if (!mp) return undefined;                                       // caller retries with a new route
       dests = mp.dests;
-      const [a, b, c] = mp.clues;
-      // three witnesses: two carry route clues; a third clue (if any) rides along with the trait
-      lines = [a, b, c ? `${traitLine}對了，${c}` : traitLine];
-      notes = [[a], [b], c ? [c] : []];
+      // three witnesses share 2–4 clues: the first two get one each, extras go to the trait witness, then round again
+      notes = [[], [], []];
+      mp.clues.forEach((c, k) => notes[k < 2 ? k : (k === 2 ? 2 : 0)].push(c));
+      lines = [notes[0].join(""), notes[1].join(""), notes[2].length ? `${traitLine}對了，${notes[2].join("")}` : traitLine];
     } else {
       const next = CITIES[route[i + 1]];
       const cl = shuffle(next.clues).slice(0, 2);
