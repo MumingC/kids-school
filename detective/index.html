@@ -73,6 +73,22 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .cnote p { margin: 0; font-size: 15px; line-height: 1.65 }
 .ctag { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent) }
 .k-culture { background: #b0477e }
+/* level picker, warrant */
+.levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 12px 0 }
+@media (max-width: 520px) { .levels { grid-template-columns: 1fr } }
+.lvl { border: 2px solid var(--line); background: var(--paper); border-radius: 12px; padding: 10px 14px; text-align: left; display: grid; gap: 2px }
+.lvl b { font-size: 18px }
+.lvl small { color: var(--muted); font-size: 13px }
+.lvl.on { border-color: var(--accent); background: var(--chip); box-shadow: inset 4px 0 0 var(--accent) }
+.sus.chosen { border-color: var(--stamp); background: var(--chip); opacity: 1 }
+.sus { position: relative }
+.sus:disabled { cursor: default }
+.wtag { position: absolute; top: 6px; right: 6px; background: var(--stamp); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px }
+.warrantcard { display: flex; gap: 14px; align-items: center; border: 2px solid var(--stamp); border-radius: 12px; padding: 10px 14px; margin: 8px 0 }
+.warrantcard div { display: grid }
+.warrantcard b { font-size: 18px }
+.warrantcard small { color: var(--muted) }
+
 /* boarding gate screen */
 .flight .sheet { width: min(1240px, 100%); gap: 12px }
 .flgrid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start }
@@ -494,6 +510,7 @@ aside.wrap { margin: 0; width: 100% }
         <button class="btn ghost" onclick="openNotes(false)">關閉</button></div>
       <div><h3>嫌犯長相線索</h3><div class="traits" id="traits"></div></div>
       <div><h3>去向線索</h3><ul class="notes" id="notes"></ul></div>
+      <div id="warrantBox" hidden></div>
     </div>
   </div>
   <div class="modal" id="passModal" hidden onclick="if (event.target === this) openPass(false)">
@@ -736,23 +753,23 @@ function tripH(a, b) {
 }
 const reachable = a => Object.keys(CITIES).filter(b => b !== a && km(a, b) <= MAX_HOP_KM);
 
-function makeRoute() {
+function makeRoute(len = ROUTE_LEN) {
   for (let tries = 0; tries < 200; tries++) {
     const route = [Object.keys(CITIES)[rnd(Object.keys(CITIES).length)]];
-    while (route.length < ROUTE_LEN) {
+    while (route.length < len) {
       const next = reachable(route[route.length - 1]).filter(c => !route.includes(c));
       if (!next.length) break;
       route.push(next[rnd(next.length)]);
     }
-    if (route.length === ROUTE_LEN) return route;
+    if (route.length === len) return route;
   }
-  return shuffle(Object.keys(CITIES)).slice(0, ROUTE_LEN);
+  return shuffle(Object.keys(CITIES)).slice(0, len);
 }
 // time budget: the thief's own flights, 3 interviews per stop, plus slack for one or two mistakes
-function budgetFor(route) {
+function budgetFor(route, slack = 0.5) {
   let t = 0;
   for (let i = 1; i < route.length; i++) t += tripH(route[i - 1], route[i]);
-  return { thief: t, total: Math.ceil(t + 3 * ASK * (route.length - 1) + Math.max(10, t * 0.5)) };
+  return { thief: t, total: Math.ceil(t + 3 * ASK * (route.length - 1) + Math.max(10, t * slack)) };
 }
 const fmtH = h => (h % 1 ? h.toFixed(1) : String(h));
 function clockText(elapsed) {
@@ -1203,8 +1220,8 @@ function freshView() { CLEAN_PHOTO = false; PEEK = false; MV = { ...MAP_FULL }; 
 function restartCase() { freshView(); newCase(S); }
 // start over completely
 function wipeAll() {
-  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing saved */ }
-  openPass(false); freshView(); newCase();
+  try { localStorage.removeItem(saveKey(S.level)); } catch (e) { /* nothing saved */ }
+  openPass(false); freshView(); newCase(null, S.level);
 }
 
 function openPass(on) {
@@ -1787,31 +1804,154 @@ function tapSelect(svg, e) {
   if (best) selectDest(best);
 }
 
+// ---------- 中級：交叉比對線索 ----------
+// Each clue is a yes/no fact about a city. A clue returns true / false, or null when the answer is
+// unclear for that city (Cape Town is one of three capitals; English is spoken in Dubai but is not
+// official). A clue is only used when none of the four destinations on offer is null for it.
+const MED = { ROUTE: 7, SLACK: 0.3 };
+const inSet = (...ids) => id => ids.includes(id);
+const CAPITALS = inSet("tokyo", "paris", "giza", "rome", "london", "seoul", "bangkok", "mexico", "taipei", "singapore", "nairobi", "athens", "reykjavik", "buenos");
+const LATIN = inSet("paris", "rome", "sydney", "rio", "nyc", "london", "mexico", "machu", "capetown", "istanbul", "nairobi", "barcelona", "reykjavik", "auckland", "buenos");
+const CLUES = [
+  { k: "南半球", t: id => CITIES[id].lat < 0, s: "那個人說要去南半球，那裡的季節跟台灣剛好相反。" },
+  { k: "北半球", t: id => CITIES[id].lat >= 0, s: "那個人說要去的地方跟台灣一樣在北半球。" },
+  ...["亞洲", "歐洲", "非洲", "北美洲", "南美洲", "大洋洲"].map(c => ({ k: c, t: id => EXTRA[id].cont === c || EXTRA[id].cont2 === c, s: `那個人說，接下來要去${c}。` })),
+  { k: "靠左開", t: id => PROFILE[id][6] === "左", s: "那個人說到了那裡，過馬路要先看右邊，因為車子靠左邊開。" },
+  { k: "靠右開", t: id => PROFILE[id][6] === "右", s: "那個人說那裡的車子跟台灣一樣，靠右邊開。" },
+  { k: "首都", t: id => id === "capetown" ? null : CAPITALS(id), s: "那個人說要去的是一個國家的首都。" },
+  { k: "不是首都", t: id => id === "capetown" ? null : !CAPITALS(id), s: "那個人說要去的城市很有名，但它不是那個國家的首都。" },
+  { k: "島國", t: inSet("tokyo", "london", "taipei", "singapore", "reykjavik", "auckland"), s: "那個人說要去一個四面都被海包圍的島國。" },
+  { k: "人口過億", t: inSet("tokyo", "giza", "rio", "nyc", "agra", "mexico"), s: "那個人說那個國家的人口超過一億人。" },
+  { k: "熱帶", t: id => Math.abs(CITIES[id].lat) < 23.44, s: "那個人說那裡在南北回歸線之間，是熱帶地區。" },
+  { k: "高原", t: inSet("mexico", "machu", "nairobi"), s: "那個人說那裡海拔超過 1,500 公尺，走樓梯會有點喘。" },
+  { k: "沙漠", t: inSet("giza", "dubai", "marrakech", "sydney"), s: "那個人說那個國家有一大片乾燥的沙漠。" },
+  { k: "伊斯蘭教", t: inSet("giza", "dubai", "istanbul", "marrakech"), s: "那個人說那裡大部分的人信伊斯蘭教，一天會聽到好幾次喚拜的聲音。" },
+  { k: "佛教", t: inSet("bangkok", "siemreap"), s: "那個人說那裡大部分的人信佛教，早上常看到穿橘色袈裟的僧侶。" },
+  { k: "筷子", t: inSet("tokyo", "seoul", "taipei"), s: "那個人說那裡的人吃飯習慣用筷子。" },
+  { k: "歐元", t: inSet("paris", "rome", "athens", "barcelona"), s: "那個人在換歐元。" },
+  { k: "西班牙語", t: inSet("mexico", "machu", "barcelona", "buenos"), s: "那個人在練習說西班牙語。" },
+  { k: "英語", t: id => id === "dubai" ? null : inSet("sydney", "nyc", "london", "singapore", "agra", "capetown", "nairobi", "auckland")(id), s: "那個人說到了那裡，用英語就能和當地人溝通，因為英語是官方語言。" },
+  { k: "由右往左", t: inSet("giza", "dubai", "marrakech"), s: "那個人在練習一種從右邊往左邊寫的文字。" },
+  { k: "ABC 字母", t: id => id === "agra" || id === "singapore" ? null : LATIN(id), s: "那個人說那裡的文字跟英文一樣，是用 ABC 這種字母寫的。" },
+  { k: "不用 ABC", t: id => id === "agra" || id === "singapore" ? null : !LATIN(id), s: "那個人說那裡的文字不是用 ABC 這種字母寫的，看起來很不一樣。" },
+  { k: "比台灣快", t: id => NAMES[id][5] > 8, s: "那個人說到了那裡，時間比台灣快，要把手錶調快。" },
+  { k: "比台灣慢", t: id => NAMES[id][5] < 8, s: "那個人說到了那裡，時間比台灣慢，要把手錶調慢。" },
+  { k: "同時區", t: id => NAMES[id][5] === 8, s: "那個人說到了那裡不用調手錶，時間跟台灣一樣。" },
+];
+// clues that depend on where the thief is flying from
+function tripClues(from) {
+  const dLng = id => ((CITIES[id].lng - CITIES[from].lng + 540) % 360) - 180;
+  return [
+    { k: "往東", t: id => dLng(id) > 15, s: "那個人說下一站要往東邊飛。" },
+    { k: "往西", t: id => dLng(id) < -15, s: "那個人說下一站要往西邊飛。" },
+    { k: "往南", t: id => CITIES[id].lat < CITIES[from].lat - 10, s: "那個人說下一站在這裡的南方很遠的地方。" },
+    { k: "往北", t: id => CITIES[id].lat > CITIES[from].lat + 10, s: "那個人說下一站在這裡的北方很遠的地方。" },
+    { k: "長程", t: id => tripH(from, id) >= 10, s: "那個人說接下來要坐 10 個小時以上的飛機。" },
+    { k: "短程", t: id => tripH(from, id) <= 5, s: "那個人說下一段飛機不用坐太久，5 個小時以內就到了。" },
+  ];
+}
+
+// Pick 3 decoys and 2–3 clues so that only the target fits every clue, and no single clue gives it away.
+function mediumPlan(from, target, prev) {
+  const pool = CLUES.concat(tripClues(from));
+  const truthy = pool.filter(c => c.t(target) === true);
+  const near = reachable(from).filter(c => c !== target && c !== prev);
+  const sim = id => truthy.filter(c => c.t(id) === true).length;      // similar cities make better decoys
+  const ranked = near.sort((a, b) => sim(b) - sim(a));
+  for (let tries = 0; tries < 60; tries++) {
+    const decoys = shuffle(ranked.slice(0, Math.min(ranked.length, 7))).slice(0, 3);
+    if (decoys.length < 3) break;
+    const opts = [target, ...decoys];
+    const usable = truthy.filter(c => opts.every(o => c.t(o) !== null));
+    const fits = c => opts.filter(o => c.t(o) === true);
+    const soft = shuffle(usable.filter(c => fits(c).length >= 2));    // each clue alone still leaves a choice
+    for (const size of [2, 3]) {
+      const combos = [];
+      const pick = (start, chosen) => {
+        if (chosen.length === size) { combos.push(chosen.slice()); return; }
+        for (let i = start; i < soft.length; i++) { chosen.push(soft[i]); pick(i + 1, chosen); chosen.pop(); }
+      };
+      pick(0, []);
+      for (const combo of shuffle(combos)) {
+        if (new Set(combo.map(c => c.k)).size < combo.length) continue;
+        const left = opts.filter(o => combo.every(c => c.t(o) === true));
+        if (left.length === 1 && left[0] === target) return { clues: combo.map(c => c.s), keys: combo.map(c => c.k), dests: shuffle(opts) };
+      }
+    }
+  }
+  return null;
+}
+
+// indirect trait descriptions for the medium level
+const TRAIT_LINES_MED = {
+  hat: { 貝雷帽: "那個人戴著一頂扁扁圓圓、像法國畫家戴的軟帽子。", 棒球帽: "那個人戴著一頂前面有帽簷、打棒球時戴的帽子。", 草帽: "那個人戴著一頂用草編成的寬邊帽子。" },
+  hobby: { 溜滑板: "那個人說最喜歡的運動，要用到一塊裝了輪子的板子。", 彈吉他: "那個人說他最喜歡彈一種有六條弦的樂器。", 下西洋棋: "那個人說他最愛下一種有國王和皇后的棋。" },
+  pet: { 鸚鵡: "那個人肩上有一隻會學人說話的鳥。", 蜥蜴: "那個人肩上趴著一隻有鱗片、愛曬太陽的小爬蟲。" }
+};
+
+function buildPlans(route, suspect, level) {
+  const traitOrder = shuffle(["hat", "hobby", "pet"]);
+  return route.map((id, i) => {
+    if (i === route.length - 1) return null;
+    const trait = traitOrder[i % 3], tv = SUSPECTS[suspect][trait];
+    const traitLine = level === "medium" ? TRAIT_LINES_MED[trait][tv] : TRAIT_LINES[trait](tv);
+    let lines, notes, dests;
+    if (level === "medium") {
+      const mp = mediumPlan(id, route[i + 1], route[i - 1]);
+      if (!mp) return undefined;                                       // caller retries with a new route
+      dests = mp.dests;
+      const [a, b, c] = mp.clues;
+      // three witnesses: two carry route clues; a third clue (if any) rides along with the trait
+      lines = [a, b, c ? `${traitLine}對了，${c}` : traitLine];
+      notes = [[a], [b], c ? [c] : []];
+    } else {
+      const next = CITIES[route[i + 1]];
+      const cl = shuffle(next.clues).slice(0, 2);
+      lines = [cl[0], cl[1], traitLine];
+      notes = [[cl[0]], [cl[1]], []];
+      let others = shuffle(reachable(id).filter(c => c !== route[i + 1] && c !== route[i - 1])).slice(0, 3);
+      if (others.length < 3) others = others.concat(Object.keys(CITIES).filter(c => c !== id && c !== route[i + 1] && !others.includes(c))
+        .sort((x, y) => km(id, x) - km(id, y)).slice(0, 3 - others.length));
+      dests = shuffle([route[i + 1], ...others]);
+    }
+    // shuffle which witness says what, keeping lines and notes together
+    const order = shuffle([0, 1, 2]);
+    return { lines: order.map(j => lines[j]), notes: order.map(j => notes[j]), traitAt: order.indexOf(2), trait, dests };
+  });
+}
+
+const LEVEL_NAME = { easy: "初級", medium: "中級" };
+// notebook section: pick the suspect for the arrest warrant (medium); locked once the last stop is reached
+function renderWarrant() {
+  const box = $("warrantBox");
+  if (!box) return;
+  box.hidden = S.level !== "medium";
+  if (box.hidden) return;
+  const known = S.traits, locked = S.mode === "final" || !["city", "intro"].includes(S.mode);
+  box.innerHTML = `<h3>逮捕令</h3>
+    <p class="hint" style="margin:0 0 8px">${locked ? "已經到最後一站了，逮捕令不能再改。" : "根據長相線索選一個嫌犯開逮捕令。不符合線索的人會變淡；在抵達最後一站之前都可以改。"}</p>
+    <div class="suspects">${SUSPECTS.map((s, i) => {
+      const fit = Object.keys(known).every(k => s[k] === known[k]);
+      return `<button class="sus ${fit ? "" : "fade"} ${S.warrant === i ? "chosen" : ""}" onclick="setWarrant(${i})" ${locked ? "disabled" : ""} aria-pressed="${S.warrant === i}">
+        ${suspectAv(i, "lg")}<b>${esc(s.name)}</b><small>${esc(s.hat)} · ${esc(s.hobby)} · ${esc(s.pet)}</small>${S.warrant === i ? `<span class="wtag">逮捕令</span>` : ""}</button>`; }).join("")}</div>`;
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-function newCase(prev) {
-  const route = makeRoute();
-  const B = budgetFor(route);
+function newCase(prev, level) {
+  level = level || (prev && prev.level) || "easy";
   const suspect = rnd(SUSPECTS.length);
-  // each of the 4 middle stops (index 0..3) reveals one trait; cycle hat/hobby/pet
-  const traitOrder = shuffle(["hat", "hobby", "pet"]);
-  const plans = route.map((id, i) => {
-    if (i === ROUTE_LEN - 1) return null;
-    const next = CITIES[route[i + 1]];
-    const clues = shuffle(next.clues).slice(0, 2);
-    const lines = [clues[0], clues[1], TRAIT_LINES[traitOrder[i % 3]](SUSPECTS[suspect][traitOrder[i % 3]])];
-    const traitAt = rnd(3); // which witness holds the trait clue
-    const ordered = [lines[0], lines[1]]; ordered.splice(traitAt, 0, lines[2]);
-    // decoys are also within one flight, so "too far" is never a giveaway — and never the way the thief came
-    let others = shuffle(reachable(id).filter(c => c !== route[i + 1] && c !== route[i - 1])).slice(0, 3);
-    if (others.length < 3) others = others.concat(Object.keys(CITIES).filter(c => c !== id && c !== route[i + 1] && !others.includes(c))
-      .sort((a, b) => km(id, a) - km(id, b)).slice(0, 3 - others.length));
-    return { lines: ordered, traitAt, trait: traitOrder[i % 3], dests: shuffle([route[i + 1], ...others]) };
-  });
-  S = { route, step: 0, at: route[0], hours: B.total, budget: B.total, thief: B.thief, t: 0, lastTrip: null, suspect, plans,
+  let route, plans;
+  for (let tries = 0; tries < 60; tries++) {
+    route = makeRoute(level === "medium" ? MED.ROUTE : ROUTE_LEN);
+    plans = buildPlans(route, suspect, level);
+    if (!plans.includes(undefined)) break;
+  }
+  const B = budgetFor(route, level === "medium" ? MED.SLACK : 0.5);
+  S = { level, warrant: null, route, step: 0, at: route[0], hours: B.total, budget: B.total, thief: B.thief, t: 0, lastTrip: null, suspect, plans,
         asked: {}, heard: [], traits: {}, path: [route[0]], stamps: prev ? prev.stamps : {},
         visited: prev && prev.visited ? prev.visited : {}, found: prev && prev.found ? prev.found : {},
         quizDone: {}, solved: prev ? prev.solved : 0, mode: "intro", said: null, flying: false, msg: "" };
@@ -1825,13 +1965,16 @@ function ask(i) {
   if (!S.asked[key]) { S.hours -= ASK; S.t += ASK; S.asked[key] = true; }
   let text, flag = null;
   if (!onRoute) text = ["沒有耶，我今天沒看到什麼奇怪的人。", "嗯……這裡很平靜，你是不是走錯城市了？", "可疑人物？沒看到。也許你該回上一站再問問看。"][i];
-  else if (S.step === ROUTE_LEN - 1) text = ["剛剛有個鬼鬼祟祟的人跑過去，手上抱著好大一包東西！", "快！那個人就躲在附近！", "我看到那個人往轉角跑了，現在去還追得到！"][i];
+  else if (S.step === S.route.length - 1) text = ["剛剛有個鬼鬼祟祟的人跑過去，手上抱著好大一包東西！", "快！那個人就躲在附近！", "我看到那個人往轉角跑了，現在去還追得到！"][i];
   else {
     const p = S.plans[S.step];
     text = p.lines[i];
     if (i === p.traitAt) S.traits[p.trait] = SUSPECTS[S.suspect][p.trait];
-    else if (!S.heard.includes(text)) S.heard.push(text);
-    if (text.includes("國旗") && i !== p.traitAt) { flag = S.route[S.step + 1]; (S.heardFlag || (S.heardFlag = {}))[text] = flag; }
+    const notes = p.notes ? p.notes[i] : (i === p.traitAt ? [] : [text]);
+    for (const n of notes) {
+      if (!S.heard.includes(n)) S.heard.push(n);
+      if (n.includes("國旗")) { flag = S.route[S.step + 1]; (S.heardFlag || (S.heardFlag = {}))[n] = flag; }
+    }
   }
   S.said = { who: whoName(S.at, i), text, i };
   if (!S.chat) S.chat = [];
@@ -1853,11 +1996,18 @@ function fly(to) {
   if (S.hours <= 0) { S.mode = "timeout"; render(); return; }
   if (to === S.route[S.step + 1] && S.at === S.route[S.step]) { S.step++; S.heard = []; }
   S.at = to; S.path.push(to);
-  if (S.step === ROUTE_LEN - 1 && S.at === S.route[S.step]) S.mode = "final"; else S.mode = "city";
+  if (S.step === S.route.length - 1 && S.at === S.route[S.step]) S.mode = "final"; else S.mode = "city";
   render();
 }
 
 
+function setWarrant(i) { if (S.mode === "final") return; S.warrant = S.warrant === i ? null : i; render(); }
+function arrestWarrant() {
+  if (S.warrant === null || S.warrant === undefined) { S.mode = "noWarrant"; render(); return; }
+  S.mode = S.warrant === S.suspect ? "win" : "wrongArrest";
+  if (S.mode === "win") S.solved++;
+  render();
+}
 function arrest(i) {
   if (!S.traits.hat && !S.traits.hobby && !S.traits.pet) { S.msg = "先問問附近的人，收集嫌犯的長相線索吧！"; render(); return; }
   S.mode = i === S.suspect ? "win" : "wrongArrest";
@@ -1905,12 +2055,14 @@ function render() {
   const c = CITIES[S.at];
   const start = CITIES[S.route[0]];
   $("caseName").textContent = `${start.stolen}失竊案`;
-  $("rank").textContent = RANKS[Math.min(S.solved, RANKS.length - 1)];
+  $("rank").textContent = `${LEVEL_NAME[S.level || "easy"]}・${RANKS[Math.min(S.solved, RANKS.length - 1)]}`;
+  $("passTitle").textContent = `${LEVEL_NAME[S.level || "easy"]}護照`;
   $("stampCount").textContent = `${Object.keys(S.stamps).length} / ${Object.keys(CITIES).length}`;
   const h = Math.max(0, S.hours);
   $("clock").textContent = `${fmtH(h)} 小時`;
   $("clockSub").textContent = `現在 ${clockText(S.t)}`;
-  $("barClock").textContent = `剩 ${fmtH(h)} 小時`;
+  $("barClock").textContent = `剩 ${fmtH(h)} 小時・第 ${Math.min(S.step + 1, S.route.length)} / ${S.route.length} 站`;
+  renderWarrant();
   const canFly = S.mode === "city";
   $("gateBtn").disabled = !canFly;
   $("gateLabel").textContent = canFly ? (S.at === S.route[S.step] ? "選下一站" : "飛回上一站") : (S.mode === "final" ? "嫌犯就在這裡" : "還不能出發");
@@ -1920,6 +2072,8 @@ function render() {
   if (S.mode === "intro") {
     html = photoFig(S.route[0]) + `<p class="eyebrow">緊急案件 · ${esc(start.country)}</p>
       <h2>${esc(start.name)}的${esc(start.stolen)}不見了！</h2>
+      <div class="levels">${["easy", "medium"].map(l => `<button class="lvl ${S.level === l ? "on" : ""}" onclick="setLevel('${l}')" aria-pressed="${S.level === l}">
+        <b>${LEVEL_NAME[l]}</b><small>${l === "easy" ? "小三起・線索很直接・5 站" : "小六起・要把好幾條線索合起來想・7 站・要開逮捕令"}</small></button>`).join("")}</div>
       <p>怪盜團「影子貓」又出手了。我們只知道，嫌犯是怪盜團的其中一個人，而且已經帶著寶物逃到別的國家。</p>
       <p>你的任務：在 <b>${S.budget} 小時</b>內，跟著目擊者的線索追到嫌犯，認出是誰，然後逮捕他！</p>
       <ul class="notes">
@@ -1927,6 +2081,8 @@ function render() {
         <li>想看更多？按「打開街景」，就能用 Google 街景在那座城市裡走走看。</li>
         <li>尋寶挑戰：每座城市的關卡都不一樣，有拼圖、說你好、換錢、找洲、是非題和文化問答。過關就能在護照蓋一個印章。</li>
         <li>記下嫌犯的帽子、興趣和寵物，最後才抓得到對的人。</li>
+        ${S.level === "medium" ? `<li><span><b>中級：</b>每一條線索都只能排除一部分城市，要把同一站問到的線索合起來，才知道嫌犯去了哪裡。</span></li>
+        <li><span><b>中級：</b>嫌犯會逃 ${S.route.length - 1} 段。在抵達最後一站之前，記得打開偵探筆記本開好逮捕令，不然抓到人也沒用。</span></li>` : ""}
         <li>怪盜也只能搭一般的飛機，一次最遠大約飛 ${MAX_HOP_KM.toLocaleString()} 公里。嫌犯逃完全程要 ${fmtH(S.thief)} 小時，你要追得比他快！</li>
       </ul>
       <div class="gang"><div class="me">${detectiveAv("lg bounce")}<small>你：小偵探</small></div>
@@ -1934,6 +2090,13 @@ function render() {
       <div class="actions"><button class="btn" onclick="S.mode='city';render()">出發去${esc(start.name)}</button></div>`;
   } else if (S.mode === "city") {
     html = cityPanel(c) + flyPanel();
+  } else if (S.mode === "final" && S.level === "medium") {
+    const w = S.warrant;
+    html = cityPanel(c) + `<div class="quiz"><p class="eyebrow">逮捕令</p><h3>嫌犯就在${esc(c.name)}！</h3>
+      ${w === null || w === undefined
+        ? `<p>糟糕，你還沒有開逮捕令。到了最後一站才開已經來不及了。</p><div class="actions"><button class="btn" onclick="arrestWarrant()">試試看抓人</button></div>`
+        : `<div class="warrantcard">${suspectAv(w, "md")}<div><small>你的逮捕令寫的是</small><b>${esc(SUSPECTS[w].name)}</b><small>${esc(SUSPECTS[w].hat)} · ${esc(SUSPECTS[w].hobby)} · ${esc(SUSPECTS[w].pet)}</small></div></div>
+           <div class="actions"><button class="btn takeoff" style="width:auto" onclick="arrestWarrant()">用逮捕令逮捕！</button></div>`}</div>`;
   } else if (S.mode === "final") {
     const known = S.traits;
     html = cityPanel(c) + `<div class="quiz"><p class="eyebrow">逮捕令</p><h3>嫌犯就在${esc(c.name)}！是哪一個人？</h3>
@@ -1946,6 +2109,7 @@ function render() {
     const s = SUSPECTS[S.suspect];
     const titles = { win: ["抓到了！", `你在${c.name}逮捕了${s.name}，${start.stolen}已經送回${start.name}。`],
                      wrongArrest: ["抓錯人了！", `真正的嫌犯是${s.name}（${s.hat}、${s.hobby}、${s.pet}），趁亂逃走了。`],
+                     noWarrant: ["沒有逮捕令……", `嫌犯${s.name}就在眼前，但你沒有逮捕令，只能看著他帶著${start.stolen}溜走。下次要在最後一站之前，先在偵探筆記本開好逮捕令！`],
                      timeout: ["時間到了……", `嫌犯${s.name}帶著${start.stolen}溜走了。下次記得先看清楚線索再搭飛機！`] }[S.mode];
     html = `<div class="banner">${S.mode === "win" ? `<div class="duo">${detectiveAv("lg")}${suspectAv(S.suspect, "lg")}</div>` : suspectAv(S.suspect, "lg")}<h2>${esc(titles[0])}</h2><p>${esc(titles[1])}</p>
       <p>這次你走過：${S.path.map(id => esc(CITIES[id].name)).join(" → ")}</p>
@@ -1982,7 +2146,7 @@ function render() {
   if (FLIGHT_OPEN && !gateOptions().length) { FLIGHT_OPEN = false; SEL = null; $("flightModal").hidden = true; syncOverlay(); }
   placeMap();
   if (FLIGHT_OPEN) $("flSide").innerHTML = flightSide();
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* private window: play without saving */ }
+  try { localStorage.setItem(saveKey(S.level), JSON.stringify(S)); localStorage.setItem(LEVEL_KEY, S.level || "easy"); } catch (e) { /* private window: play without saving */ }
   $("credits").innerHTML = Object.keys(PHOTOS).map(id => { const p = PHOTOS[id];
     return `<li>${esc(CITIES[id].treasure)}：${esc(p.artist)}，<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>，<a href="${p.page}" target="_blank" rel="noopener">原圖</a></li>`; }).join("");
 }
@@ -2024,17 +2188,32 @@ window.claude?.hot?.snapshot?.(() => ({ S }));
 const MAP_CARD = $("mapCard");
 initMapGestures();
 // progress (case in hand, passport, discoveries) is kept in this browser only
-const SAVE_KEY = "worldDetective.v1";
-function loadSaved() {
-  try { const v = JSON.parse(localStorage.getItem(SAVE_KEY)); return v && v.budget && v.route.every(id => CITIES[id]) ? v : null; } catch (e) { return null; }
+// each level keeps its own case, passport and record (the easy key is the original one, so old saves carry over)
+const LEVEL_KEY = "worldDetective.level";
+const saveKey = level => level === "medium" ? "worldDetective.medium.v1" : "worldDetective.v1";
+function loadSaved(level) {
+  try {
+    const v = JSON.parse(localStorage.getItem(saveKey(level)));
+    if (!(v && v.budget && v.route.every(id => CITIES[id]))) return null;
+    v.level = v.level || "easy";
+    return v;
+  } catch (e) { return null; }
+}
+function setLevel(l) {
+  if (l === (S.level || "easy")) return;
+  freshView();
+  const saved = loadSaved(l);
+  if (saved) { S = saved; render(); } else newCase(null, l);
 }
 const boot = d => {
-  const saved = d && d.S && d.S.budget ? d.S : loadSaved();
+  let pref = "easy";
+  try { pref = localStorage.getItem(LEVEL_KEY) || "easy"; } catch (e) { /* no storage */ }
+  const saved = d && d.S && d.S.budget ? d.S : loadSaved(pref);
   if (saved) {
     S = saved;
     for (const id of NO_PUZZLE) if (S.ch && S.ch[id] && S.ch[id].kind === "puzzle" && !S.ch[id].done) delete S.ch[id];
     render();
-  } else newCase();
+  } else newCase(null, pref);
 };
 window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
 </script>
