@@ -73,6 +73,55 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .cnote p { margin: 0; font-size: 15px; line-height: 1.65 }
 .ctag { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--accent) }
 .k-culture { background: #b0477e }
+/* pinned toolbar: the four things a detective reaches for, always one tap away */
+.toolbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 8px; box-shadow: 0 6px 16px -12px rgba(0,0,0,.45) }
+.toolbar .passbtn { padding: 6px 12px }
+.toolbar .passbtn:disabled { opacity: .45; cursor: not-allowed }
+.toolbar #gateBtn:not(:disabled) { border-color: var(--accent) }
+.toolbar #gateBtn:not(:disabled) svg { color: var(--accent) }
+.barclock { margin-left: auto; font-family: var(--f-data); font-weight: 700; font-size: 15px; color: var(--ink); padding: 0 6px; font-variant-numeric: tabular-nums }
+@media (max-width: 640px) {
+  .toolbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 6px }
+  .toolbar .passbtn { flex-direction: column; gap: 2px; padding: 6px 2px; text-align: center; justify-content: center }
+  .toolbar .passbtn svg { width: 22px; height: 22px }
+  .toolbar .passbtn > span { justify-items: center }
+  .toolbar .passbtn b { font-size: 12px; letter-spacing: 0; color: var(--ink) }
+  .toolbar .passbtn #noteCount, .toolbar .passbtn #stampCount, .toolbar .passbtn .armlabel { font-size: 11px; font-weight: 500; color: var(--muted) }
+  .barclock { grid-column: 1 / -1; margin: 0; text-align: center; font-size: 13px }
+}
+
+/* culture cards: one swipeable row everywhere; arrows for mouse users */
+.carousel { position: relative }
+.carousel .culture { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+  padding: 2px 2px 10px; scrollbar-width: thin; scroll-padding-inline: 2px }
+.carousel .culture { align-items: flex-start }
+.carousel .cnote { flex: 0 0 calc((100% - 36px) / 3.3); scroll-snap-align: start; min-width: 0 }
+@media (max-width: 900px) { .carousel .cnote { flex-basis: calc((100% - 24px) / 2.3) } }
+.carr { position: absolute; top: 90px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--paper); color: var(--ink); font-size: 26px; line-height: 1; display: grid; place-items: center; padding: 0 0 3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2) }
+.carr:hover { background: var(--accent); color: #fff; border-color: var(--accent) }
+.carr.prev { left: -10px } .carr.next { right: -10px }
+@media (max-width: 640px) {
+  .carousel .cnote { flex-basis: 82%; scroll-snap-align: center }
+  .carr { display: none }
+  .swipehint { display: block; font-size: 12px; color: var(--muted); margin: -4px 0 8px }
+}
+
+/* city profile */
+.ptiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px }
+.ptile { background: var(--chip); border-radius: 10px; padding: 8px 12px; display: grid; gap: 2px; min-width: 0 }
+.ptile > span { font-size: 12px; font-weight: 700; color: var(--muted) }
+.ptile b { font-size: 16px; line-height: 1.35; overflow-wrap: anywhere }
+.ptile small { font-size: 12px; color: var(--muted) }
+.locked { font-size: 13px; font-weight: 500; color: var(--muted); font-style: italic }
+.pfacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px }
+@media (max-width: 640px) { .pfacts { grid-template-columns: 1fr } }
+.pfacts p { margin: 0; font-size: 15px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px }
+.pfacts b { display: block; font-size: 12px; color: var(--accent); letter-spacing: .06em }
+.flagq { display: inline-grid; place-items: center; font-weight: 900; font-size: 26px; color: var(--muted); background: var(--chip); height: 48px }
+
 /* culture cards: two columns on wide screens, a swipeable row of cards on phones */
 .cnote.hasphoto { padding: 0; overflow: hidden; display: grid; grid-template-rows: auto 1fr }
 .cnote .ctext { padding: 10px 14px 12px; min-width: 0 }
@@ -83,12 +132,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 .ccredit { display: block; margin-top: 6px; font-size: 11px; line-height: 1.4; color: var(--muted) }
 .ccredit a { color: inherit }
 .swipehint { display: none }
-@media (max-width: 640px) {
-  .culture { display: flex !important; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
-    margin-inline: -4px; padding: 2px 4px 10px; scrollbar-width: thin }
-  .culture .cnote { flex: 0 0 82%; scroll-snap-align: center }
-  .swipehint { display: block; font-size: 12px; color: var(--muted); margin: -4px 0 8px }
-}
 .lightbox .sheet { width: min(960px, 100%); gap: 10px }
 .lightbox img { display: block; width: 100%; max-height: 70vh; object-fit: contain; background: #000; border-radius: 10px }
 .lightbox h2 { font-size: 22px }
@@ -359,12 +402,16 @@ aside.wrap { margin: 0; width: 100% }
       <div class="brand">環球小偵探<small>WORLD DETECTIVE AGENCY</small></div>
       <div class="field"><b>案件</b><span id="caseName">—</span></div>
       <div class="field"><b>偵探</b><span id="rank">見習偵探</span></div>
-      <button class="passbtn" id="noteBtn" onclick="openNotes(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span><b>偵探筆記本</b><span id="noteCount">0 條線索</span></span><i class="newdot" id="noteDot" hidden></i></button>
-      <button class="passbtn" id="restartBtn" onclick="armed(this, restartCase)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span><b>重新開始</b><span class="armlabel">換新案件</span></span></button>
-      <button class="passbtn" id="passBtn" onclick="openPass(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 16h6"/></svg><span><b>我的護照</b><span id="stampCount">0</span></span></button>
     </div>
     <div class="stub"><b>剩餘時間</b><div class="clock" id="clock">—</div><small class="clocksub" id="clockSub"></small></div>
   </header>
+  <nav class="toolbar" aria-label="偵探工具">
+    <button class="passbtn" id="gateBtn" onclick="goGate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 13.5l19-8-6 15-3-6-6-1z"/></svg><span><b>登機門</b><span class="armlabel" id="gateLabel">選下一站</span></span></button>
+    <button class="passbtn" id="noteBtn" onclick="openNotes(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span><b>偵探筆記本</b><span id="noteCount">0 條線索</span></span><i class="newdot" id="noteDot" hidden></i></button>
+    <button class="passbtn" id="passBtn" onclick="openPass(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 16h6"/></svg><span><b>我的護照</b><span id="stampCount">0</span></span></button>
+    <button class="passbtn" id="restartBtn" onclick="armed(this, restartCase)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span><b>重新開始</b><span class="armlabel">換新案件</span></span></button>
+    <span class="barclock" id="barClock" aria-hidden="true"></span>
+  </nav>
 
   <div id="mapHold"><section class="card mapcard" id="mapCard" hidden>
     <div class="maphead"><p class="eyebrow" style="margin:0">追蹤路線</p>
@@ -1085,6 +1132,16 @@ function armed(el, action) {
   el.classList.add("arming");
   el.dataset.armed = setTimeout(() => { delete el.dataset.armed; el.classList.remove("arming"); label.textContent = el.dataset.label; }, 4000);
 }
+function goGate() {
+  const g = $("gate");
+  if (!g) return;
+  const bar = document.querySelector(".toolbar").getBoundingClientRect().height;
+  window.scrollTo({ top: g.getBoundingClientRect().top + window.scrollY - bar - 12, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+function scrollCulture(btn, dir) {
+  const row = btn.parentElement.querySelector(".culture");
+  row.scrollBy({ left: dir * row.clientWidth * 0.85, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
 function freshView() { CLEAN_PHOTO = false; PEEK = false; MV = { ...MAP_FULL }; window.scrollTo(0, 0); }
 // give up on this case; the passport, visited cities and discoveries carry over
 function restartCase() { freshView(); newCase(S); }
@@ -1396,7 +1453,7 @@ function regionPanel(id) {
           <div><dt>位置</dt><dd>${c.lat >= 0 ? "北" : "南"}半球・${c.lng >= 0 ? "東" : "西"}經 ${Math.abs(c.lng).toFixed(1)} 度</dd></div>
           <div><dt>離台北</dt><dd>${id === "taipei" ? "就是這裡！" : `${dTaipei.toLocaleString()} 公里，飛機約 ${fmtH(tripH("taipei", id))} 小時`}</dd></div>
           <div><dt>時差</dt><dd>${tzText(id)}<small>（不算夏令時間）</small></dd></div>
-          <div><dt>所在洲</dt><dd>${esc(EXTRA[id].cont)}${EXTRA[id].cont2 ? "、" + esc(EXTRA[id].cont2) : ""}</dd></div>
+          <div><dt>所在洲</dt><dd>${spoils(id, "cont") ? LOCKED : esc(EXTRA[id].cont) + (EXTRA[id].cont2 ? "、" + esc(EXTRA[id].cont2) : "")}</dd></div>
         </dl>
       </div>
     </div></div>`;
@@ -1510,13 +1567,73 @@ function culturePanel(id) {
   const shots = CULTURE[id].filter((_, i) => CULTURE_PHOTOS[id + "-" + i]).length;
   return `<div class="quiz"><p class="eyebrow">文化圖鑑 · ${esc(CITIES[id].country)}${shots ? ` · ${shots} 張照片，點照片可以放大` : ""}</p>
     <p class="swipehint">← 左右滑動，看下一張卡片 →</p>
+    <div class="carousel"><button class="carr prev" onclick="scrollCulture(this, -1)" aria-label="上一張卡片">‹</button>
+    <button class="carr next" onclick="scrollCulture(this, 1)" aria-label="下一張卡片">›</button>
     <div class="culture">${CULTURE[id].map(([tag, title, text], i) => {
       const p = CULTURE_PHOTOS[id + "-" + i];
       return `<article class="cnote ${p ? "hasphoto" : ""}">
         ${p ? `<button class="cphoto" onclick="openPhoto('c:${id}:${i}')" aria-label="放大照片：${esc(title)}"><img src="${p.src}" alt="${esc(title)}" loading="lazy"></button>` : ""}
         <div class="ctext"><span class="ctag">${esc(tag)}</span><h4>${esc(title)}</h4><p>${esc(text)}</p>
         ${p ? `<small class="ccredit">${photoCredit(p)}</small>` : ""}</div></article>`;
-    }).join("")}</div></div>`;
+    }).join("")}</div></div></div>`;
+}
+
+// ---------- city profile: language, money, capital, people, roads ----------
+// [languages, currency name, symbol, code, capital, population (rounded), drives on, language fact, money fact]
+const PROFILE = {
+  tokyo: ["日語", "日圓", "¥", "JPY", "東京", "約 1 億 2,300 萬人", "左", "日文有三種文字：平假名、片假名和漢字，常常混在同一個句子裡。", "5 圓和 50 圓的硬幣中間有一個圓洞。"],
+  paris: ["法語", "歐元", "€", "EUR", "巴黎", "約 6,800 萬人", "右", "法語有很多字的最後一個字母不發音，像 Paris 的 s 就不唸。", "歐元硬幣一面是各國共用的圖案，另一面每個國家都不一樣。"],
+  giza: ["阿拉伯語", "埃及鎊", "E£", "EGP", "開羅", "約 1 億 1,000 萬人", "右", "阿拉伯文是從右往左寫的。", "埃及鎊的鈔票一面印阿拉伯文，另一面印英文。"],
+  rome: ["義大利語", "歐元", "€", "EUR", "羅馬", "約 5,900 萬人", "右", "義大利語和西班牙語很像，兩國的人常常聽得懂對方一部分的話。", "義大利的 1 歐元硬幣上，印著達文西畫的〈維特魯威人〉。"],
+  sydney: ["英語", "澳幣", "A$", "AUD", "坎培拉（不是雪梨喔！）", "約 2,700 萬人", "左", "澳洲人很愛把字縮短，例如早餐 breakfast 叫 brekkie。", "澳洲是世界上最早使用塑膠鈔票的國家，鈔票不怕水。"],
+  rio: ["葡萄牙語", "雷亞爾", "R$", "BRL", "巴西利亞", "約 2 億 1,000 萬人", "右", "說「謝謝」時，男生說 obrigado，女生說 obrigada。", "雷亞爾的鈔票背面印著巴西的動物，像海龜、金剛鸚鵡和美洲豹。"],
+  nyc: ["英語", "美元", "US$", "USD", "華盛頓特區", "約 3 億 4,000 萬人", "右", "紐約有很多人在家裡說英語以外的語言，是全世界語言最多的城市之一。", "美元鈔票不管面額大小，尺寸幾乎都一樣。"],
+  london: ["英語", "英鎊", "£", "GBP", "倫敦", "約 6,900 萬人", "左", "英式英語和美式英語有些字不一樣，像薯條英國叫 chips，美國叫 fries。", "英鎊鈔票上印著國王的頭像，以前印的是女王。"],
+  seoul: ["韓語", "韓元", "₩", "KRW", "首爾", "約 5,200 萬人", "右", "韓文字母會拼成一個個方塊字，學會基本的 24 個字母就能拼出字來。", "1 萬韓元的鈔票上，印的是發明韓文的世宗大王。"],
+  bangkok: ["泰語", "泰銖", "฿", "THB", "曼谷", "約 7,000 萬人", "左", "泰語有 5 種聲調，同一個音用不同聲調唸，意思就不一樣。", "泰銖鈔票上印著國王的肖像，所以踩到錢是很不禮貌的事。"],
+  agra: ["印地語、英語等 22 種", "印度盧比", "₹", "INR", "新德里", "約 14 億人", "左", "印度的憲法列出 22 種語言，很多人會說兩、三種語言。", "盧比鈔票上印著甘地的肖像，還用十幾種文字寫著面額。"],
+  mexico: ["西班牙語", "墨西哥披索", "$", "MXN", "墨西哥城", "約 1 億 3,000 萬人", "右", "墨西哥是全世界說西班牙語的人最多的國家。", "墨西哥披索的符號也是「$」，和美元一樣，所以要看清楚是哪一種錢。"],
+  machu: ["西班牙語、克丘亞語", "索爾", "S/", "PEN", "利馬", "約 3,400 萬人", "右", "克丘亞語是印加帝國的語言，現在還有幾百萬人在說。", "「索爾（sol）」在西班牙語裡就是「太陽」的意思。"],
+  capetown: ["12 種官方語言", "南非蘭特", "R", "ZAR", "有三個首都：普利托利亞、開普敦、布隆泉", "約 6,300 萬人", "左", "很多南非人從小就會說好幾種語言，像祖魯語、科薩語和英語。", "蘭特的鈔票印著曼德拉，背面是「五大動物」：獅子、豹、大象、犀牛和水牛。"],
+  taipei: ["華語、台語、客語、原住民族語", "新臺幣", "NT$", "TWD", "台北", "約 2,300 萬人", "右", "台灣除了華語，還有台語、客語和十幾種原住民族語言。", "1,000 元鈔票的背面是玉山和帝雉。"],
+  singapore: ["英語、華語、馬來語、淡米爾語", "新加坡元", "S$", "SGD", "新加坡（整個國家就是一座城市）", "約 600 萬人", "左", "新加坡人說的英語叫 Singlish，句子最後常常加一個 lah。", "新加坡的鈔票上都印著第一任總統尤索夫的肖像。"],
+  siemreap: ["高棉語", "柬埔寨瑞爾（也常用美元）", "៛", "KHR", "金邊", "約 1,800 萬人", "右", "高棉文的字母非常多，是世界上字母最多的文字之一。", "在柬埔寨買東西常常美元和瑞爾一起用，找零的小錢會找瑞爾。"],
+  dubai: ["阿拉伯語", "阿聯迪拉姆", "د.إ", "AED", "阿布達比", "約 1,000 萬人", "右", "杜拜大部分的居民是從其他國家來工作的，所以英語在街上也很通用。", "1 迪拉姆可以分成 100 費爾斯。"],
+  istanbul: ["土耳其語", "土耳其里拉", "₺", "TRY", "安卡拉（不是伊斯坦堡喔！）", "約 8,500 萬人", "右", "土耳其文以前用阿拉伯字母書寫，1928 年才改成拉丁字母。", "土耳其里拉的鈔票上，都印著建國之父凱末爾的肖像。"],
+  nairobi: ["史瓦希里語、英語", "肯亞先令", "KSh", "KES", "奈洛比", "約 5,600 萬人", "左", "史瓦希里語的 safari 原本的意思就是「旅行」。", "肯亞新版鈔票的背面，印著獅子、大象等「五大動物」。"],
+  marrakech: ["阿拉伯語、柏柏爾語", "摩洛哥迪拉姆", "د.م.", "MAD", "拉巴特", "約 3,700 萬人", "右", "摩洛哥人說話時，常常在一句話裡混著阿拉伯語、法語和柏柏爾語。", "1 迪拉姆可以分成 100 生丁。"],
+  athens: ["希臘語", "歐元", "€", "EUR", "雅典", "約 1,000 萬人", "右", "「字母 alphabet」這個字，來自希臘字母的前兩個：alpha 和 beta。", "希臘的 1 歐元硬幣上有一隻貓頭鷹，那是智慧女神雅典娜的象徵。"],
+  barcelona: ["西班牙語（當地也說加泰隆尼亞語）", "歐元", "€", "EUR", "馬德里", "約 4,900 萬人", "右", "西班牙語的 ñ 是一個獨立的字母，像 España 裡就有。", "西班牙的 1 歐元硬幣上，印著西班牙國王的頭像。"],
+  reykjavik: ["冰島語", "冰島克朗", "kr", "ISK", "雷克雅維克", "約 39 萬人", "右", "冰島語一千多年來變化很少，冰島人到現在還讀得懂古代的傳說故事。", "冰島的硬幣上印著鱈魚、海豚和螃蟹等海洋生物。"],
+  auckland: ["英語、毛利語、紐西蘭手語", "紐西蘭元", "NZ$", "NZD", "威靈頓（不是奧克蘭喔！）", "約 530 萬人", "左", "很多紐西蘭地名來自毛利語，像奧克蘭的毛利名字是 Tāmaki Makaurau。", "5 元鈔票上印著希拉蕊爵士，他是最早登上聖母峰頂的人之一。"],
+  buenos: ["西班牙語", "阿根廷披索", "$", "ARS", "布宜諾斯艾利斯", "約 4,600 萬人", "右", "阿根廷人說西班牙語時，「你」常常說 vos，而不是 tú。", "阿根廷的新鈔票上印著當地的動物，像鯨魚、美洲豹和兀鷹。"]
+};
+
+// facts that would hand over the answer to this city's treasure challenge stay covered until it is done
+function spoils(id, kind) {
+  const ch = S.ch && S.ch[id];
+  const k = ch ? ch.kind : (S.kinds && S.kinds[id]);
+  return k === kind && !(ch && (ch.picked !== undefined || ch.done));
+}
+const LOCKED = `<span class="locked">完成下面的尋寶挑戰就會揭曉</span>`;
+
+function profilePanel(id) {
+  const [lang, money, sym, code, capital, people, side, langFact, moneyFact] = PROFILE[id];
+  const tile = (label, value, sub = "") => `<div class="ptile"><span>${label}</span><b>${value}</b>${sub ? `<small>${sub}</small>` : ""}</div>`;
+  const greet = EXTRA[id].greet;
+  return `<div class="quiz"><p class="eyebrow">城市小檔案 · ${esc(CITIES[id].name)}</p>
+    <div class="ptiles">
+      ${tile("說什麼話", esc(lang))}
+      ${tile("見面打招呼", spoils(id, "greet") ? LOCKED : esc(greet[0]), spoils(id, "greet") ? "" : esc(greet[1]))}
+      ${tile("用什麼錢", spoils(id, "money") ? LOCKED : esc(money), spoils(id, "money") ? "" : `符號 ${esc(sym)}・代碼 ${esc(code)}`)}
+      ${tile("首都", esc(capital))}
+      ${tile("全國人口", esc(people))}
+      ${tile("車子靠哪邊開", `靠${side}邊`, side === "左" ? "和台灣相反，過馬路先看右邊" : "和台灣一樣")}
+    </div>
+    <div class="pfacts">
+      <p><b>語言小知識</b>${esc(langFact)}</p>
+      <p><b>錢幣小知識</b>${spoils(id, "money") ? "完成尋寶挑戰就會揭曉。" : esc(moneyFact)}</p>
+    </div></div>`;
 }
 
 // ---------- state ----------
@@ -1605,7 +1722,7 @@ function cityPanel(c, onRoute) {
   const sc = SCENES[S.at];
   return (sc ? "" : photoFig(S.at)) + `
     <div class="city-head">
-      <div class="namebox">${flagImg(S.at, "head")}<div><p class="eyebrow">你現在在 · ${esc(c.country)}・${both(NAMES[S.at][2], NAMES[S.at][3])}</p><h2>${esc(c.name)}<span class="en">${both(NAMES[S.at][0], NAMES[S.at][1])}</span></h2><div class="coords">${coord(c)}</div></div></div>
+      <div class="namebox">${spoils(S.at, "flag") ? `<span class="flag head flagq" title="完成認國旗挑戰就會揭曉">?</span>` : flagImg(S.at, "head")}<div><p class="eyebrow">你現在在 · ${esc(c.country)}・${both(NAMES[S.at][2], NAMES[S.at][3])}</p><h2>${esc(c.name)}<span class="en">${both(NAMES[S.at][0], NAMES[S.at][1])}</span></h2><div class="coords">${coord(c)}</div></div></div>
       <div class="actions" style="margin:0"><a class="sv" href="${svUrl(c)}" target="_blank" rel="noopener">${PIN}打開街景</a>
       <a class="btn ghost" style="text-decoration:none" href="${mapUrl(c)}" target="_blank" rel="noopener">Google 地圖</a></div>
     </div>
@@ -1615,19 +1732,19 @@ function cityPanel(c, onRoute) {
       <button class="wbtn ${S.asked[S.at + ":" + i] ? "done" : ""} ${S.said && S.said.i === i ? "talking" : ""}" onclick="ask(${i})">${avatar(witnessLook(S.at, i), "sm")}<span class="wtxt"><small>${S.asked[S.at + ":" + i] ? "問過了" : "去問問"}</small><span>${esc(p)}</span></span></button>`).join("")}
     </div>`}
     ${chatPanel()}
-    ` + regionPanel(S.at) + culturePanel(S.at) + challengePanel(S.at);
+    ` + regionPanel(S.at) + profilePanel(S.at) + culturePanel(S.at) + challengePanel(S.at);
 }
 
 function flyPanel() {
   const onRoute = S.at === S.route[S.step];
   if (!onRoute) {
     const back = CITIES[S.route[S.step]];
-    return `<div class="quiz"><p class="eyebrow">登機門</p><h3>線索斷了……要回去嗎？</h3>
+    return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p><h3>線索斷了……要回去嗎？</h3>
       <div class="dests"><button class="dest" onclick="fly('${S.route[S.step]}')"><span><b>飛回${esc(back.name)}</b><br><small>${esc(back.country)}</small></span>${gate(S.at, S.route[S.step])}</button></div>
     <div class="gatemap"><button class="btn ghost" onclick="toggleMap()" aria-expanded="${MAP_OPEN}">${MAP_OPEN ? "收起地圖" : "看地圖：這些城市在哪裡？"}</button><div id="mapSlot"></div></div></div>`;
   }
   const opts = shuffleStable(S.plans[S.step].dests);
-  return `<div class="quiz"><p class="eyebrow">登機門</p><h3>根據線索，嫌犯飛去哪裡了？</h3>
+  return `<div class="quiz" id="gate"><p class="eyebrow">登機門</p><h3>根據線索，嫌犯飛去哪裡了？</h3>
     <div class="dests">${opts.map(id => { const c = CITIES[id]; return `
       <button class="dest" onclick="fly('${id}')"><span><b>${esc(c.name)}</b> <small>${esc(NAMES[id][0])}</small><br><small>${esc(c.country)}・${esc(NAMES[id][2])}</small></span>${gate(S.at, id)}</button>`; }).join("")}</div>
     <p class="hint">噴射客機每小時大約飛 ${CRUISE_KMH} 公里，再加上起飛、降落和轉車的時間。</p>
@@ -1645,6 +1762,10 @@ function render() {
   const h = Math.max(0, S.hours);
   $("clock").textContent = `${fmtH(h)} 小時`;
   $("clockSub").textContent = `現在 ${clockText(S.t)}`;
+  $("barClock").textContent = `剩 ${fmtH(h)} 小時`;
+  const canFly = S.mode === "city";
+  $("gateBtn").disabled = !canFly;
+  $("gateLabel").textContent = canFly ? (S.at === S.route[S.step] ? "選下一站" : "飛回上一站") : (S.mode === "final" ? "嫌犯就在這裡" : "還不能出發");
   $("clock").classList.toggle("low", h <= 12);
 
   let html = "";
@@ -1706,7 +1827,7 @@ function render() {
     const c = CITIES[id], f = (S.found[id] || []).length, total = SCENES[id] ? SCENES[id].spots.length : 0;
     const sub = S.visited[id] && total ? `<small>秘密 ${f}/${total}</small>` : "";
     if (S.stamps[id]) return `<div class="stampbox got">${flagImg(id, "stamp")}${esc(c.name)}<em>${esc(c.treasure)}</em>${sub}</div>`;
-    return `<div class="stampbox ${S.visited[id] ? "seen" : ""}">${S.visited[id] ? flagImg(id, "stamp") : ""}${esc(c.name)}${S.visited[id] ? "<em>去過了</em>" : ""}${sub}</div>`;
+    return `<div class="stampbox ${S.visited[id] ? "seen" : ""}">${S.visited[id] && !spoils(id, "flag") ? flagImg(id, "stamp") : ""}${esc(c.name)}${S.visited[id] ? "<em>去過了</em>" : ""}${sub}</div>`;
   }).join("");
 
   drawMap();
