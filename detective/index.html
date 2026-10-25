@@ -215,8 +215,13 @@ aside.wrap { margin: 0; width: 100% }
 .passbtn svg { width: 26px; height: 26px; color: var(--stamp) }
 .passbtn > span { display: grid; line-height: 1.25 }
 .passbtn b { font-size: 11px; letter-spacing: .14em; color: var(--muted) }
-.passbtn #stampCount, .passbtn #noteCount { font-weight: 700; font-size: 17px }
+.passbtn #stampCount, .passbtn #noteCount, .passbtn .armlabel { font-weight: 700; font-size: 17px }
 .passbtn { position: relative }
+.passbtn.arming { border-color: var(--stamp); background: var(--paper) }
+.passbtn.arming .armlabel { color: var(--stamp) }
+.resetrow { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 14px }
+.btn.danger { color: var(--stamp); border-color: var(--stamp) }
+.btn.danger.arming { background: var(--stamp); color: #fff }
 .newdot { position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--stamp); border: 2px solid var(--paper) }
 .newdot[hidden] { display: none }
 .modal { position: fixed; inset: 0; z-index: 50; background: rgba(10, 20, 30, .55); display: grid; place-items: center; padding: 16px }
@@ -352,6 +357,7 @@ aside.wrap { margin: 0; width: 100% }
       <div class="field"><b>案件</b><span id="caseName">—</span></div>
       <div class="field"><b>偵探</b><span id="rank">見習偵探</span></div>
       <button class="passbtn" id="noteBtn" onclick="openNotes(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h11a2 2 0 0 1 2 2v16H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span><b>偵探筆記本</b><span id="noteCount">0 條線索</span></span><i class="newdot" id="noteDot" hidden></i></button>
+      <button class="passbtn" id="restartBtn" onclick="armed(this, restartCase)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span><b>重新開始</b><span class="armlabel">換新案件</span></span></button>
       <button class="passbtn" id="passBtn" onclick="openPass(true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 16h6"/></svg><span><b>我的護照</b><span id="stampCount">0</span></span></button>
     </div>
     <div class="stub"><b>剩餘時間</b><div class="clock" id="clock">—</div><small class="clocksub" id="clockSub"></small></div>
@@ -391,6 +397,8 @@ aside.wrap { margin: 0; width: 100% }
         <button class="btn ghost" onclick="openPass(false)">關閉</button></div>
       <div class="stats" id="passStats"></div>
       <div class="passport" id="passport"></div>
+      <div class="resetrow"><p class="hint" style="margin:0">清除後，護照印章、去過的城市、照片秘密和破案紀錄都會歸零。</p>
+        <button class="btn ghost danger" id="wipeBtn" onclick="armed(this, wipeAll)"><span class="armlabel">清除所有紀錄</span></button></div>
     </div>
   </div>
   <p class="foot">每座城市的「打開街景」都會在新分頁開啟 Google 街景，帶你看真實的照片。</p>
@@ -1064,6 +1072,24 @@ const MAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 
 let CLEAN_PHOTO = false;   // "看清楚照片": hide every overlay so the photo can be seen as it is
 function whoName(id, i) { return SCENES[id] ? SCENES[id].who[i] : CITIES[id].places[i] + "的目擊者"; }
+
+// destructive buttons need a second press within 4 seconds (the viewer cannot show confirm())
+function armed(el, action) {
+  const label = el.querySelector(".armlabel");
+  if (el.dataset.armed) { clearTimeout(+el.dataset.armed); delete el.dataset.armed; el.classList.remove("arming"); label.textContent = el.dataset.label; action(); return; }
+  el.dataset.label = label.textContent;
+  label.textContent = "再按一次確定";
+  el.classList.add("arming");
+  el.dataset.armed = setTimeout(() => { delete el.dataset.armed; el.classList.remove("arming"); label.textContent = el.dataset.label; }, 4000);
+}
+function freshView() { CLEAN_PHOTO = false; PEEK = false; MV = { ...MAP_FULL }; window.scrollTo(0, 0); }
+// give up on this case; the passport, visited cities and discoveries carry over
+function restartCase() { freshView(); newCase(S); }
+// start over completely
+function wipeAll() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing saved */ }
+  openPass(false); freshView(); newCase();
+}
 
 function openPass(on) {
   $("passModal").hidden = !on; syncOverlay();
