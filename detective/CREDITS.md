@@ -221,6 +221,11 @@ Feel free to use any of my images, but please mention me as the author an | [CC 
 | toronto | [File:Flag of Canada.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Canada.svg) | Public domain |
 | vienna | [File:Flag of Austria.svg](https://commons.wikimedia.org/wiki/File:Flag_of_Austria.svg) | Public domain |
 
+## Suspect portraits
+
+The ten suspect portraits in `suspects/` are AI-generated illustrations (OpenAI gpt-image-2, via Codex CLI) of fictional characters. They do not depict real people or places.
+
+
 ## World map
 
 Country shapes from [Natural Earth](https://www.naturalearthdata.com/) (public domain) via the `world-atlas` package, embedded in `index.html`.

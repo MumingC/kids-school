@@ -380,7 +380,8 @@ aside.wrap { margin: 0; width: 100% }
 .qopt.wrong { border-color: var(--stamp); color: var(--stamp); text-decoration: line-through }
 
 .suspects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px }
-@media (max-width: 520px) { .suspects, .dests, .qopts { grid-template-columns: 1fr } }
+@media (max-width: 520px) { .dests, .qopts { grid-template-columns: 1fr } .suspects { grid-template-columns: repeat(2, minmax(0, 1fr)) } .sus small { font-size: 11px } }
+@media (min-width: 900px) { .suspects.ten { grid-template-columns: repeat(5, minmax(0, 1fr)) } }
 .sus { border: 2px solid var(--line); background: transparent; border-radius: 12px; padding: 10px; text-align: left; display: grid; gap: 4px }
 .sus:hover { border-color: var(--stamp) }
 .sus.fade { opacity: .35 }
@@ -495,6 +496,11 @@ aside.wrap { margin: 0; width: 100% }
 .linkbtn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0 }
 .stampbox.gold { border-color: #c99a06; color: #a87c00; background: rgba(240, 190, 40, .14) }
 .stampbox.gold::after { content: "★"; display: block; font-size: 14px; line-height: 1 }
+/* suspect portraits (AI illustrations, 2:3) */
+.susimg { object-fit: contain; aspect-ratio: 2 / 3; height: auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.18)) }
+.av.md.susimg { width: 66px; height: 99px }
+.av.lg.susimg { width: 100%; max-width: 110px }
+.sus.fade .susimg { filter: grayscale(1) opacity(.45) }
 </style>
 
 </head>
@@ -679,15 +685,23 @@ function photoFig(id) {
     <figcaption>${esc(c.treasure)}・攝影：${esc(p.artist)}・<a href="${p.licenseUrl || p.page}" target="_blank" rel="noopener">${esc(p.license)}</a>・<a href="${p.page}" target="_blank" rel="noopener">Wikimedia Commons</a></figcaption></figure>`;
 }
 
-const TRAITS = { hat: "戴著", hobby: "喜歡", pet: "帶著" };
+const TRAITS = { hat: "戴著", hobby: "喜歡", pet: "帶著", scarf: "圍著", shoes: "穿著" };
 const SUSPECTS = [
-  { name: "閃電貓 露露", hat: "貝雷帽", hobby: "溜滑板", pet: "鸚鵡" },
-  { name: "霧影 摩斯",   hat: "貝雷帽", hobby: "下西洋棋", pet: "蜥蜴" },
-  { name: "跳跳魚 皮皮", hat: "棒球帽", hobby: "溜滑板", pet: "蜥蜴" },
-  { name: "夜梟 諾克斯", hat: "棒球帽", hobby: "彈吉他", pet: "鸚鵡" },
-  { name: "糖霜 蘇蘇",   hat: "草帽",   hobby: "下西洋棋", pet: "鸚鵡" },
-  { name: "石頭臉 洛可", hat: "草帽",   hobby: "彈吉他", pet: "蜥蜴" }
+  { name: "閃電貓 露露", hat: "貝雷帽", hobby: "溜滑板", pet: "鸚鵡", scarf: "紅圍巾", shoes: "運動鞋" },
+  { name: "霧影 摩斯",   hat: "貝雷帽", hobby: "下西洋棋", pet: "蜥蜴", scarf: "紅圍巾", shoes: "長靴" },
+  { name: "跳跳魚 皮皮", hat: "棒球帽", hobby: "溜滑板", pet: "蜥蜴", scarf: "紅圍巾", shoes: "長靴" },
+  { name: "夜梟 諾克斯", hat: "棒球帽", hobby: "彈吉他", pet: "鸚鵡", scarf: "藍圍巾", shoes: "運動鞋" },
+  { name: "糖霜 蘇蘇",   hat: "草帽",   hobby: "下西洋棋", pet: "鸚鵡", scarf: "藍圍巾", shoes: "長靴" },
+  { name: "石頭臉 洛可", hat: "草帽",   hobby: "彈吉他", pet: "蜥蜴", scarf: "藍圍巾", shoes: "運動鞋" },
+  { name: "火箭 阿飛",   hat: "棒球帽", hobby: "下西洋棋", pet: "蜥蜴", scarf: "紅圍巾", shoes: "運動鞋" },
+  { name: "月光 米拉",   hat: "貝雷帽", hobby: "溜滑板", pet: "蜥蜴", scarf: "黃圍巾", shoes: "長靴" },
+  { name: "沙漏 托托",   hat: "草帽",   hobby: "彈吉他", pet: "鸚鵡", scarf: "黃圍巾", shoes: "長靴" },
+  { name: "雲朵 妮妮",   hat: "草帽",   hobby: "下西洋棋", pet: "鸚鵡", scarf: "黃圍巾", shoes: "運動鞋" }
 ];
+const EASY_GANG = 6;
+const traitKeys = level => (level || (typeof S !== "undefined" && S && S.level)) === "medium" ? ["hat", "hobby", "pet", "scarf", "shoes"] : ["hat", "hobby", "pet"];
+const gangSize = () => S.level === "medium" ? SUSPECTS.length : EASY_GANG;
+const susTraits = s => traitKeys().map(k => esc(s[k])).join(" · ");
 // ---------- clay-toy characters (SVG with shading) ----------
 let AVN = 0;
 function shade(hex, amt) {
@@ -762,7 +776,7 @@ const SUS_LOOK = [
   { skin: SKINS[0], hair: HAIRS[2], shirt: "#5b4b8a" }, { skin: SKINS[3], hair: HAIRS[0], shirt: "#3a5f7d" },
   { skin: SKINS[1], hair: HAIRS[1], shirt: "#7d3a5f" }, { skin: SKINS[2], hair: HAIRS[3], shirt: "#2f4f4f" },
   { skin: SKINS[4], hair: HAIRS[4], shirt: "#8a4b2b" }, { skin: SKINS[2], hair: HAIRS[1], shirt: "#4b5d2b" }];
-const suspectAv = (i, cls) => { const s = SUSPECTS[i]; return avatar({ ...SUS_LOOK[i], hat: s.hat, pet: s.pet, prop: PROP[s.hobby], mask: true }, cls); };
+const suspectAv = (i, cls) => `<img class="av susimg ${cls || ""}" src="suspects/sus${i}.webp" alt="${esc(SUSPECTS[i].name)}的畫像" loading="lazy">`;
 const detectiveAv = cls => avatar({ skin: SKINS[1], hair: HAIRS[0], shirt: "#c79a5a", hat: "偵探帽", prop: "glass", coat: true }, cls);
 
 const TRAIT_LINES = {
@@ -1930,14 +1944,16 @@ function mediumPlan(from, target, visited, relaxed = false) {
 const TRAIT_LINES_MED = {
   hat: { 貝雷帽: "那個人戴著一頂扁扁圓圓、像法國畫家戴的軟帽子。", 棒球帽: "那個人戴著一頂前面有帽簷、打棒球時戴的帽子。", 草帽: "那個人戴著一頂用草編成的寬邊帽子。" },
   hobby: { 溜滑板: "那個人說最喜歡的運動，要用到一塊裝了輪子的板子。", 彈吉他: "那個人說他最喜歡彈一種有六條弦的樂器。", 下西洋棋: "那個人說他最愛下一種有國王和皇后的棋。" },
-  pet: { 鸚鵡: "那個人肩上有一隻會學人說話的鳥。", 蜥蜴: "那個人肩上趴著一隻有鱗片、愛曬太陽的小爬蟲。" }
+  pet: { 鸚鵡: "那個人肩上有一隻會學人說話的鳥。", 蜥蜴: "那個人肩上趴著一隻有鱗片、愛曬太陽的小爬蟲。" },
+  scarf: { 紅圍巾: "那個人脖子上圍著一條跟消防車同樣顏色的圍巾。", 藍圍巾: "那個人的圍巾是晴天時天空的顏色。", 黃圍巾: "那個人的圍巾跟香蕉皮一樣的顏色。" },
+  shoes: { 運動鞋: "那個人穿著一雙綁鞋帶、鞋底軟軟的跑步鞋。", 長靴: "那個人穿著一雙高到膝蓋的靴子，走起路來叩叩響。" }
 };
 
 function buildPlans(route, suspect, level, relax = false) {
-  const traitOrder = shuffle(["hat", "hobby", "pet"]);
+  const traitOrder = shuffle(traitKeys(level));
   return route.map((id, i) => {
     if (i === route.length - 1) return null;
-    const trait = traitOrder[i % 3], tv = SUSPECTS[suspect][trait];
+    const trait = traitOrder[i % traitOrder.length], tv = SUSPECTS[suspect][trait];
     const traitLine = level === "medium" ? TRAIT_LINES_MED[trait][tv] : TRAIT_LINES[trait](tv);
     let lines, notes, dests, pc = { orders: [shuffle([0, 1, 2, 3]), shuffle([0, 1, 2, 3])] };
     if (level === "medium") {
@@ -1984,10 +2000,10 @@ function renderWarrant() {
   const known = S.traits, locked = S.mode === "final" || !["city", "intro"].includes(S.mode);
   box.innerHTML = `<h3>逮捕令</h3>
     <p class="hint" style="margin:0 0 8px">${locked ? "已經到最後一站了，逮捕令不能再改。" : "根據長相線索選一個嫌犯開逮捕令。不符合線索的人會變淡；在抵達最後一站之前都可以改。"}</p>
-    <div class="suspects">${SUSPECTS.map((s, i) => {
+    <div class="suspects ten">${SUSPECTS.slice(0, gangSize()).map((s, i) => {
       const fit = Object.keys(known).every(k => s[k] === known[k]);
       return `<button class="sus ${fit ? "" : "fade"} ${S.warrant === i ? "chosen" : ""}" onclick="setWarrant(${i})" ${locked ? "disabled" : ""} aria-pressed="${S.warrant === i}">
-        ${suspectAv(i, "lg")}<b>${esc(s.name)}</b><small>${esc(s.hat)} · ${esc(s.hobby)} · ${esc(s.pet)}</small>${S.warrant === i ? `<span class="wtag">逮捕令</span>` : ""}</button>`; }).join("")}</div>`;
+        ${suspectAv(i, "lg")}<b>${esc(s.name)}</b><small>${susTraits(s)}</small>${S.warrant === i ? `<span class="wtag">逮捕令</span>` : ""}</button>`; }).join("")}</div>`;
 }
 
 // ---------- 12 more cities: Europe, Southeast Asia, the Americas, the Middle East ----------
@@ -2777,7 +2793,7 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 
 function newCase(prev, level) {
   level = level || (prev && prev.level) || "easy";
-  const suspect = rnd(SUSPECTS.length);
+  const suspect = rnd(level === "medium" ? SUSPECTS.length : EASY_GANG);
   let route, plans;
   for (let tries = 0; tries < 200; tries++) {
     route = makeRoute(level === "medium" ? MED.ROUTE : ROUTE_LEN);
@@ -2917,13 +2933,13 @@ function render() {
         <li>想看更多？按「打開街景」，就能用 Google 街景在那座城市裡走走看。</li>
         <li>${S.level === "medium" ? "護照印章：明信片上的兩題閱讀檢查都答對，就能在護照蓋上那座城市的印章。" : "尋寶挑戰：每座城市的關卡都不一樣，有拼圖、說你好、換錢、找洲、是非題和文化問答。過關就能在護照蓋一個印章。"}</li>
         <li>嫌犯每一站都會掉一張明信片，裡面藏著下一站的${S.level === "medium" ? "線索。有一行被咖啡漬蓋住，要先通過閱讀檢查才看得到，答錯扣 1 小時" : "謎語"}。</li>
-        <li>記下嫌犯的帽子、興趣和寵物，最後才抓得到對的人。</li>
+        <li>記下嫌犯的帽子、興趣和寵物${S.level === "medium" ? "，還有圍巾的顏色和鞋子。怪盜團有 10 個人，要五樣都對才抓得到對的人" : "，最後才抓得到對的人"}。</li>
         ${S.level === "medium" ? `<li><span><b>中級：</b>每一條線索都只能排除一部分城市，要把同一站問到的線索合起來，才知道嫌犯去了哪裡。</span></li>
         <li><span><b>中級：</b>嫌犯會逃 ${S.route.length - 1} 段。在抵達最後一站之前，記得打開偵探筆記本開好逮捕令，不然抓到人也沒用。</span></li>` : ""}
         <li>怪盜也只能搭一般的飛機，一次最遠大約飛 ${MAX_HOP_KM.toLocaleString()} 公里。嫌犯逃完全程要 ${fmtH(S.thief)} 小時，你要追得比他快！</li>
       </ul>
       <div class="gang"><div class="me">${detectiveAv("lg bounce")}<small>你：小偵探</small></div>
-        <div class="crew"><p class="eyebrow" style="margin:0 0 4px">怪盜團「影子貓」成員</p><div class="crewrow">${SUSPECTS.map((x, i) => `<div>${suspectAv(i, "md")}<small>${esc(x.name)}</small></div>`).join("")}</div></div></div>
+        <div class="crew"><p class="eyebrow" style="margin:0 0 4px">怪盜團「影子貓」成員</p><div class="crewrow">${SUSPECTS.slice(0, gangSize()).map((x, i) => `<div>${suspectAv(i, "md")}<small>${esc(x.name)}</small></div>`).join("")}</div></div></div>
       <div class="actions"><button class="btn" onclick="S.mode='city';render()">出發去${esc(start.name)}</button></div>`;
   } else if (S.mode === "city") {
     html = cityPanel(c) + flyPanel();
@@ -2932,20 +2948,20 @@ function render() {
     html = cityPanel(c) + `<div class="quiz"><p class="eyebrow">逮捕令</p><h3>嫌犯就在${esc(c.name)}！</h3>
       ${w === null || w === undefined
         ? `<p>糟糕，你還沒有開逮捕令。到了最後一站才開已經來不及了。</p><div class="actions"><button class="btn" onclick="arrestWarrant()">試試看抓人</button></div>`
-        : `<div class="warrantcard">${suspectAv(w, "md")}<div><small>你的逮捕令寫的是</small><b>${esc(SUSPECTS[w].name)}</b><small>${esc(SUSPECTS[w].hat)} · ${esc(SUSPECTS[w].hobby)} · ${esc(SUSPECTS[w].pet)}</small></div></div>
+        : `<div class="warrantcard">${suspectAv(w, "md")}<div><small>你的逮捕令寫的是</small><b>${esc(SUSPECTS[w].name)}</b><small>${susTraits(SUSPECTS[w])}</small></div></div>
            <div class="actions"><button class="btn takeoff" style="width:auto" onclick="arrestWarrant()">用逮捕令逮捕！</button></div>`}</div>`;
   } else if (S.mode === "final") {
     const known = S.traits;
     html = cityPanel(c) + `<div class="quiz"><p class="eyebrow">逮捕令</p><h3>嫌犯就在${esc(c.name)}！是哪一個人？</h3>
       <p style="margin:0;color:var(--muted);font-size:14px">根據筆記本上的長相線索，不符合的人會變淡。</p>
-      <div class="suspects">${SUSPECTS.map((s, i) => {
+      <div class="suspects">${SUSPECTS.slice(0, gangSize()).map((s, i) => {
         const fit = Object.keys(known).every(k => s[k] === known[k]);
-        return `<button class="sus ${fit ? "" : "fade"}" onclick="arrest(${i})">${suspectAv(i, "lg")}<b>${esc(s.name)}</b><small>${esc(s.hat)} · ${esc(s.hobby)} · ${esc(s.pet)}</small></button>`; }).join("")}</div>
+        return `<button class="sus ${fit ? "" : "fade"}" onclick="arrest(${i})">${suspectAv(i, "lg")}<b>${esc(s.name)}</b><small>${susTraits(s)}</small></button>`; }).join("")}</div>
       <p class="toast">${esc(S.msg)}</p></div>`;
   } else {
     const s = SUSPECTS[S.suspect];
     const titles = { win: ["抓到了！", `你在${c.name}逮捕了${s.name}，${start.stolen}已經送回${start.name}。`],
-                     wrongArrest: ["抓錯人了！", `真正的嫌犯是${s.name}（${s.hat}、${s.hobby}、${s.pet}），趁亂逃走了。`],
+                     wrongArrest: ["抓錯人了！", `真正的嫌犯是${s.name}（${traitKeys().map(k => s[k]).join("、")}），趁亂逃走了。`],
                      noWarrant: ["沒有逮捕令……", `嫌犯${s.name}就在眼前，但你沒有逮捕令，只能看著他帶著${start.stolen}溜走。下次要在最後一站之前，先在偵探筆記本開好逮捕令！`],
                      timeout: ["時間到了……", `嫌犯${s.name}帶著${start.stolen}溜走了。下次記得先看清楚線索再搭飛機！`] }[S.mode];
     html = `<div class="banner">${S.mode === "win" ? `<div class="duo">${detectiveAv("lg")}${suspectAv(S.suspect, "lg")}</div>` : suspectAv(S.suspect, "lg")}<h2>${esc(titles[0])}</h2><p>${esc(titles[1])}</p>
@@ -2956,7 +2972,7 @@ function render() {
   $("scene").innerHTML = html;
 
   // notebook
-  $("traits").innerHTML = Object.keys(TRAITS).map(k => S.traits[k]
+  $("traits").innerHTML = traitKeys().map(k => S.traits[k]
     ? `<span class="chip on">${TRAITS[k]}${esc(S.traits[k])}</span>`
     : `<span class="chip">${TRAITS[k]}？</span>`).join("");
   const clueN = S.heard.length + Object.keys(S.traits).length;
