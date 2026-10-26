@@ -486,6 +486,15 @@ aside.wrap { margin: 0; width: 100% }
 .pcopt.wrong { border-color: var(--stamp); text-decoration: line-through }
 .pcopt.dim { opacity: .5 }
 .pcopt[disabled] { cursor: default }
+/* detective library */
+.libclosed { border-color: #2d6cdf }
+.libclosed.open { margin-bottom: 10px }
+.libcard { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--paper) }
+.libsrc { margin: 0 0 6px }
+.libcard .btn { display: inline-block; text-decoration: none }
+.linkbtn { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0 }
+.stampbox.gold { border-color: #c99a06; color: #a87c00; background: rgba(240, 190, 40, .14) }
+.stampbox.gold::after { content: "★"; display: block; font-size: 14px; line-height: 1 }
 </style>
 
 </head>
@@ -2693,6 +2702,74 @@ function hqPanel() {
       : `<p class="hint" style="margin:0">這一段已經問過總部 ${HQ_MAX} 次了。對照筆記本裡的線索，打開登機門再選一次吧！</p>`}</section>`;
 }
 
+// ---------- detective library: optional outside reading (medium) ----------
+// One real article per city, opened in a new tab. Wikipedia links point at a fixed revision so the text
+// never changes under the questions. Three questions, first answer right; all three right = gold stamp.
+// kind: 百科 / 政府與國際組織 / 雜誌. No time cost: reading happens outside the game clock.
+const LIBRARY = {
+  tokyo: { kind: "百科", lang: "英文", title: "Tokyo", site: "Simple English Wikipedia", mins: 8,
+    url: "https://simple.wikipedia.org/w/index.php?oldid=10653989",
+    read: "讀最上面的介紹，和「History」裡的「1457-1869」那一段，再看看「Landmarks」。",
+    qs: [["文章說，「Edo」這個名字在日文裡是什麼意思？", "河口", "東邊的京城", "大城堡", "小漁村"],
+         ["1869 年，是誰搬到了江戶，讓江戶城變成皇居？", "17 歲的明治天皇", "德川家康", "太田道灌", "一位將軍"],
+         ["文章說東京很少有超過 50 年的建築。根據文章前面的內容，最合理的原因是什麼？", "1923 年大地震引起的大火和二戰轟炸，讓城市幾乎重建", "日本法律規定房子每 50 年要拆掉", "東京人只喜歡住新房子", "東京是 1964 年奧運時才建立的城市"]] },
+  rome: { kind: "政府與國際組織", lang: "英文", title: "Historic Centre of Rome", site: "UNESCO 世界遺產中心", mins: 6,
+    url: "https://whc.unesco.org/en/list/91/",
+    read: "讀英文的第一段介紹，和「Brief synthesis」的第一段。這是聯合國教科文組織寫給大人看的文章，生字比較多，慢慢讀。",
+    qs: [["根據傳說，羅馬是誰在哪一年建立的？", "羅慕路斯和雷穆斯，西元前 753 年", "凱撒，西元前 44 年", "奧古斯都，西元 1 年", "教宗，西元 4 世紀"],
+         ["文章說，羅馬在西元 4 世紀變成了什麼？", "基督教世界的首都", "文藝復興的起點", "地中海最大的港口", "歐盟的首都"],
+         ["文章說「The Christian city was built on top of the ancient city」。這句話的意思最接近哪一個？", "基督教時期的羅馬蓋在古城上面，還重複使用舊的建築和材料", "古城被全部拆光，再蓋一座新城", "基督教的羅馬蓋在台伯河的另一邊", "古城和新城中間隔著一道城牆，互不相干"]] },
+  sydney: { kind: "雜誌", lang: "英文", title: "Australia Country Profile", site: "National Geographic Kids", mins: 7,
+    url: "https://kids.nationalgeographic.com/geography/countries/article/australia",
+    read: "讀「Geography」和「Nature」這兩段。這是國家地理雜誌給小朋友看的版本，網頁內容可能會更新。",
+    qs: [["文章說，澳洲有什麼全世界只有它才有的特點？", "它是唯一占了整塊大陸的國家", "它是唯一沒有沙漠的國家", "它是唯一在赤道上的國家", "它是唯一沒有河流的國家"],
+         ["文章說「Great Artesian Basin」是什麼？", "世界上最大的地下水源", "世界上最大的珊瑚礁", "澳洲最高的山脈", "澳洲最大的沙漠"],
+         ["為什麼澳洲有很多別的地方沒有的動物，像鴨嘴獸和無尾熊？", "因為澳洲的位置很偏遠", "因為澳洲有 516 座國家公園", "因為澳洲的天氣特別熱", "因為移民從世界各地把動物帶來"]] },
+  taipei: { kind: "百科", lang: "中文", title: "台北101", site: "中文維基百科", mins: 5,
+    url: "https://zh.wikipedia.org/w/index.php?oldid=94660335&variant=zh-tw",
+    read: "只要讀最上面、還沒出現「歷史」標題之前的四段介紹。",
+    qs: [["台北101 從哪時候到哪時候是世界第一高樓？", "2004 年底落成，到 2010 年初", "1998 年開工，到 2004 年", "2004 年到現在", "2010 年到 2023 年"],
+         ["觀景台電梯從 5 樓到 89 樓，只需要多久？", "37 秒", "37 分鐘", "101 秒", "5 分鐘"],
+         ["台北101 擁有全球第一座開放給遊客觀賞的什麼設備？", "巨型阻尼器", "垂直馬拉松跑道", "如意符號", "彩虹外牆燈光"]] },
+};
+const LIB_KIND_ICON = { "百科": "📖", "政府與國際組織": "🏛️", "雜誌": "📰" };
+function libState(id) { S.lib = S.lib || {}; return S.lib[id] || (S.lib[id] = { open: false, ans: [] }); }
+function libOpen(id) { libState(id).open = !libState(id).open; render(); }
+function libAnswer(id, qi, j) {
+  const st = libState(id);
+  if (st.ans[qi] !== undefined && st.ans[qi] !== null) return;
+  st.ans[qi] = j;
+  const qs = LIBRARY[id].qs;
+  if (qs.every((q, i) => st.ans[i] !== undefined && st.ans[i] !== null) && st.ans.every(a => a === 0)) (S.gold || (S.gold = {}))[id] = true;
+  render();
+}
+function libRetry(id) { const st = libState(id); if (S.gold && S.gold[id]) return; st.ans = []; render(); }
+function libraryPanel() {
+  const id = S.at, L = LIBRARY[id];
+  if (S.level !== "medium" || !L || (S.mode !== "city" && S.mode !== "final")) return "";
+  const st = (S.lib || {})[id] || { open: false, ans: [] }, gold = S.gold && S.gold[id];
+  const head = `<span class="pcicon" aria-hidden="true">📚</span><span><b>偵探圖書館・延伸閱讀（選做）${gold ? "・🥇 已拿到金色印章" : ""}</b>
+    <small>${LIB_KIND_ICON[L.kind]} ${esc(L.kind)}・${esc(L.lang)}・約 ${L.mins} 分鐘。讀一篇真的文章，三題全對可以拿到${esc(CITIES[id].name)}的金色印章，不扣時間。</small></span>`;
+  if (!st.open) return `<button class="pcclosed libclosed" onclick="libOpen('${id}')">${head}</button>`;
+  const done = L.qs.every((q, i) => st.ans[i] !== undefined && st.ans[i] !== null);
+  const quiz = L.qs.map((q, qi) => {
+    const a = st.ans[qi], open = a === undefined || a === null;
+    const order = [0, 1, 2, 3].sort((x, y) => ((x * 7 + qi * 3 + id.length) % 4) - ((y * 7 + qi * 3 + id.length) % 4));
+    return `<div class="pcquiz"><p><b>第 ${qi + 1}／${L.qs.length} 題：</b>${esc(q[0])}</p><div class="pcopts">${order.map(j =>
+      `<button class="pcopt ${open ? "" : j === 0 ? "right" : a === j ? "wrong" : "dim"}" ${open ? "" : "disabled"} onclick="libAnswer('${id}', ${qi}, ${j})">${esc(q[j + 1])}</button>`).join("")}</div>
+      ${open ? "" : `<p class="toast">${a === 0 ? "答對了！" : `答錯了。正確答案是「${esc(q[1])}」。`}</p>`}</div>`;
+  }).join("");
+  const result = !done ? "" : gold
+    ? `<p class="hint good" style="margin:8px 0 0">三題全對！護照上的${esc(CITIES[id].name)}蓋了一個金色印章。</p>`
+    : `<p class="hint" style="margin:8px 0 0">差一點點！回去再讀一次文章，然後 <button class="linkbtn" onclick="libRetry('${id}')">重新作答</button>。</p>`;
+  return `<section class="pcwrap libwrap"><button class="pcclosed libclosed open" onclick="libOpen('${id}')">${head}</button>
+    <div class="libcard"><p class="libsrc">${LIB_KIND_ICON[L.kind]} <b>${esc(L.title)}</b>・${esc(L.site)}</p>
+      <p style="margin:0 0 8px">${esc(L.read)}</p>
+      <a class="btn" href="${L.url}" target="_blank" rel="noopener">在新分頁打開文章 ↗</a>
+      <p class="hint" style="margin:8px 0 0">讀完回到這一頁作答。遊戲進度會留著，不用擔心。</p></div>
+    ${quiz}${result}</section>`;
+}
+
 // ---------- state ----------
 let S;
 const rnd = n => Math.floor(Math.random() * n);
@@ -2710,7 +2787,7 @@ function newCase(prev, level) {
   if (plans.includes(undefined)) { route = makeRoute(ROUTE_LEN); plans = buildPlans(route, suspect, "easy"); level = "easy"; }   // never leave a case unplayable
   const B = budgetFor(route, level === "medium" ? MED.SLACK : 0.5);
   S = { level, warrant: null, route, step: 0, at: route[0], hours: B.total, budget: B.total, thief: B.thief, t: 0, lastTrip: null, suspect, plans,
-        asked: {}, heard: [], traits: {}, path: [route[0]], stamps: prev ? prev.stamps : {},
+        asked: {}, heard: [], traits: {}, path: [route[0]], stamps: prev ? prev.stamps : {}, gold: prev && prev.gold ? prev.gold : {}, lib: prev && prev.lib ? prev.lib : {},
         visited: prev && prev.visited ? prev.visited : {}, found: prev && prev.found ? prev.found : {},
         quizDone: {}, solved: prev ? prev.solved : 0, mode: "intro", said: null, flying: false, msg: "" };
   render();
@@ -2795,7 +2872,7 @@ function cityPanel(c, onRoute) {
       <button class="wbtn ${S.asked[S.at + ":" + i] ? "done" : ""} ${S.said && S.said.i === i ? "talking" : ""}" onclick="ask(${i})">${avatar(witnessLook(S.at, i), "sm")}<span class="wtxt"><small>${S.asked[S.at + ":" + i] ? "問過了" : "去問問"}</small><span>${esc(p)}</span></span></button>`).join("")}
     </div>`}
     ${sc ? "" : chatPanel()}
-    ${postcardPanel()}${hqPanel()}
+    ${postcardPanel()}${hqPanel()}${libraryPanel()}
     ` + regionPanel(S.at) + profilePanel(S.at) + culturePanel(S.at) + (S.level === "medium" ? "" : challengePanel(S.at));
 }
 
@@ -2894,11 +2971,12 @@ function render() {
   const secretsGot = ids.reduce((n, id) => n + ((S.found[id] || []).length), 0);
   const stat = (v, label) => `<div class="stat"><b>${v}</b><small>${label}</small></div>`;
   $("passStats").innerHTML = stat(S.solved, "破案") + stat(`${Object.keys(S.stamps).length}<i>/${ids.length}</i>`, "護照印章")
+    + (S.level === "medium" ? stat(`${Object.keys(S.gold || {}).length}<i>/${Object.keys(LIBRARY).length}</i>`, "金色印章") : "")
     + stat(`${Object.keys(S.visited).length}<i>/${ids.length}</i>`, "去過的城市") + stat(`${secretsGot}<i>/${secretsAll}</i>`, "照片秘密");
   $("passport").innerHTML = ids.map(id => {
     const c = CITIES[id], f = (S.found[id] || []).length, total = SCENES[id] ? SCENES[id].spots.length : 0;
     const sub = S.visited[id] && total ? `<small>秘密 ${f}/${total}</small>` : "";
-    if (S.stamps[id]) return `<div class="stampbox got">${flagImg(id, "stamp")}${esc(c.name)}<em>${esc(c.treasure)}</em>${sub}</div>`;
+    if (S.stamps[id] || (S.gold && S.gold[id])) return `<div class="stampbox got ${S.gold && S.gold[id] ? "gold" : ""}">${flagImg(id, "stamp")}${esc(c.name)}<em>${esc(c.treasure)}</em>${sub}</div>`;
     return `<div class="stampbox ${S.visited[id] ? "seen" : ""}">${S.visited[id] && !spoils(id, "flag") ? flagImg(id, "stamp") : ""}${esc(c.name)}${S.visited[id] ? "<em>去過了</em>" : ""}${sub}</div>`;
   }).join("");
 
