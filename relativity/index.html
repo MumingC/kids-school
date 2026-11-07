@@ -191,7 +191,45 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <div class="prose">
     <p>想像你坐在一列往前開的火車上，把球往前丟。站在月台上的人看，球的速度＝<b>你丟的速度＋火車的速度</b>，比較快。這很合理。</p>
     <p>可是換成打開手電筒，就不一樣了：不管火車開多快，月台上的人量到的光速<b>還是一樣</b>，每秒 30 萬公里，一點都沒有變快。</p>
-    <p>這件事很奇怪，但做了好多次實驗都是這樣。愛因斯坦想：<b>如果光速永遠不變，那會變的是什麼？</b>他的答案嚇了大家一跳——<b class="hl">會變的是時間</b>。下一站，我們用一個「光做的時鐘」來看看為什麼。</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><span>互動 02 — 兩列火車比賽</span><span>上面停著，下面在開</span></div>
+    <div class="panel-bd">
+      <canvas id="trainCv" height="300" aria-label="兩列火車，一列停著一列在開，同時把球丟出去或打開手電筒，看誰先到終點"></canvas>
+      <div class="btnrow">
+        <button class="btn" id="trBall" aria-pressed="true">⚾ 丟球</button>
+        <button class="btn" id="trLight" aria-pressed="false">🔦 打開手電筒</button>
+        <button class="btn main" id="trGo">再比一次</button>
+      </div>
+      <div class="verdict" id="trVerdict"></div>
+    </div>
+  </div>
+
+  <h2 class="sec">科學家怎麼知道的？ <small>The experiments</small></h2>
+  <div class="prose">
+    <p>這件事太奇怪了，所以科學家做了很多實驗想抓到光速變快或變慢的那一刻，結果一次都沒有。來看兩個最有名的。</p>
+    <h3 style="font-size:18px;margin-top:22px">1887 年：邁克生和莫雷的「光賽跑」</h3>
+    <p>地球繞著太陽跑，每秒大約 <b>30 公里</b>。美國的邁克生<span class="t">Michelson</span>和莫雷<span class="t">Morley</span>以為，光在太空中就像在河裡游泳的人：<b>逆著水流游比較慢、順著水流游比較快</b>。地球在跑，光的速度應該會跟著方向變。</p>
+    <p>他們做了一台超精密的機器：把一道光<b>分成兩道</b>，一道往前跑、一道往旁邊跑，碰到鏡子再跑回來比賽。如果光速會變，兩道光回來的時間就會差一點點。</p>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><span>互動 03 — 邁克生–莫雷實驗</span><span>從上面往下看；速度差被放大很多倍</span></div>
+    <div class="panel-bd">
+      <canvas id="mmCv" height="340" aria-label="一道光被分成兩道，一道往右一道往上，碰到鏡子再回來，比誰先回到偵測器"></canvas>
+      <div class="btnrow">
+        <button class="btn" id="mmGuess" aria-pressed="true">科學家原本猜的</button>
+        <button class="btn" id="mmReal" aria-pressed="false">真正量到的</button>
+      </div>
+      <div class="verdict" id="mmVerdict"></div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>結果兩道光<b>一起回來</b>，一點差別都沒有。他們把機器轉了方向、換了季節再量，還是一樣。之後一百多年，科學家用越來越精密的儀器重做，到今天都沒有找到差別。</p>
+    <h3 style="font-size:18px;margin-top:22px">1964 年：比火車快一百萬倍的「手電筒」</h3>
+    <p>上面火車的手電筒，真的有人做過，只是火車換成了粒子。在歐洲的 <b>CERN</b> 實驗室，科學家讓一種叫 <b>π 介子</b><span class="t">pion</span>的小粒子用<b>光速的 99.975%</b> 飛，它在飛的時候會放出光。</p>
+    <p>如果速度會相加，這道光應該快到將近兩倍光速。科學家讓它跑了 30 公尺，量它的速度——結果還是每秒 30 萬公里，跟一般的光<b>一模一樣</b>。</p>
+    <p>所以愛因斯坦想：<b>如果光速永遠不變，那會變的是什麼？</b>他的答案嚇了大家一跳——<b class="hl">會變的是時間</b>。下一站，我們用一個「光做的時鐘」來看看為什麼。</p>
   </div>
 
   <div class="quiz" data-st="1">
@@ -211,7 +249,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <p class="lede">做一個最簡單的時鐘：上下各一面鏡子，讓一點光在中間跳來跳去。光<b>每來回一次</b>，時鐘就走<b>一下</b>（tick）。</p>
 
   <div class="panel">
-    <div class="panel-hd"><span>互動 02 — 兩個一模一樣的光子鐘</span><span>光被放慢很多倍，才看得清楚</span></div>
+    <div class="panel-hd"><span>互動 04 — 兩個一模一樣的光子鐘</span><span>光被放慢很多倍，才看得清楚</span></div>
     <div class="panel-bd">
       <canvas id="clockCv" height="360" aria-label="上方是停在地上的光子鐘，下方是坐在火箭上飛過去的光子鐘"></canvas>
       <div class="ctl">
@@ -262,7 +300,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <p class="lede">一個人坐超快的太空船去遠方的星星再回來，另一個人留在地球。太空船上的時間走得慢，所以回來的時候……誰比較老？自己算算看。</p>
 
   <div class="panel">
-    <div class="panel-hd"><span>互動 03 — 太空旅行計算機</span><span>來回一趟</span></div>
+    <div class="panel-hd"><span>互動 05 — 太空旅行計算機</span><span>來回一趟</span></div>
     <div class="panel-bd">
       <div class="twin-in">
         <label>🚀 出發的人現在幾歲<input type="number" id="ageGo" min="1" max="99" value="8"></label>
@@ -304,7 +342,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <p>可是科學家在地面上，偏偏測到了一大堆緲子。為什麼？按下面的按鈕比比看。</p>
   </div>
   <div class="panel">
-    <div class="panel-hd"><span>互動 04 — 緲子雨</span><span>從 10 公里高掉下來</span></div>
+    <div class="panel-hd"><span>互動 06 — 緲子雨</span><span>從 10 公里高掉下來</span></div>
     <div class="panel-bd">
       <canvas id="muCv" height="320" aria-label="緲子從天空往地面掉，途中有些會消失"></canvas>
       <div class="btnrow">
@@ -339,7 +377,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <p>合起來，衛星的鐘<b>每天快 38 微秒</b>（1 微秒＝百萬分之一秒）。聽起來很少，但 GPS 是用「光跑了多久」來算距離的，光在 38 微秒裡可以跑 11 公里！</p>
   </div>
   <div class="panel gps">
-    <div class="panel-hd"><span>互動 05 — 如果工程師忘了愛因斯坦</span><span>GPS 每天多錯 11 公里</span></div>
+    <div class="panel-hd"><span>互動 07 — 如果工程師忘了愛因斯坦</span><span>GPS 每天多錯 11 公里</span></div>
     <div class="panel-bd">
       <svg id="gpsSvg" viewBox="0 0 400 400" role="img" aria-label="地圖：你的家在中間，GPS 以為你在的位置會越飄越遠"></svg>
       <div class="ctl">
@@ -525,6 +563,171 @@ $('#raceReset').onclick = () => {
   RACERS.forEach((r, i) => $('#rn' + i).style.left = '44px');
   $('#raceWatch').textContent = '0.0 秒';
 };
+
+/* ---------- 1b. two trains: ball vs flashlight ---------- */
+const tc = $('#trainCv'); canvases.push(tc);
+const TR = { train: 70, ball: 110, light: 300 };   // px/s on screen; light slowed way down
+const T_THROW = 1.0;
+let trMode = 'ball', trT = 0, lastTr = null, trDone = false;
+function trReset(mode) {
+  if (mode) trMode = mode;
+  trT = 0; trDone = false; lastTr = null;
+  $('#trBall').setAttribute('aria-pressed', trMode === 'ball');
+  $('#trLight').setAttribute('aria-pressed', trMode === 'light');
+  $('#trVerdict').innerHTML = trMode === 'ball'
+    ? '兩個小朋友在同一個地方、同一個時間，用一樣的力氣把球往前丟。猜猜看，誰的球先到終點？'
+    : '這次換成同時打開手電筒。下面的火車在開，它的光會不會比較快到？';
+}
+$('#trBall').onclick = () => trReset('ball');
+$('#trLight').onclick = () => trReset('light');
+$('#trGo').onclick = () => trReset();
+function drawTrain(ctx, front, rail, moving) {
+  const w = 130, h = 36, x = front - w, y = rail - h - 8;
+  ctx.fillStyle = css('--instr-soft'); ctx.strokeStyle = css('--instr'); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, [6, 14, 4, 4]); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = css('--surface');
+  for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.roundRect(x + 10 + i * 28, y + 7, 20, 13, 3); ctx.fill(); ctx.stroke(); }
+  ctx.fillStyle = css('--ink-soft');
+  [x + 22, x + 50, x + 86, x + 112].forEach(cx => { ctx.beginPath(); ctx.arc(cx, rail - 5, 5, 0, 7); ctx.fill(); });
+  if (moving) {
+    ctx.strokeStyle = css('--ink-faint'); ctx.lineWidth = 2;
+    [0, 10, 20].forEach(d => { ctx.beginPath(); ctx.moveTo(x - 8 - d * 1.4, y + 10 + d * 0.8); ctx.lineTo(x - 24 - d * 1.4, y + 10 + d * 0.8); ctx.stroke(); });
+  }
+}
+function trFrame(now) {
+  requestAnimationFrame(trFrame);
+  const dt = lastTr ? Math.min(0.05, (now - lastTr) / 1000) : 0; lastTr = now;
+  if (!visible('trainCv')) return;
+  trT += dt;
+  const ctx = tc.getContext('2d'), W = tc._w, H = tc._h;
+  const throwX = Math.max(150, W * 0.3), finX = W - 26;
+  const rails = [H * 0.40, H * 0.86];
+  const ball = trMode === 'ball';
+  const speeds = ball ? [TR.ball, TR.ball + TR.train] : [TR.light, TR.light];
+  const labels = ball ? ['時速 50 公里', '50 ＋ 100 ＝ 時速 150 公里'] : ['每秒 30 萬公里', '還是每秒 30 萬公里'];
+  ctx.clearRect(0, 0, W, H);
+  ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.textAlign = 'left';
+  // finish line
+  ctx.strokeStyle = css('--flame'); ctx.setLineDash([5, 5]); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(finX, 14); ctx.lineTo(finX, H - 6); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = css('--flame'); ctx.textAlign = 'right'; ctx.fillText('終點 🏁', finX - 6, 16);
+  let arrived = 0;
+  rails.forEach((rail, i) => {
+    ctx.strokeStyle = css('--line'); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, rail); ctx.lineTo(W, rail); ctx.stroke();
+    ctx.fillStyle = css('--ink'); ctx.textAlign = 'left';
+    ctx.fillText(i ? '🚄 開動的火車：時速 100 公里 →' : '🚉 停著的火車', 8, rail - 62);
+    const front = i ? throwX + TR.train * (trT - T_THROW) : throwX;
+    drawTrain(ctx, front, rail, i === 1);
+    if (trT < T_THROW) return;
+    const py = rail - 30;
+    const px = Math.min(finX, throwX + speeds[i] * (trT - T_THROW));
+    if (px >= finX) arrived++;
+    if (ball) {
+      ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('⚾', px, py + 7);
+    } else {
+      const g = ctx.createLinearGradient(Math.max(throwX, px - 90), 0, px, 0);
+      g.addColorStop(0, 'transparent'); g.addColorStop(1, css('--photon'));
+      ctx.strokeStyle = g; ctx.lineWidth = 6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(Math.max(throwX, px - 90), py); ctx.lineTo(px, py); ctx.stroke();
+      ctx.fillStyle = css('--photon'); ctx.shadowColor = css('--photon'); ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    }
+    ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.fillStyle = css('--ink-soft');
+    ctx.textAlign = px > W - 140 ? 'right' : 'left';
+    ctx.fillText(labels[i], px > W - 140 ? px - 12 : px + 12, py - 14);
+  });
+  if (arrived === 2 && !trDone) {
+    trDone = true;
+    $('#trVerdict').innerHTML = ball
+      ? '<b>下面的球先到！</b>開動的火車本來就在往前跑，球被丟出去時已經帶著火車的速度，所以月台上的人量到 50＋100＝150。'
+      : '<b>兩道光同時到！</b>火車有沒有在開，光的速度都一樣，不會加上火車的速度。（為了看得清楚，這裡的光被放慢了很多很多倍。）';
+  }
+}
+trReset();
+requestAnimationFrame(trFrame);
+
+/* ---------- 1c. Michelson–Morley ---------- */
+const mmc = $('#mmCv'); canvases.push(mmc);
+const MM_C = 120, MM_V = 0.5;   // px/s; the "space wind" is exaggerated to half of light speed
+let mmMode = 'guess', mmT = 0, lastMm = null, mmShown = false;
+function mmReset(mode) {
+  mmMode = mode; mmT = 0; mmShown = false;
+  $('#mmGuess').setAttribute('aria-pressed', mode === 'guess');
+  $('#mmReal').setAttribute('aria-pressed', mode === 'real');
+  $('#mmVerdict').innerHTML = mode === 'guess'
+    ? '如果光像游泳的人：<b>往右那道</b>（黃色）要逆風去、順風回，<b>往上那道</b>（藍色）要斜斜地頂著風游。看看誰先回到偵測器。'
+    : '這是真正量到的結果。看看兩道光這次怎麼回來。';
+}
+$('#mmGuess').onclick = () => mmReset('guess');
+$('#mmReal').onclick = () => mmReset('real');
+function mmFrame(now) {
+  requestAnimationFrame(mmFrame);
+  const dt = lastMm ? Math.min(0.05, (now - lastMm) / 1000) : 0; lastMm = now;
+  if (!visible('mmCv')) return;
+  mmT += dt;
+  const ctx = mmc.getContext('2d'), W = mmc._w, H = mmc._h;
+  const L = Math.min(W * 0.36, 170), cx = Math.max(120, W * 0.36), cy = H - 120;
+  const sx = cx - Math.min(100, cx - 30), detY = cy + 80;
+  const guess = mmMode === 'guess';
+  const sOut = guess ? MM_C * (1 - MM_V) : MM_C, sBack = guess ? MM_C * (1 + MM_V) : MM_C;
+  const sUp = guess ? MM_C * Math.sqrt(1 - MM_V * MM_V) : MM_C;
+  const tSplit = (cx - sx) / MM_C, tDown = (detY - cy) / MM_C;
+  const tH = tSplit + L / sOut + L / sBack + tDown, tV = tSplit + 2 * L / sUp + tDown;
+  ctx.clearRect(0, 0, W, H);
+  // wind and earth motion
+  ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = css('--ink');
+  ctx.fillText('🌍 地球帶著機器往右跑，每秒 30 公里 →', 10, 20);
+  if (guess) {
+    ctx.strokeStyle = css('--ink-faint'); ctx.lineWidth = 1.5; ctx.globalAlpha = .5;
+    for (let i = 0; i < 9; i++) {
+      const y = 40 + i * (H - 60) / 9, x = W - ((mmT * 90 + i * 137) % (W + 60));
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 30, y); ctx.stroke();
+    }
+    ctx.globalAlpha = 1; ctx.fillStyle = css('--ink-soft'); ctx.textAlign = 'right';
+    ctx.fillText('← 以為迎面吹來的「太空風」', W - 10, 20 + 18);
+  }
+  // apparatus
+  ctx.strokeStyle = css('--line'); ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(sx, cy); ctx.lineTo(cx + L, cy); ctx.moveTo(cx, cy - L); ctx.lineTo(cx, detY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = css('--ink-soft'); ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx + L + 4, cy - 18); ctx.lineTo(cx + L + 4, cy + 18);
+  ctx.moveTo(cx - 18, cy - L - 4); ctx.lineTo(cx + 18, cy - L - 4); ctx.stroke();
+  ctx.lineWidth = 3; ctx.strokeStyle = css('--instr');
+  ctx.beginPath(); ctx.moveTo(cx - 14, cy + 14); ctx.lineTo(cx + 14, cy - 14); ctx.stroke();
+  ctx.font = '12px "Noto Sans TC",sans-serif'; ctx.fillStyle = css('--ink-soft');
+  ctx.textAlign = 'center';
+  ctx.fillText('💡 光源', sx, cy + 22);
+  ctx.fillText('鏡子', cx + L + 4, cy + 34);
+  ctx.textAlign = 'left'; ctx.fillText('鏡子', cx + 24, cy - L);
+  ctx.fillText('分光鏡', cx + 14, cy + 22);
+  ctx.textAlign = 'center'; ctx.fillText('👁 偵測器', cx, detY + 22);
+  // pulses
+  const dot = (x, y, col) => { ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0; };
+  const t = mmT;
+  if (t < tSplit) dot(sx + MM_C * t, cy, css('--photon'));
+  else {
+    let tau = t - tSplit;                        // horizontal beam
+    const o = L / sOut, b = L / sBack;
+    if (tau < o) dot(cx + sOut * tau, cy, css('--photon'));
+    else if (tau < o + b) dot(cx + L - sBack * (tau - o), cy, css('--photon'));
+    else dot(cx - 4, Math.min(detY, cy + MM_C * (tau - o - b)), css('--photon'));
+    const u = L / sUp;                           // vertical beam
+    if (tau < u) dot(cx, cy - sUp * tau, css('--instr'));
+    else if (tau < 2 * u) dot(cx, cy - L + sUp * (tau - u), css('--instr'));
+    else dot(cx + 4, Math.min(detY, cy + MM_C * (tau - 2 * u)), css('--instr'));
+  }
+  const done = Math.max(tH, tV);
+  if (t > done && !mmShown) {
+    mmShown = true;
+    $('#mmVerdict').innerHTML = guess
+      ? `<b>藍色先回來，黃色晚到了！</b>如果光真的會被「太空風」吹得忽快忽慢，兩道光就會差一點點時間回來。邁克生和莫雷本來以為一定量得到這個差別。`
+      : '<b>兩道光同時回來！</b>不管地球往哪個方向跑、機器怎麼轉，光速都一樣。他們預期會看到的差別，連四十分之一都沒有出現。';
+  }
+  if (t > done + 2.5) { mmT = 0; mmShown = false; }
+}
+mmReset('guess');
+requestAnimationFrame(mmFrame);
 
 /* ---------- 2. light clock ---------- */
 const cc = $('#clockCv'); canvases.push(cc);
