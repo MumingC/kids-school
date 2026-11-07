@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>時間變慢實驗室</title>
+<meta name="description" content="給國小孩子的相對論：光速賽跑、光子鐘、雙胞胎太空旅行，以及時間真的會變慢的證據。">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%8F%B3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --paper:#E7EDF3; --surface:#FFFFFF; --surface-2:#F2F6FA;
+  --ink:#0F2137; --ink-soft:#54718F; --ink-faint:#8AA0B6;
+  --line:#C3D3E1; --line-soft:#DDE7F0;
+  --flame:#D2431C; --instr:#0B7F8E; --instr-soft:#DDF0F2;
+  --photon:#B57800; --photon-soft:#FFF3D6; --good:#2E7D32; --bad:#C62828;
+  --sky-top:#0F2137; --sky-bot:#3E6C93;
+  --shadow:0 1px 2px rgba(15,33,55,.06),0 8px 24px rgba(15,33,55,.07);
+  --grid:rgba(15,33,55,.055);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+  --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+  --line:#22414F; --line-soft:#1A3340;
+  --flame:#FF7E52; --instr:#3FC9D6; --instr-soft:#0C2E33;
+  --photon:#FFD15C; --photon-soft:#3A2E0E; --good:#7BD389; --bad:#FF8A80;
+  --sky-top:#04090F; --sky-bot:#123048;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --grid:rgba(150,200,230,.07);
+}}
+:root[data-theme="dark"]{
+  --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+  --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+  --line:#22414F; --line-soft:#1A3340;
+  --flame:#FF7E52; --instr:#3FC9D6; --instr-soft:#0C2E33;
+  --photon:#FFD15C; --photon-soft:#3A2E0E; --good:#7BD389; --bad:#FF8A80;
+  --sky-top:#04090F; --sky-bot:#123048;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --grid:rgba(150,200,230,.07);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans TC","Chakra Petch",system-ui,sans-serif;font-size:17px;line-height:1.85;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px}
+h1,h2,h3{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-weight:700;line-height:1.35;text-wrap:balance;margin:0}
+a{color:var(--instr)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--instr);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--surface) 92%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.top-in{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.home{font-size:13px;text-decoration:none;color:var(--ink-soft);white-space:nowrap}
+.brand{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-left:auto;padding:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);
+  border-radius:99px;padding:4px 12px 4px 5px;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.tab .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;
+  font-family:"IBM Plex Mono",monospace;border:1.5px solid var(--line);color:var(--ink-soft)}
+.tab[aria-selected="true"]{border-color:var(--instr);background:var(--instr-soft)}
+.tab[aria-selected="true"] .n{border-color:var(--instr);color:var(--instr)}
+.tab.done .n{background:var(--instr);border-color:var(--instr);color:var(--surface)}
+
+main{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.station{display:none}
+.station.on{display:block}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--flame)}
+.title{font-size:clamp(30px,6vw,46px);margin:6px 0 0}
+.subtitle{color:var(--ink-faint);font-family:"Chakra Petch",sans-serif;margin:2px 0 0}
+.lede{font-size:19px;max-width:36em;margin:18px 0 0}
+.sec{font-size:22px;margin:40px 0 10px}
+.sec small{font-family:"Chakra Petch",sans-serif;font-size:14px;color:var(--ink-faint);font-weight:500;margin-left:6px}
+.prose{max-width:38em}
+.prose p{margin:10px 0}
+.t{font-family:"Chakra Petch",sans-serif;font-size:.8em;color:var(--ink-faint);margin:0 4px}
+b.hl{background:var(--photon-soft);padding:0 3px;border-radius:3px}
+
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;box-shadow:var(--shadow);margin:22px 0;overflow:hidden}
+.panel-hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line-soft);
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
+.panel-bd{padding:16px}
+canvas{display:block;width:100%;border-radius:10px;background:var(--surface-2)}
+.ctl{margin-top:14px}
+.ctl label{display:flex;justify-content:space-between;font-size:15px}
+.ctl .v{font-family:"IBM Plex Mono",monospace;color:var(--instr);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--instr);height:28px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:7px 14px;font-size:15px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--instr)}
+.btn.main{background:var(--instr);border-color:var(--instr);color:var(--surface);font-weight:700}
+.btn[aria-pressed="true"]{border-color:var(--instr);background:var(--instr-soft);color:var(--ink);font-weight:700}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.ro{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.ro .k{font-size:13px;color:var(--ink-soft)}
+.ro .big{font-family:"Chakra Petch",sans-serif;font-size:28px;font-weight:700;line-height:1.2}
+.verdict{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--photon-soft);font-size:16px}
+.note{margin:26px 0;border-left:3px solid var(--photon);background:var(--surface);padding:14px 18px;border-radius:0 10px 10px 0;max-width:40em}
+.note .h{display:block;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--photon);margin-bottom:4px}
+
+/* moon race */
+.lane{display:grid;grid-template-columns:76px 1fr 92px;align-items:center;gap:10px;margin:8px 0;font-size:14.5px}
+.track{position:relative;height:30px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line-soft)}
+.track::after{content:"🌕";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:18px}
+.track::before{content:"🌍";position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:18px}
+.runner{position:absolute;top:50%;left:44px;transform:translate(-50%,-50%);font-size:18px;transition:none}
+.lane .tm{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);text-align:right}
+.watch{font-family:"IBM Plex Mono",monospace;font-size:15px;margin-left:auto;align-self:center;color:var(--ink-soft)}
+
+/* twins */
+.twin-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.twin-in label{font-size:15px;display:block}
+.twin-in input[type=number]{width:100%;font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);color:var(--ink)}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.person{background:var(--surface-2);border-radius:12px;padding:14px;text-align:center}
+.person .face{font-size:42px;line-height:1.2}
+.person .who{font-size:14px;color:var(--ink-soft)}
+.person .age{font-family:"Chakra Petch",sans-serif;font-size:34px;font-weight:700}
+.person .pass{font-size:14px;color:var(--ink-soft)}
+
+/* gps */
+.gps svg{display:block;width:100%;max-width:420px;margin:0 auto;height:auto}
+
+/* quiz */
+.quiz{margin-top:36px;background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:16px 18px}
+.quiz h3{font-size:17px}
+.quiz .q{margin:14px 0 0}
+.quiz .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.quiz .opt{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 12px;cursor:pointer}
+.quiz .opt.right{border-color:var(--good);color:var(--good);font-weight:700}
+.quiz .opt.wrong{border-color:var(--bad);color:var(--bad)}
+.quiz .fb{font-size:15px;margin-top:6px;min-height:1.5em}
+.next{margin-top:20px}
+
+/* resources */
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:12px}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.card .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--flame);text-transform:uppercase}
+.card h3{font-size:17px;margin:4px 0 6px}
+.card p{font-size:15px;color:var(--ink-soft);margin:0}
+.card a{font-size:14px}
+
+@media (max-width:640px){
+  .top-in{flex-wrap:wrap;gap:6px 12px}
+  .tabs{order:3;width:100%;margin-left:0}
+  .lane{grid-template-columns:58px 1fr 74px;font-size:13px}
+  .person .age{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="home" href="../">← Kids School</a>
+    <span class="brand">⏳ 時間變慢實驗室</span>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="站別"></nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ─────────── 1 ─────────── -->
+<section class="station on" id="st1" data-name="光有多快">
+  <div class="eyebrow">Station 01 · Speed of Light</div>
+  <h1 class="title">光：宇宙最快的東西</h1>
+  <p class="subtitle">Nothing goes faster than light.</p>
+  <p class="lede">打開手電筒，光一下子就照到牆上了，快到我們根本看不出它在「跑」。可是光真的有速度：<b class="hl">每秒大約 30 萬公里</b>。一秒鐘，它可以繞地球跑 <b>7 圈半</b>。</p>
+
+  <div class="panel">
+    <div class="panel-hd"><span>互動 01 — 大家一起跑到月球</span><span>地球 → 月球 38 萬 4 千公里</span></div>
+    <div class="panel-bd">
+      <div id="race"></div>
+      <div class="btnrow">
+        <button class="btn main" id="raceGo">出發！</button>
+        <button class="btn" id="raceReset">回到起點</button>
+        <span class="watch" id="raceWatch">0.0 秒</span>
+      </div>
+      <div class="verdict" id="raceVerdict">按「出發」。這裡每個人都用<b>真正的速度</b>在跑，眼睛盯著光 ✨，數數看它跑了幾秒。</div>
+    </div>
+  </div>
+
+  <h2 class="sec">愛因斯坦發現的怪規則 <small>Light never speeds up</small></h2>
+  <div class="prose">
+    <p>想像你坐在一列往前開的火車上，把球往前丟。站在月台上的人看，球的速度＝<b>你丟的速度＋火車的速度</b>，比較快。這很合理。</p>
+    <p>可是換成打開手電筒，就不一樣了：不管火車開多快，月台上的人量到的光速<b>還是一樣</b>，每秒 30 萬公里，一點都沒有變快。</p>
+    <p>這件事很奇怪，但做了好多次實驗都是這樣。愛因斯坦想：<b>如果光速永遠不變，那會變的是什麼？</b>他的答案嚇了大家一跳——<b class="hl">會變的是時間</b>。下一站，我們用一個「光做的時鐘」來看看為什麼。</p>
+  </div>
+
+  <div class="quiz" data-st="1">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="0">光從地球跑到月球，大約要多久？
+      <div class="opts"><button class="opt">1 秒多一點</button><button class="opt">1 小時</button><button class="opt">1 天</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="2">下一站：光子鐘 →</button>
+</section>
+
+<!-- ─────────── 2 ─────────── -->
+<section class="station" id="st2" data-name="光子鐘">
+  <div class="eyebrow">Station 02 · Light Clock</div>
+  <h1 class="title">光做的時鐘</h1>
+  <p class="subtitle">Why a moving clock ticks slower.</p>
+  <p class="lede">做一個最簡單的時鐘：上下各一面鏡子，讓一點光在中間跳來跳去。光<b>每來回一次</b>，時鐘就走<b>一下</b>（tick）。</p>
+
+  <div class="panel">
+    <div class="panel-hd"><span>互動 02 — 兩個一模一樣的光子鐘</span><span>光被放慢很多倍，才看得清楚</span></div>
+    <div class="panel-bd">
+      <canvas id="clockCv" height="360" aria-label="上方是停在地上的光子鐘，下方是坐在火箭上飛過去的光子鐘"></canvas>
+      <div class="ctl">
+        <label for="vSl">火箭的速度（光速的幾 %） <span class="v" id="vVal">60%</span></label>
+        <input type="range" id="vSl" min="0" max="99" value="60">
+      </div>
+      <div class="btnrow">
+        <button class="btn" data-v="0">停住 0%</button>
+        <button class="btn" data-v="50">50%</button>
+        <button class="btn" data-v="87">87%</button>
+        <button class="btn" data-v="99">99%</button>
+        <button class="btn" id="clockReset">計數歸零</button>
+      </div>
+      <div class="readout">
+        <div class="ro"><div class="k">🏠 地上的鐘走了</div><div class="big" id="tickA">0</div></div>
+        <div class="ro"><div class="k">🚀 火箭上的鐘走了</div><div class="big" id="tickB">0</div></div>
+        <div class="ro"><div class="k">地上走幾下，火箭才走 1 下</div><div class="big" id="gam">1.25</div></div>
+      </div>
+      <div class="verdict" id="clockVerdict"></div>
+    </div>
+  </div>
+
+  <h2 class="sec">為什麼火箭的鐘比較慢？ <small>The diagonal path</small></h2>
+  <div class="prose">
+    <p>從地上看，火箭一直往右飛，所以火箭鐘裡的光不是直直上下，而是走<b>斜斜的鋸齒線</b>（就是畫面上那條黃色的線）。</p>
+    <p>斜線比直線<b>長</b>。可是上一站說過，光速<b>不能變快</b>。路變長、速度又不變，光就要花比較久才跳完一次——所以火箭上的鐘，每一下都走得比較慢。</p>
+    <p>重點來了：火箭上<b>所有的東西</b>都一起變慢，手錶、心跳、吃飯、長大，全部一樣。坐在火箭裡的人完全不會覺得怪，因為他身邊的一切都用同樣的節奏在走。這就叫做<b class="hl">時間膨脹</b><span class="t">time dilation</span>。</p>
+  </div>
+  <div class="note"><span class="h">Try this · 試試看</span>把速度拉到 <b>87%</b>：地上的鐘走 2 下，火箭的鐘才走 1 下。拉到 <b>99%</b>，差了 7 倍！可是拉到 10%，幾乎看不出差別——平常生活的東西都太慢了，所以我們從來沒注意到。</div>
+
+  <div class="quiz" data-st="2">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="0">火箭飛得越快，火箭上的鐘會……
+      <div class="opts"><button class="opt">走得越慢</button><button class="opt">走得越快</button><button class="opt">完全一樣</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="1">為什麼會這樣？
+      <div class="opts"><button class="opt">因為火箭太冷，時鐘被凍住了</button><button class="opt">因為光要走斜線，路比較長，光速又不能變快</button><button class="opt">因為火箭上的電池快沒電了</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="3">下一站：雙胞胎太空旅行 →</button>
+</section>
+
+<!-- ─────────── 3 ─────────── -->
+<section class="station" id="st3" data-name="太空旅行">
+  <div class="eyebrow">Station 03 · The Twin Trip</div>
+  <h1 class="title">去太空旅行，回來變年輕？</h1>
+  <p class="subtitle">Who is older when the traveler comes home?</p>
+  <p class="lede">一個人坐超快的太空船去遠方的星星再回來，另一個人留在地球。太空船上的時間走得慢，所以回來的時候……誰比較老？自己算算看。</p>
+
+  <div class="panel">
+    <div class="panel-hd"><span>互動 03 — 太空旅行計算機</span><span>來回一趟</span></div>
+    <div class="panel-bd">
+      <div class="twin-in">
+        <label>🚀 出發的人現在幾歲<input type="number" id="ageGo" min="1" max="99" value="8"></label>
+        <label>🏠 留在地球的人現在幾歲<input type="number" id="ageStay" min="1" max="99" value="10"></label>
+      </div>
+      <div class="ctl"><label>要去哪裡？</label></div>
+      <div class="btnrow" id="dests"></div>
+      <div class="ctl"><label>太空船的速度</label></div>
+      <div class="btnrow" id="speeds"></div>
+      <div class="people">
+        <div class="person"><div class="face">🧑‍🚀</div><div class="who">出發的人回來時</div><div class="age" id="outGo">–</div><div class="pass" id="passGo"></div></div>
+        <div class="person"><div class="face">🏠</div><div class="who">留在地球的人那時</div><div class="age" id="outStay">–</div><div class="pass" id="passStay"></div></div>
+      </div>
+      <div class="verdict" id="twinVerdict"></div>
+    </div>
+  </div>
+
+  <div class="note"><span class="h">For grown-ups · 給大人</span>計算只用了等速飛行的時間膨脹，忽略加速、轉彎與減速；距離用地球看到的光年數。現實中沒有太空船能飛到這麼快——目前最快的人造物（帕克太陽探測器）大約只有光速的 0.064%。</div>
+
+  <div class="quiz" data-st="3">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">旅行回來的時候，誰比較年輕？
+      <div class="opts"><button class="opt">留在地球的人</button><button class="opt">去太空旅行的人</button><button class="opt">兩個人一樣大</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="4">下一站：這是真的嗎？ →</button>
+</section>
+
+<!-- ─────────── 4 ─────────── -->
+<section class="station" id="st4" data-name="真的有發生">
+  <div class="eyebrow">Station 04 · Proof</div>
+  <h1 class="title">這是真的嗎？科學家量到了！</h1>
+  <p class="subtitle">Time dilation is measured every day.</p>
+  <p class="lede">聽起來很像科幻故事，可是時間膨脹每天都在發生，而且被量到過很多次。我們來看三個證據。</p>
+
+  <h2 class="sec">證據 1：從天上掉下來的緲子 <small>Muons</small></h2>
+  <div class="prose">
+    <p>太空來的高能粒子撞到大約 <b>10 公里高</b>的空氣，會產生一種很小的粒子，叫做<b>緲子</b><span class="t">muon</span>。緲子壽命超短，平均只活<b>百萬分之 2 秒</b>就消失了。它們跑得非常快（光速的 99.8%），可是照這個壽命算，幾乎全部都會在半路消失，根本到不了地面。</p>
+    <p>可是科學家在地面上，偏偏測到了一大堆緲子。為什麼？按下面的按鈕比比看。</p>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><span>互動 04 — 緲子雨</span><span>從 10 公里高掉下來</span></div>
+    <div class="panel-bd">
+      <canvas id="muCv" height="320" aria-label="緲子從天空往地面掉，途中有些會消失"></canvas>
+      <div class="btnrow">
+        <button class="btn" id="muNo" aria-pressed="false">如果時間不會變慢</button>
+        <button class="btn" id="muYes" aria-pressed="true">真實世界：緲子的時間變慢</button>
+      </div>
+      <div class="readout">
+        <div class="ro"><div class="k">放出的緲子</div><div class="big" id="muSent">0</div></div>
+        <div class="ro"><div class="k">到達地面</div><div class="big" id="muHit">0</div></div>
+      </div>
+      <div class="verdict" id="muVerdict"></div>
+    </div>
+  </div>
+
+  <h2 class="sec">證據 2：帶著原子鐘坐飛機 <small>Hafele–Keating, 1971</small></h2>
+  <div class="prose">
+    <p>1971 年，兩位美國科學家把非常準的<b>原子鐘</b>搬上一般的客機，繞地球飛一圈，回來再跟留在地面的原子鐘比。結果時間真的不一樣了：</p>
+    <ul>
+      <li>往東飛一圈的鐘，<b>慢了 59 奈秒</b></li>
+      <li>往西飛一圈的鐘，<b>快了 273 奈秒</b></li>
+    </ul>
+    <p>1 奈秒是<b>十億分之一秒</b>，非常非常小，可是原子鐘量得出來，而且跟愛因斯坦算的差不多。往東、往西結果不同，是因為地球本身也在轉，加上飛機飛得高、重力比較弱（下面會講到）。</p>
+  </div>
+
+  <h2 class="sec">證據 3：你家的 GPS <small>Satellites need Einstein</small></h2>
+  <div class="prose">
+    <p>手機導航靠的是天上的 <b>GPS 衛星</b>，每顆衛星都帶著原子鐘。衛星的時間受到兩件事影響：</p>
+    <ul>
+      <li>衛星飛得很快（每秒將近 4 公里）→ 時間<b>變慢</b>，每天慢 7 微秒</li>
+      <li>衛星離地球很遠，<b>重力比較弱</b>→ 時間<b>變快</b>，每天快 45 微秒（這是愛因斯坦的另一個發現：重力越強，時間走得越慢）</li>
+    </ul>
+    <p>合起來，衛星的鐘<b>每天快 38 微秒</b>（1 微秒＝百萬分之一秒）。聽起來很少，但 GPS 是用「光跑了多久」來算距離的，光在 38 微秒裡可以跑 11 公里！</p>
+  </div>
+  <div class="panel gps">
+    <div class="panel-hd"><span>互動 05 — 如果工程師忘了愛因斯坦</span><span>GPS 每天多錯 11 公里</span></div>
+    <div class="panel-bd">
+      <svg id="gpsSvg" viewBox="0 0 400 400" role="img" aria-label="地圖：你的家在中間，GPS 以為你在的位置會越飄越遠"></svg>
+      <div class="ctl">
+        <label for="daySl">不修正，過了幾天 <span class="v" id="dayVal">0 天</span></label>
+        <input type="range" id="daySl" min="0" max="168" value="0" step="1">
+      </div>
+      <div class="verdict" id="gpsVerdict"></div>
+    </div>
+  </div>
+
+  <div class="quiz" data-st="4">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">如果 GPS 不修正愛因斯坦說的時間差，一天會錯多遠？
+      <div class="opts"><button class="opt">幾公分</button><button class="opt">大約 11 公里</button><button class="opt">大約 1000 公里</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="2">為什麼地面上還測得到那麼多緲子？
+      <div class="opts"><button class="opt">因為緲子其實是在地面上產生的</button><button class="opt">因為緲子跑得比光還快</button><button class="opt">因為緲子跑得很快，它的時間變慢，活得比較久</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="5">最後一站：再多玩一點 →</button>
+</section>
+
+<!-- ─────────── 5 ─────────── -->
+<section class="station" id="st5" data-name="延伸資源">
+  <div class="eyebrow">Station 05 · Keep Exploring</div>
+  <h1 class="title">再多玩一點</h1>
+  <p class="subtitle">Games, videos and books.</p>
+  <p class="lede">喜歡的話，這些可以接著玩、接著看。</p>
+
+  <h2 class="sec">玩遊戲 <small>Play</small></h2>
+  <div class="res">
+    <div class="card"><div class="tag">Browser game · 英文</div><h3>Velocity Raptor</h3>
+      <p>當一隻恐龍，用接近光速的速度闖關。越跑越快，周圍的東西會被壓扁、時間會變慢，關卡要靠這些效果才過得去。適合跟大人一起玩。</p>
+      <a href="https://testtubegames.com/velocityraptor.html" target="_blank" rel="noopener">testtubegames.com</a></div>
+    <div class="card"><div class="tag">Computer game · 英文</div><h3>A Slower Speed of Light</h3>
+      <p>MIT 做的免費 3D 遊戲：撿起球，光速就變慢一點，直到慢得像走路一樣，可以親眼看到顏色和形狀怎麼變。需要電腦安裝，畫面要求比較高。</p>
+      <a href="https://gamelab.mit.edu/games/a-slower-speed-of-light/" target="_blank" rel="noopener">MIT Game Lab</a></div>
+  </div>
+
+  <h2 class="sec">看影片、讀文章 <small>Watch &amp; read</small></h2>
+  <div class="res">
+    <div class="card"><div class="tag">Video · 英文，5 分鐘</div><h3>Einstein's twin paradox explained</h3>
+      <p>TED-Ed 的 5 分鐘動畫：雙胞胎 Terra 和 Stella，一個去太空、一個留在地球，正好接著第 3 站看。</p>
+      <a href="https://ed.ted.com/lessons/einstein-s-twin-paradox-explained-amber-l-stuver" target="_blank" rel="noopener">TED-Ed</a></div>
+    <div class="card"><div class="tag">Article · 英文，簡單</div><h3>Is Time Travel Possible?</h3>
+      <p>NASA 給孩子的網站，用 GPS 和太空人當例子，講時間為什麼會變快變慢。</p>
+      <a href="https://spaceplace.nasa.gov/time-travel/en/" target="_blank" rel="noopener">NASA Space Place</a></div>
+  </div>
+
+  <h2 class="sec">讀書 <small>Books</small></h2>
+  <div class="res">
+    <div class="card"><div class="tag">漫畫＋百科 · 中高年級</div><h3>超科少年 10：現代物理學之父愛因斯坦</h3>
+      <p>一面是愛因斯坦的人物漫畫，另一面是光速、重力、相對論的知識百科。</p>
+      <a href="https://www.eslite.com/product/10012030392682905719003" target="_blank" rel="noopener">誠品線上</a></div>
+    <div class="card"><div class="tag">繪本 · 低中年級</div><h3>我的第一本相對論</h3>
+      <p>英文原書 <i>My First Book of Relativity</i>。由「愛因斯坦老師」帶著孩子一頁一頁認識光、時間和重力。</p>
+      <a href="https://www.eslite.com/product/1001116082682034977008" target="_blank" rel="noopener">誠品線上</a></div>
+  </div>
+
+  <div class="note"><span class="h">For grown-ups · 給大人</span>這一課刻意簡化了幾件事：
+    <br>① 相對論其實是對稱的——火箭上的人也會覺得地上的鐘比較慢；雙胞胎問題的答案在於旅行者有「掉頭」，兩邊並不對等（TED-Ed 影片有講）。
+    <br>② 光子鐘的光被放慢了幾百萬倍；時間比例（γ）是照真實公式 1/√(1−v²/c²) 算的。
+    <br>③ 1971 年實驗的數字出自原始論文，可參考 <a href="http://hyperphysics.gsu.edu/hbase/Relativ/airtim.html" target="_blank" rel="noopener">HyperPhysics 整理</a>。</div>
+</section>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const KEY = 'relativity.v1';
+
+/* ---------- progress & tabs ---------- */
+let state = { st: 1, done: [] };
+try { const r = localStorage.getItem(KEY); if (r) state = Object.assign(state, JSON.parse(r)); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const stations = $$('.station');
+const tabs = $('#tabs');
+stations.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab'; b.setAttribute('role', 'tab'); b.dataset.st = i + 1;
+  b.innerHTML = `<span class="n">${i + 1}</span>${s.dataset.name}`;
+  b.onclick = () => show(i + 1);
+  tabs.appendChild(b);
+});
+function paintTabs() {
+  $$('.tab').forEach(t => {
+    const n = +t.dataset.st;
+    t.setAttribute('aria-selected', n === state.st);
+    t.classList.toggle('done', state.done.includes(n));
+  });
+}
+function show(n, scroll = true) {
+  state.st = n; save();
+  stations.forEach((s, i) => s.classList.toggle('on', i + 1 === n));
+  paintTabs();
+  if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  const tb = $$('.tab')[n - 1]; tabs.scrollLeft = tb.offsetLeft - tabs.offsetLeft - 8;
+  resizeAll();
+}
+$$('[data-go]').forEach(b => b.onclick = () => show(+b.dataset.go));
+const visible = id => $('#' + id).closest('.station').classList.contains('on');
+
+/* ---------- quizzes ---------- */
+const PRAISE = ['答對了！', '沒錯！', '太厲害了！'];
+$$('.quiz').forEach(qz => {
+  const st = +qz.dataset.st;
+  const qs = $$(`.quiz[data-st="${st}"] .q`);
+  qs.forEach(q => {
+    const ans = +q.dataset.ans;
+    const fb = q.querySelector('.fb');
+    q.querySelectorAll('.opt').forEach((o, i) => o.onclick = () => {
+      if (i === ans) {
+        o.classList.add('right'); q.dataset.ok = 1;
+        fb.textContent = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+        if (qs.every(x => x.dataset.ok) && !state.done.includes(st)) { state.done.push(st); save(); paintTabs(); }
+      } else {
+        o.classList.add('wrong'); fb.textContent = '再想想看，可以回去玩一下上面的互動。';
+      }
+    });
+  });
+});
+
+/* ---------- canvas helper ---------- */
+const canvases = [];
+function fit(cv) {
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = +cv.getAttribute('height');
+  cv.style.height = h + 'px';
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cv._w = w; cv._h = h;
+}
+function resizeAll() { canvases.forEach(fit); }
+window.addEventListener('resize', resizeAll);
+
+/* ---------- 1. moon race ---------- */
+const MOON = 384400; // km
+const RACERS = [
+  { e: '✨', n: '光', kmh: 299792.458 * 3600 },
+  { e: '🚀', n: '火箭', kmh: 40000 },
+  { e: '✈️', n: '噴射機', kmh: 900 },
+  { e: '🚗', n: '汽車', kmh: 100 },
+  { e: '🚶', n: '走路', kmh: 5 },
+];
+function fmtDur(h) {
+  const s = h * 3600;
+  if (s < 60) return s.toFixed(1) + ' 秒';
+  if (h < 48) return h.toFixed(1) + ' 小時';
+  if (h < 24 * 365) return (h / 24).toFixed(0) + ' 天';
+  return (h / 24 / 365.25).toFixed(1) + ' 年';
+}
+const race = $('#race');
+RACERS.forEach((r, i) => {
+  race.insertAdjacentHTML('beforeend',
+    `<div class="lane"><span>${r.e} ${r.n}</span><div class="track"><span class="runner" id="rn${i}">${r.e}</span></div><span class="tm">${fmtDur(MOON / r.kmh)}</span></div>`);
+});
+let raceT0 = null, raceRAF = null;
+function raceFrame(now) {
+  const t = (now - raceT0) / 1000;
+  $('#raceWatch').textContent = t.toFixed(1) + ' 秒';
+  RACERS.forEach((r, i) => {
+    const el = $('#rn' + i), track = el.parentNode;
+    const p = Math.min(1, (r.kmh / 3600 * t) / MOON);
+    const x = 44 + p * (track.clientWidth - 88);
+    el.style.left = x + 'px';
+  });
+  if (t > 1.282 && !$('#raceVerdict').dataset.shown) {
+    $('#raceVerdict').dataset.shown = 1;
+    $('#raceVerdict').innerHTML = '光只花了 <b>1.3 秒</b>就到月球了！其他人呢？火箭要跑 9.6 小時，走路要走將近 9 年。它們其實都在動，只是慢到眼睛看不出來。';
+  }
+  if (t < 8) raceRAF = requestAnimationFrame(raceFrame);
+}
+$('#raceGo').onclick = () => {
+  cancelAnimationFrame(raceRAF); delete $('#raceVerdict').dataset.shown;
+  raceT0 = performance.now(); raceRAF = requestAnimationFrame(raceFrame);
+};
+$('#raceReset').onclick = () => {
+  cancelAnimationFrame(raceRAF);
+  RACERS.forEach((r, i) => $('#rn' + i).style.left = '44px');
+  $('#raceWatch').textContent = '0.0 秒';
+};
+
+/* ---------- 2. light clock ---------- */
+const cc = $('#clockCv'); canvases.push(cc);
+const C_SIM = 150;           // px/s: light, slowed down
+const L = 100;               // mirror gap px
+let v = 0.6, tA = 0, tB = 0, phA = 0, phB = 0, rocketX = 0, trail = [];
+const gamma = b => 1 / Math.sqrt(1 - b * b);
+function setV(p) {
+  v = p / 100; $('#vSl').value = p; $('#vVal').textContent = p + '%';
+  $('#gam').textContent = gamma(v).toFixed(2);
+  trail = [];
+  const g = gamma(v);
+  $('#clockVerdict').innerHTML = v === 0
+    ? '火箭停住了，兩個鐘走得一樣快。'
+    : `火箭用光速的 <b>${p}%</b> 飛。地上的鐘走 <b>${g.toFixed(2)}</b> 下，火箭的鐘才走 1 下。` +
+      (g < 1.05 ? '差一點點而已，很難看出來。' : g > 5 ? '差好多！' : '');
+}
+$('#vSl').oninput = e => setV(+e.target.value);
+$$('[data-v]').forEach(b => b.onclick = () => setV(+b.dataset.v));
+$('#clockReset').onclick = () => { tA = tB = 0; phA = phB = 0; $('#tickA').textContent = 0; $('#tickB').textContent = 0; trail = []; };
+
+function drawClock(ctx, x, yTop, ph, label, emoji) {
+  const ink = css('--ink-soft'), ph1 = css('--photon');
+  ctx.strokeStyle = ink; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 22, yTop); ctx.lineTo(x + 22, yTop);
+  ctx.moveTo(x - 22, yTop + L); ctx.lineTo(x + 22, yTop + L); ctx.stroke();
+  ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(x - 22, yTop); ctx.lineTo(x - 22, yTop + L);
+  ctx.moveTo(x + 22, yTop); ctx.lineTo(x + 22, yTop + L); ctx.stroke(); ctx.setLineDash([]);
+  // photon: ph in [0,1): 0 bottom -> .5 top -> 1 bottom
+  const y = yTop + L - (ph < .5 ? ph * 2 : 2 - ph * 2) * L;
+  ctx.fillStyle = ph1; ctx.shadowColor = ph1; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.font = '15px "Noto Sans TC",sans-serif'; ctx.fillStyle = css('--ink');
+  ctx.textAlign = 'center'; ctx.fillText(emoji + ' ' + label, x, yTop - 12);
+  return y;
+}
+let lastClock = null;
+function clockFrame(now) {
+  requestAnimationFrame(clockFrame);
+  const dt = lastClock ? Math.min(0.05, (now - lastClock) / 1000) : 0; lastClock = now;
+  if (!visible('clockCv')) return;
+  const ctx = cc.getContext('2d'), W = cc._w, H = cc._h;
+  const period = 2 * L / C_SIM;
+  phA += dt / period; while (phA >= 1) { phA -= 1; tA++; $('#tickA').textContent = tA; }
+  phB += dt / (period * gamma(v)); while (phB >= 1) { phB -= 1; tB++; $('#tickB').textContent = tB; }
+  rocketX += v * C_SIM * dt;
+  const span = W + 60;
+  if (rocketX > span) { rocketX -= span; trail = []; }
+  ctx.clearRect(0, 0, W, H);
+  // divider
+  ctx.strokeStyle = css('--line'); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
+  drawClock(ctx, W / 2, 40, phA, '停在地上的鐘', '🏠');
+  const rx = rocketX - 30;
+  // trail
+  const yTop = H / 2 + 46;
+  const py = yTop + L - (phB < .5 ? phB * 2 : 2 - phB * 2) * L;
+  trail.push([rx, py]); if (trail.length > 400) trail.shift();
+  ctx.strokeStyle = css('--photon'); ctx.globalAlpha = .55; ctx.lineWidth = 2;
+  ctx.beginPath(); trail.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+  ctx.globalAlpha = 1;
+  // rocket body
+  ctx.fillStyle = css('--instr-soft'); ctx.strokeStyle = css('--instr'); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(rx - 34, yTop - 8, 68, L + 16, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = css('--flame');
+  if (v > 0) { ctx.beginPath(); ctx.moveTo(rx - 34, yTop + L / 2 - 10); ctx.lineTo(rx - 34 - 10 - 18 * v, yTop + L / 2); ctx.lineTo(rx - 34, yTop + L / 2 + 10); ctx.fill(); }
+  drawClock(ctx, rx, yTop, phB, '火箭上的鐘', '🚀');
+}
+setV(60);
+requestAnimationFrame(clockFrame);
+
+/* ---------- 3. twins ---------- */
+const DESTS = [
+  { n: '比鄰星', ly: 4.24 }, { n: '天狼星', ly: 8.6 }, { n: '織女星', ly: 25 },
+  { n: '昴宿星團', ly: 444 }, { n: '銀河中心', ly: 26000 },
+];
+const SPEEDS = [0.1, 0.5, 0.9, 0.99, 0.999, 0.9999];
+let dest = 0, spd = 3;
+function chips(el, list, label, get, set) {
+  el.innerHTML = '';
+  list.forEach((x, i) => {
+    const b = document.createElement('button'); b.className = 'btn'; b.textContent = label(x);
+    b.setAttribute('aria-pressed', i === get()); b.onclick = () => { set(i); twin(); };
+    el.appendChild(b);
+  });
+}
+function fmtYears(y) {
+  if (y < 1 / 12) return Math.round(y * 365) + ' 天';
+  if (y < 1) return Math.round(y * 12) + ' 個月';
+  if (y < 100) return y.toFixed(1) + ' 年';
+  return Math.round(y).toLocaleString() + ' 年';
+}
+function twin() {
+  chips($('#dests'), DESTS, d => `${d.n}（${d.ly.toLocaleString()} 光年）`, () => dest, i => dest = i);
+  chips($('#speeds'), SPEEDS, s => (s * 100).toString() + '%', () => spd, i => spd = i);
+  const d = DESTS[dest], s = SPEEDS[spd];
+  const earth = 2 * d.ly / s, ship = earth / gamma(s);
+  const a = +$('#ageGo').value || 0, b = +$('#ageStay').value || 0;
+  const ag = a + ship, as = b + earth;
+  const fmtAge = x => x < 1000 ? x.toFixed(x < 100 ? 1 : 0) + ' 歲' : Math.round(x).toLocaleString() + ' 歲';
+  $('#outGo').textContent = fmtAge(ag);
+  $('#outStay').textContent = fmtAge(as);
+  $('#passGo').textContent = '旅行中過了 ' + fmtYears(ship);
+  $('#passStay').textContent = '地球上過了 ' + fmtYears(earth);
+  let msg = `飛到${d.n}再回來，地球上過了 <b>${fmtYears(earth)}</b>，太空船上只過了 <b>${fmtYears(ship)}</b>。`;
+  if (ag < as && a < b) msg += ` 出發時比較小的人，回來時跟對方<b>差得更多</b>了。`;
+  if (ag < as && a >= b) msg += ` 出發時比較大的人，回來時<b>反而比較年輕</b>！`;
+  if (as > 120) msg += ' 留在地球的人早就不在了……回來看到的會是他的好幾代子孫。';
+  else if (gamma(s) < 1.2) msg += ' 速度不夠快，時間差得不多。試試 99% 以上！';
+  $('#twinVerdict').innerHTML = msg;
+}
+['#ageGo', '#ageStay'].forEach(id => $(id).oninput = twin);
+twin();
+
+/* ---------- 4a. muons ---------- */
+const mc = $('#muCv'); canvases.push(mc);
+const FALL = 4;            // seconds on screen for the 10 km trip
+const HALVES = { no: 22.0, yes: 1.39 }; // half-lives during the trip: 33.4 us / 1.52 us, then / gamma 15.8
+let muMode = 'yes', mus = [], muSent = 0, muHit = 0, muSpawn = 0, lastMu = null, muRestart = 0;
+function muReset(mode) {
+  clearTimeout(muRestart); muRestart = 0;
+  muMode = mode; mus = []; muSent = muHit = 0; muSpawn = 0;
+  $('#muNo').setAttribute('aria-pressed', mode === 'no');
+  $('#muYes').setAttribute('aria-pressed', mode === 'yes');
+  $('#muVerdict').innerHTML = mode === 'no'
+    ? '如果緲子的時間跟我們一樣快，10 公里的路上它要經過 <b>22 次</b>「消失一半」，幾乎一顆都到不了地面。'
+    : '緲子跑得超快（光速的 99.8%），它的時間慢了大約 <b>16 倍</b>。路上只經過大約 1.4 次「消失一半」，所以有<b>三成多</b>到得了地面——這就是科學家真的測到的。';
+}
+$('#muNo').onclick = () => muReset('no');
+$('#muYes').onclick = () => muReset('yes');
+function muFrame(now) {
+  requestAnimationFrame(muFrame);
+  const dt = lastMu ? Math.min(0.05, (now - lastMu) / 1000) : 0; lastMu = now;
+  if (!visible('muCv')) return;
+  const ctx = mc.getContext('2d'), W = mc._w, H = mc._h, top = 26, ground = H - 30;
+  muSpawn += dt;
+  while (muSpawn > 0.04 && muSent < 200) {
+    muSpawn -= 0.04; muSent++;
+    mus.push({ x: 20 + Math.random() * (W - 40), p: 0, dead: 0 });
+  }
+  const pDecay = 1 - Math.pow(0.5, HALVES[muMode] * dt / FALL);
+  mus.forEach(m => {
+    if (m.dead) { m.dead += dt; return; }
+    m.p += dt / FALL;
+    if (Math.random() < pDecay) m.dead = 1e-6;
+    else if (m.p >= 1) { m.p = 1; m.dead = -1; muHit++; }
+  });
+  mus = mus.filter(m => !(m.dead > 0.5));
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = css('--ink-soft'); ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('☁️ 10 公里高：緲子在這裡誕生', 8, 18);
+  ctx.fillStyle = css('--good'); ctx.fillRect(0, ground, W, H - ground);
+  ctx.fillStyle = css('--surface'); ctx.fillText('🧪 地面的偵測器', 8, ground + 19);
+  mus.forEach(m => {
+    const y = top + m.p * (ground - top);
+    if (m.dead > 0) {
+      ctx.globalAlpha = 1 - m.dead / 0.5; ctx.strokeStyle = css('--flame'); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(m.x, y, 3 + m.dead * 16, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    } else {
+      ctx.fillStyle = css('--instr'); ctx.beginPath(); ctx.arc(m.x, y, 3.5, 0, 7); ctx.fill();
+    }
+  });
+  mus = mus.filter(m => m.dead !== -1 || (m.hitT = (m.hitT || 0) + dt) < 0.6);
+  $('#muSent').textContent = muSent; $('#muHit').textContent = muHit;
+  if (muSent >= 200 && mus.length === 0 && !muRestart) muRestart = setTimeout(() => { muRestart = 0; muReset(muMode); }, 1500);
+}
+muReset('yes');
+requestAnimationFrame(muFrame);
+
+/* ---------- 4b. GPS drift ---------- */
+const KM_PER_DAY = 38e-6 * 299792.458;   // ≈ 11.4 km
+const svg = $('#gpsSvg');
+function gps() {
+  const h = +$('#daySl').value, days = h / 24, km = days * KM_PER_DAY;
+  $('#dayVal').textContent = h < 24 ? h + ' 小時' : days.toFixed(days % 1 ? 1 : 0) + ' 天';
+  const R = 170, maxKm = 80, s = R / maxKm;           // rings every 20 km
+  const ang = -0.6, px = 200 + Math.cos(ang) * km * s, py = 200 + Math.sin(ang) * km * s;
+  let g = '';
+  for (let r = 20; r <= maxKm; r += 20) {
+    g += `<circle cx="200" cy="200" r="${r * s}" fill="none" stroke="var(--line)" stroke-dasharray="3 5"/>` +
+         `<text x="${200 + r * s + 3}" y="196" font-size="11" fill="var(--ink-faint)" font-family="IBM Plex Mono,monospace">${r}km</text>`;
+  }
+  g += `<line x1="200" y1="200" x2="${px}" y2="${py}" stroke="var(--flame)" stroke-width="2" stroke-dasharray="5 4"/>`;
+  g += `<text x="200" y="208" text-anchor="middle" font-size="22">🏠</text>`;
+  g += `<text x="200" y="232" text-anchor="middle" font-size="12" fill="var(--ink)">你真正在這裡</text>`;
+  if (km > 0.5) {
+    g += `<text x="${px}" y="${py}" text-anchor="middle" font-size="24">📍</text>` +
+         `<text x="${px}" y="${py - 26}" text-anchor="middle" font-size="12" fill="var(--flame)">GPS 以為你在這裡</text>`;
+  }
+  svg.innerHTML = g;
+  let msg;
+  if (km < 0.5) msg = '工程師有把愛因斯坦的時間差算進去，所以 GPS 很準。往右拉，看看如果忘了會怎樣。';
+  else msg = `只過了 ${$('#dayVal').textContent}，導航就錯了 <b>${km.toFixed(km < 10 ? 1 : 0)} 公里</b>` +
+    (km < 5 ? '，已經找不到學校門口了。' : km < 40 ? '，大概是走路好幾個小時的距離！' : '，地圖完全沒辦法用了。');
+  $('#gpsVerdict').innerHTML = msg;
+}
+$('#daySl').oninput = gps;
+gps();
+
+/* ---------- start ---------- */
+show(Math.min(Math.max(1, state.st | 0), stations.length), false);
+})();
+</script>
+</body>
+</html>

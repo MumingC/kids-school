@@ -13,6 +13,7 @@ A small collection of static learning websites I build for my kids.
 | 04 | [`ai-history/`](ai-history/) | AI 是怎麼長大的？ | 給國小三至六年級的 AI 發展史：AlphaGo、圖靈、感知器、ELIZA，以及持續增加的後續篇章。 |
 | 05 | [`village-chief/`](village-chief/) | Village Chief · 小小村長 | 英文介面的六角格經濟策略遊戲：探索、建城、供需與價格、交換與合作。可跟電腦玩或兩人輪流。圖片清單見 [`ART.md`](village-chief/ART.md)。 |
 | 06 | [`detective/`](detective/) | 環球小偵探 · World Detective | 類似《Carmen Sandiego》的世界追緝遊戲：跟著線索追怪盜飛遍 38 座城市，點真實照片找秘密、讀文化圖鑑、認國旗；飛行時間照真實距離計算。照片授權見 [`CREDITS.md`](detective/CREDITS.md)。 |
+| 07 | [`relativity/`](relativity/) | 時間變慢實驗室 · Relativity | 5 站相對論入門（小二起）：光速賽跑到月球、光子鐘看時間膨脹、雙胞胎太空旅行計算機、緲子雨與 GPS 的證據，最後是延伸遊戲、影片與書單。 |
 
 ## How it works
 
@@ -39,3 +40,4 @@ Settings → Pages → Source: `Deploy from a branch` → Branch `main` / `(root
 - AI History: `https://mumingc.github.io/kids-school/ai-history/`
 - Village Chief: `https://mumingc.github.io/kids-school/village-chief/`
 - World Detective: `https://mumingc.github.io/kids-school/detective/`
+- Relativity: `https://mumingc.github.io/kids-school/relativity/`
