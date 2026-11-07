@@ -633,9 +633,9 @@ function trFrame(now) {
       ctx.fillStyle = css('--photon'); ctx.shadowColor = css('--photon'); ctx.shadowBlur = 14;
       ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
     }
-    ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.fillStyle = css('--ink-soft');
-    ctx.textAlign = px > W - 140 ? 'right' : 'left';
-    ctx.fillText(labels[i], px > W - 140 ? px - 12 : px + 12, py - 14);
+    // speed sits in a fixed spot below the rail so it never jumps while the ball moves
+    ctx.font = '13px "Noto Sans TC",sans-serif'; ctx.fillStyle = css('--ink-soft'); ctx.textAlign = 'right';
+    ctx.fillText((ball ? '⚾ 球的速度：' : '🔦 光的速度：') + labels[i], finX - 10, rail + 20);
   });
   if (arrived === 2 && !trDone) {
     trDone = true;
