@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>台北的水上公路</title>
+<meta name="description" content="給孩子的專題：從威尼斯、布里斯本，到台北的洪水、堤防與基隆河截彎取直，判斷台北能不能有水上公路。">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B4%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --paper:#E7EDF3; --surface:#FFFFFF; --surface-2:#F2F6FA;
+  --ink:#0F2137; --ink-soft:#54718F; --ink-faint:#8AA0B6;
+  --line:#C3D3E1; --line-soft:#DDE7F0;
+  --flame:#D2431C; --instr:#0B7F8E; --instr-soft:#DDF0F2;
+  --photon:#B57800; --photon-soft:#FFF3D6; --good:#2E7D32; --bad:#C62828;
+  --sky-top:#0F2137; --sky-bot:#3E6C93;
+  --shadow:0 1px 2px rgba(15,33,55,.06),0 8px 24px rgba(15,33,55,.07);
+  --grid:rgba(15,33,55,.055);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+  --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+  --line:#22414F; --line-soft:#1A3340;
+  --flame:#FF7E52; --instr:#3FC9D6; --instr-soft:#0C2E33;
+  --photon:#FFD15C; --photon-soft:#3A2E0E; --good:#7BD389; --bad:#FF8A80;
+  --sky-top:#04090F; --sky-bot:#123048;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --grid:rgba(150,200,230,.07);
+}}
+:root[data-theme="dark"]{
+  --paper:#08151E; --surface:#0E212C; --surface-2:#132A37;
+  --ink:#DFEAF2; --ink-soft:#93AEC2; --ink-faint:#6B8699;
+  --line:#22414F; --line-soft:#1A3340;
+  --flame:#FF7E52; --instr:#3FC9D6; --instr-soft:#0C2E33;
+  --photon:#FFD15C; --photon-soft:#3A2E0E; --good:#7BD389; --bad:#FF8A80;
+  --sky-top:#04090F; --sky-bot:#123048;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  --grid:rgba(150,200,230,.07);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Noto Sans TC","Chakra Petch",system-ui,sans-serif;font-size:17px;line-height:1.85;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px}
+h1,h2,h3{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-weight:700;line-height:1.35;text-wrap:balance;margin:0}
+a{color:var(--instr)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--instr);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--surface) 92%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft)}
+.top-in{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px}
+.home{font-size:13px;text-decoration:none;color:var(--ink-soft);white-space:nowrap}
+.brand{font-family:"Chakra Petch","Noto Sans TC",sans-serif;font-weight:700;font-size:17px;white-space:nowrap}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-left:auto;padding:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);
+  border-radius:99px;padding:4px 12px 4px 5px;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.tab .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;
+  font-family:"IBM Plex Mono",monospace;border:1.5px solid var(--line);color:var(--ink-soft)}
+.tab[aria-selected="true"]{border-color:var(--instr);background:var(--instr-soft)}
+.tab[aria-selected="true"] .n{border-color:var(--instr);color:var(--instr)}
+.tab.done .n{background:var(--instr);border-color:var(--instr);color:var(--surface)}
+
+main{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.station{display:none}
+.station.on{display:block}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--flame)}
+.title{font-size:clamp(30px,6vw,46px);margin:6px 0 0}
+.subtitle{color:var(--ink-faint);font-family:"Chakra Petch",sans-serif;margin:2px 0 0}
+.lede{font-size:19px;max-width:36em;margin:18px 0 0}
+.sec{font-size:22px;margin:40px 0 10px}
+.sec small{font-family:"Chakra Petch",sans-serif;font-size:14px;color:var(--ink-faint);font-weight:500;margin-left:6px}
+.prose{max-width:38em}
+.prose p{margin:10px 0}
+.t{font-family:"Chakra Petch",sans-serif;font-size:.8em;color:var(--ink-faint);margin:0 4px}
+b.hl{background:var(--photon-soft);padding:0 3px;border-radius:3px}
+
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;box-shadow:var(--shadow);margin:22px 0;overflow:hidden}
+.panel-hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line-soft);
+  font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;color:var(--ink-soft)}
+.panel-bd{padding:16px}
+canvas{display:block;width:100%;border-radius:10px;background:var(--surface-2)}
+.ctl{margin-top:14px}
+.ctl label{display:flex;justify-content:space-between;font-size:15px}
+.ctl .v{font-family:"IBM Plex Mono",monospace;color:var(--instr);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--instr);height:28px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:7px 14px;font-size:15px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--instr)}
+.btn.main{background:var(--instr);border-color:var(--instr);color:var(--surface);font-weight:700}
+.btn[aria-pressed="true"]{border-color:var(--instr);background:var(--instr-soft);color:var(--ink);font-weight:700}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.ro{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.ro .k{font-size:13px;color:var(--ink-soft)}
+.ro .big{font-family:"Chakra Petch",sans-serif;font-size:28px;font-weight:700;line-height:1.2}
+.verdict{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--photon-soft);font-size:16px}
+.note{margin:26px 0;border-left:3px solid var(--photon);background:var(--surface);padding:14px 18px;border-radius:0 10px 10px 0;max-width:40em}
+.note .h{display:block;font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--photon);margin-bottom:4px}
+
+/* quiz */
+.quiz{margin-top:36px;background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:16px 18px}
+.quiz h3{font-size:17px}
+.quiz .q{margin:14px 0 0}
+.quiz .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.quiz .opt{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 12px;cursor:pointer}
+.quiz .opt.right{border-color:var(--good);color:var(--good);font-weight:700}
+.quiz .opt.wrong{border-color:var(--bad);color:var(--bad)}
+.quiz .fb{font-size:15px;margin-top:6px;min-height:1.5em}
+.next{margin-top:20px}
+
+/* resources */
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:12px}
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.card .tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--flame);text-transform:uppercase}
+.card h3{font-size:17px;margin:4px 0 6px}
+.card p{font-size:15px;color:var(--ink-soft);margin:0}
+.card a{font-size:14px}
+
+@media (max-width:640px){
+  .top-in{flex-wrap:wrap;gap:6px 12px}
+  .tabs{order:3;width:100%;margin-left:0}
+  .lane{grid-template-columns:58px 1fr 74px;font-size:13px}
+  .person .age{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+
+/* levee lesson */
+:root{--water:#2F7FC1;--water-soft:#D8E9F7;--earth:#A88B5E;--earth-2:#C9B289;--grass:#6E9F4D}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--water:#5AA9E6;--water-soft:#10293A;--earth:#7C6644;--earth-2:#9A8360;--grass:#4F7A37}}
+:root[data-theme="dark"]{--water:#5AA9E6;--water-soft:#10293A;--earth:#7C6644;--earth-2:#9A8360;--grass:#4F7A37}
+.xs{display:block;width:100%;height:auto;border-radius:10px;background:var(--surface-2)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tide-bar{position:relative;height:18px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line-soft);overflow:hidden;margin-top:12px}
+.tide-bar i{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--good) 45%,transparent)}
+.tide-bar b{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--flame);border-radius:2px}
+.tide-ax{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-faint)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.plan{text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px 14px;cursor:pointer}
+.plan b{display:block;font-size:16px}
+.plan span{font-size:14px;color:var(--ink-soft)}
+.plan[aria-pressed="true"]{border-color:var(--instr);background:var(--instr-soft)}
+.bars{display:grid;gap:8px;margin-top:14px}
+.bar{display:grid;grid-template-columns:72px 1fr 34px;align-items:center;gap:10px;font-size:14.5px}
+.bar .tr{height:12px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:99px;background:var(--instr);transition:width .35s}
+.bar .sc{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);text-align:right}
+.tbl-wrap{overflow-x:auto;margin-top:12px}
+.cmp{border-collapse:collapse;width:100%;min-width:520px;background:var(--surface);font-size:15px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line-soft);padding:8px 10px;text-align:left;vertical-align:top}
+.cmp th{background:var(--surface-2);font-size:14px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="home" href="../">← Kids School</a>
+    <span class="brand">⛴️ 台北的水上公路</span>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="站別"></nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ─────────── 1 ─────────── -->
+<section class="station on" id="st1" data-name="大問題">
+  <div class="eyebrow">Station 01 · The Big Question</div>
+  <h1 class="title">台北能有「水上公路」嗎？</h1>
+  <p class="subtitle">Can Taipei ride the river to school?</p>
+  <p class="lede">世界上有些城市，大家每天坐船上學、上班，就像我們坐公車和捷運一樣。台北也有一條大河：淡水河。那為什麼台北人很少坐船呢？</p>
+  <div class="prose">
+    <p>這個專題我們先去兩座「坐船的城市」看看：義大利的<b>威尼斯</b>和澳洲的<b>布里斯本</b>。再回到台北，看看颱風、洪水、堤防，還有一條被「拉直」的河。最後換你當市長，自己判斷。</p>
+    <p>一條好的水上公路，至少需要這<b class="hl">四件事</b>。每一站都用它們來檢查：</p>
+  </div>
+  <div class="res">
+    <div class="card"><div class="tag">條件 ①</div><h3>水夠深、夠穩</h3><p>船要隨時開得動，不會卡在河底，也不會被急流沖走。</p></div>
+    <div class="card"><div class="tag">條件 ②</div><h3>碼頭離人很近</h3><p>走幾分鐘就到碼頭，下了船就到學校、公司。</p></div>
+    <div class="card"><div class="tag">條件 ③</div><h3>夠快、夠方便</h3><p>至少要跟公車、捷運差不多，大家才會每天選它。</p></div>
+    <div class="card"><div class="tag">條件 ④</div><h3>不怕洪水</h3><p>大水來的時候，城市要安全，碼頭和船也不能被沖壞。</p></div>
+  </div>
+  <h2 class="sec">先猜猜看 <small>Your first guess</small></h2>
+  <div class="prose"><p>你覺得台北有可能發展出每天通勤用的水上公路嗎？先選一個，最後一站再看看你有沒有改變想法。</p></div>
+  <div class="btnrow" id="guess">
+    <button class="btn" data-g="yes" aria-pressed="false">有可能！</button>
+    <button class="btn" data-g="some" aria-pressed="false">只有一部分可以</button>
+    <button class="btn" data-g="no" aria-pressed="false">不可能</button>
+  </div>
+  <div class="verdict" id="vGuess">選一個答案。</div>
+  <button class="btn main next" data-go="2">第一站：威尼斯 →</button>
+</section>
+
+<!-- ─────────── 2 ─────────── -->
+<section class="station" id="st2" data-name="威尼斯">
+  <div class="eyebrow">Station 02 · Venice, Italy</div>
+  <h1 class="title">威尼斯：用船當公車的城市</h1>
+  <p class="subtitle">Venezia · The city where the bus is a boat.</p>
+  <p class="lede">威尼斯蓋在海邊一個<b class="hl">潟湖</b>（被沙洲圍起來的淺海灣）裡的一百多個小島上，島和島之間是運河，城裡幾乎沒有汽車。大家坐 <b>vaporetto</b>（水上巴士）出門；救護車、消防車、垃圾車和送貨車，也都是船。</p>
+  <div class="prose">
+    <p>可是威尼斯也怕水。秋冬有時候會遇到 <b>acqua alta</b>（義大利文「高水」）：大潮、低氣壓加上往岸邊吹的強風，海水就漫上街道。1966 年最嚴重，水比平常高了 194 公分，整個城市都泡在水裡。</p>
+    <p>威尼斯人<b>沒有</b>沿著每條運河蓋高牆，因為那樣運河就不是運河了。他們在潟湖通往大海的三個入口海底，放了 <b>78 片黃色的大鋼閘門</b>，叫做 <b>MOSE</b>（跟摩西分開紅海的故事同名）。平常閘門灌滿水躺在海底，船照常進出；預報有很高的潮水時，把空氣打進去，閘門就浮起來，把海水擋在外面。</p>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 · 擋住大海的閘門</span><span>簡化版</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xsV" viewBox="0 0 600 240" role="img" aria-label="威尼斯潟湖與海的剖面"></svg>
+      <div class="ctl"><label>海的潮水比平常高 <span class="v" id="tdVal"></span></label>
+        <input type="range" id="td" min="40" max="200" step="5" value="80"></div>
+      <div class="seg"><button class="btn" id="moseOn" aria-pressed="true">有 MOSE（2020 年以後）</button><button class="btn" id="moseOff" aria-pressed="false">沒有 MOSE（以前）</button></div>
+      <div class="verdict" id="vV"></div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>2020 年 10 月 3 日，MOSE 第一次真的升起來，聖馬可廣場那天沒有淹水。不過它花了 17 年才蓋好，花了大約 60 到 70 億歐元，每升起一次也要花很多錢；而且潮水只是「有點高」的時候不會升起，所以廣場偶爾還是會濕。</p>
+  </div>
+  <div class="note"><span class="h">四個條件檢查</span>① 潟湖的水淺但很平靜 ✓　② 碼頭就在家門口 ✓　③ 沒有車，船就是最快的 ✓　④ 用海口的閘門擋大潮 △（很貴，也不是每次都擋）</div>
+  <div class="quiz" data-st="2">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">威尼斯的 MOSE 閘門裝在哪裡？
+      <div class="opts"><button class="opt">沿著每一條運河</button><button class="opt">潟湖通往大海的入口海底</button><button class="opt">每一棟房子的門口</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="3">下一站：布里斯本 →</button>
+</section>
+
+<!-- ─────────── 3 ─────────── -->
+<section class="station" id="st3" data-name="布里斯本">
+  <div class="eyebrow">Station 03 · Brisbane, Australia</div>
+  <h1 class="title">布里斯本：會浮起來的碼頭</h1>
+  <p class="subtitle">River City · Ferries that ride the flood.</p>
+  <p class="lede">布里斯本是澳洲昆士蘭的首府，被叫做「河城」：布里斯本河彎彎曲曲地穿過市中心。市民坐叫做 <b>CityCat</b> 的高速雙體船上班、上學，碼頭就在河邊公園和大學門口。</p>
+  <div class="prose">
+    <p>可是這座城市蓋在河流的<b>氾濫平原</b>上，歷史上淹過很多次。2011 年 1 月的大洪水是 1974 年以來最高的，河水變成又快又急的急流，<b class="hl">7 個 CityCat 碼頭被整個沖壞</b>，河邊的步道也被沖走了。</p>
+    <p>布里斯本沒有把河圍起來，而是辦了一場設計比賽，問大家：<b>怎麼做出不怕洪水的碼頭？</b>得獎的設計有三個聰明的地方：</p>
+    <p>① 浮動平台套在一根又粗又高的柱子上，水漲，平台就跟著往上浮。<br>② 連到岸邊的走道會轉動，水真的太大時，靠岸那一頭會<b>自己鬆開</b>，讓漂流的大木頭過去。<br>③ 柱子的形狀能把撞過來的東西彈開。新碼頭是照「500 年一次」的洪水設計的。</p>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 · 河水漲起來的時候</span><span>示意圖</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xsB" viewBox="0 0 600 240" role="img" aria-label="布里斯本碼頭在洪水中"></svg>
+      <div class="ctl"><label>河水上漲 <span class="v" id="bfVal"></span></label>
+        <input type="range" id="bf" min="0" max="9" step="0.1" value="1"></div>
+      <div class="seg"><button class="btn" id="bOld" aria-pressed="false">舊碼頭（2011 以前）</button><button class="btn" id="bNew" aria-pressed="true">新碼頭（2011 以後）</button></div>
+      <div class="verdict" id="vB"></div>
+    </div>
+  </div>
+  <div class="prose"><p>2022 年布里斯本又淹了一次大水。這一次，新的碼頭很快就修好，船比 2011 年早很多回到河上。布里斯本的想法是：<b class="hl">不跟河硬碰硬，讓碼頭跟著水走。</b></p></div>
+  <div class="note"><span class="h">四個條件檢查</span>① 河很深，大船也能開 ✓　② 碼頭在公園和學校旁邊 ✓　③ 有些路線比塞車的公車快 △　④ 碼頭會浮、會鬆開，洪水後很快恢復 ✓</div>
+  <div class="quiz" data-st="3">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="2">布里斯本的新碼頭怎麼撐過洪水？
+      <div class="opts"><button class="opt">在碼頭外面蓋一道高牆</button><button class="opt">洪水來之前把碼頭搬回家</button><button class="opt">平台跟著水浮起來，走道可以鬆開轉開</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="0">威尼斯和布里斯本有什麼共同點？
+      <div class="opts"><button class="opt">都沒有用高牆把水和城市隔開</button><button class="opt">都從來不淹水</button><button class="opt">都沒有潮汐</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="4">回到台北 →</button>
+</section>
+
+<!-- ─────────── 4 ─────────── -->
+<section class="station" id="st4" data-name="台北的牆">
+  <div class="eyebrow">Station 04 · Back in Taipei</div>
+  <h1 class="title">台北為什麼蓋了一道高牆？</h1>
+  <p class="subtitle">A city in a bowl needs a levee.</p>
+  <p class="lede">台北在一個四面是山的<b class="hl">盆地</b>裡，像一個大臉盆。淡水河、基隆河、新店溪三條河在這裡會合，再從淡水流進大海。颱風一來，山上的雨全部往盆底流，海水又剛好漲潮把河口堵住，河水就會一直漲高。</p>
+
+  <div class="prose">
+    <p>1963 年的葛樂禮颱風，讓台北很多地方泡在水裡好幾天。後來政府沿著河邊蓋起又高又長的<b>堤防</b>（levee），很多段跟兩、三層樓一樣高。現在台北市的堤防加起來超過 100 公里，牆後面還有 88 座抽水站，把城裡的雨水抽到河裡。</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 1 · 河水漲起來</span><span>剖面圖：從河中間切開看</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xs1" viewBox="0 0 600 260" role="img" aria-label="河流與堤防的剖面圖"></svg>
+      <div class="ctl"><label>河水高度 <span class="v" id="w1Val"></span></label>
+        <input type="range" id="w1" min="0" max="10.5" step="0.1" value="1"></div>
+      <div class="btnrow">
+        <button class="btn" data-w="1">平常</button><button class="btn" data-w="4">下大雨</button>
+        <button class="btn" data-w="7">強颱＋漲潮</button><button class="btn" data-w="8.6">200 年一次的洪水</button>
+        <button class="btn" data-w="10">比設計還大</button>
+      </div>
+      <div class="seg"><button class="btn" id="lvOn" aria-pressed="true">有堤防</button><button class="btn" id="lvOff" aria-pressed="false">把堤防拆掉</button></div>
+      <div class="verdict" id="v1"></div>
+    </div>
+  </div>
+
+  <h2 class="sec">「200 年一次」是什麼意思？<small>A 1-in-200 flood</small></h2>
+  <div class="prose">
+    <p>台北大部分的堤防是照「<b>200 年一次</b>的大洪水」來設計的。這<b>不是</b>說要等 200 年它才會來，而是說<b class="hl">每一年都有 1/200（0.5%）的機會</b>來一次，今年來過，明年還是可能再來。</p>
+    <p>一年 0.5% 看起來很小，可是一年一年加起來呢？拉拉看。</p>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><span>計算機 · 一輩子會不會遇到？</span><span>1 − 0.995ⁿ</span></div>
+    <div class="panel-bd">
+      <div class="ctl"><label>住在台北幾年 <span class="v" id="yrVal"></span></label>
+        <input type="range" id="yr" min="1" max="100" step="1" value="10"></div>
+      <div class="readout">
+        <div class="ro"><div class="k">至少遇到一次的機會</div><div class="big" id="pOne"></div></div>
+        <div class="ro"><div class="k">換成全班 30 個人</div><div class="big" id="pClass"></div></div>
+      </div>
+      <div class="verdict" id="v1b"></div>
+    </div>
+  </div>
+  <div class="note"><span class="h">真實的故事</span>2001 年的納莉颱風，雨量超過了當時的設計，基隆河邊的抽水站被水淹壞，連台北車站和捷運都淹了。所以工程師說：堤防可以<b>減少</b>淹水，但沒辦法保證<b>永遠</b>不淹。</div>
+
+  <div class="quiz" data-st="4">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">「200 年一次的洪水」意思是？
+      <div class="opts"><button class="opt">要等 200 年才會來一次</button><button class="opt">每一年都有 0.5% 的機會來</button><button class="opt">來過一次之後，200 年內不會再來</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="2">為什麼颱風遇上漲潮特別危險？
+      <div class="opts"><button class="opt">海水比較冷</button><button class="opt">漲潮會把雨吹走</button><button class="opt">海水把河口堵住，河水流不出去</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="5">下一站：拉直的河 →</button>
+</section>
+
+<!-- ─────────── 5 ─────────── -->
+<section class="station" id="st5" data-name="拉直的河">
+  <div class="eyebrow">Station 05 · Straightening a River</div>
+  <h1 class="title">把彎彎的基隆河拉直</h1>
+  <p class="subtitle">截彎取直 · Cutting off the bends.</p>
+  <p class="lede">基隆河從汐止流進台北，以前在南港、內湖、松山、大直一帶繞了好幾個大彎。河流彎曲的地方最容易淹水，1987 年琳恩颱風就把沿岸淹成一片水鄉。於是台北市從 <b>1991 年</b>開始，花了兩年把這段河道<b class="hl">拉直</b>，叫做「截彎取直」。</p>
+
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 · 拉直一條河</span><span>從天空往下看（示意圖）</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xsM" viewBox="0 0 600 240" role="img" aria-label="彎曲河道與拉直河道"></svg>
+      <div class="ctl"><label>拉直的程度 <span class="v" id="stVal"></span></label>
+        <input type="range" id="str" min="0" max="100" step="1" value="0"></div>
+      <div class="readout">
+        <div class="ro"><div class="k">河道長度</div><div class="big" id="mLen"></div></div>
+        <div class="ro"><div class="k">河裡能暫時存的水</div><div class="big" id="mStore"></div></div>
+        <div class="ro"><div class="k">多出來的新土地</div><div class="big" id="mLand"></div></div>
+      </div>
+      <div class="verdict" id="vM"></div>
+    </div>
+  </div>
+
+  <h2 class="sec">得到什麼？付出什麼？<small>Trade-offs</small></h2>
+  <div class="prose">
+    <p><b>得到：</b>舊河道填起來，多出一大片新土地，後來變成<b>內湖科技園區</b>和<b>大直重劃區</b>，蓋了公司、住宅和購物中心。當時的市長也說，這個工程其實很像一個都市開發計畫。</p>
+    <p><b>付出：</b>彎彎的河像一個長長的大水盆，大雨時可以先存一些水。拉直以後，河變短、存的水變少，水也更快沖到下游。工程師把河道挖深來補，但風險還在。</p>
+    <p>2001 年<b>納莉颱風</b>，雨下得又久又大，又碰上漲潮，基隆河的水漫了出來，成美橋邊的玉成抽水站被淹壞，南港、內湖、松山都淹了。後來政府在上游挖了<b>員山子分洪道</b>：一條 12 公尺高、2.4 公里長的隧道，基隆河水太高時，水會自己流進隧道，直接送到北海岸的大海。到 2026 年，它已經分洪 66 次。</p>
+  </div>
+  <div class="note"><span class="h">跟水上公路有什麼關係？</span>一條河要怎麼用，從來不只是「開不開船」。台北為了不淹水、為了多一點土地，選擇把河拉直、蓋高牆、挖隧道。每一個選擇都讓城市更安全，但也讓城市離河更遠一點。</div>
+
+  <div class="quiz" data-st="5">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="0">基隆河截彎取直的「好處」和「代價」是？
+      <div class="opts"><button class="opt">多了新土地，但河能暫時存的水變少</button><button class="opt">河變長了，船可以開更久</button><button class="opt">完全沒有代價</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="1">員山子分洪道是做什麼的？
+      <div class="opts"><button class="opt">讓船從基隆河開到太平洋</button><button class="opt">水太高時，把基隆河的水用隧道送到海裡</button><button class="opt">把海水送進台北</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="6">下一站：牆的另一邊 →</button>
+</section>
+
+<!-- ─────────── 6 ─────────── -->
+<section class="station" id="st6" data-name="牆的另一邊">
+  <div class="eyebrow">Station 06 · The Other Side</div>
+  <h1 class="title">有了牆，就看不到河了</h1>
+  <p class="subtitle">Safe from the river, but far from it.</p>
+  <p class="lede">堤防保護了城市，可是也把河藏起來了。走在台北街上，你幾乎看不到淡水河，要穿過<b class="hl">水門</b>（堤防上的大門）才走得到河邊。颱風來的時候，水門會關起來。</p>
+  <div class="prose">
+    <p>以前的大稻埕是熱鬧的港口，船從淡水一路開進來。現在也有「<b>藍色公路</b>」的遊河船，可以從大稻埕坐到關渡、淡水、八里。可是它一直很難變成像捷運那樣的交通工具，最大的原因之一是<b class="hl">潮汐</b>：淡水河靠近大海，海水一天漲兩次、退兩次，河水也跟著一下深一下淺。</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 2 · 船什麼時候開得進來？</span><span>大稻埕碼頭（簡化版）</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xs2" viewBox="0 0 600 220" role="img" aria-label="碼頭水深隨潮汐變化"></svg>
+      <div class="ctl"><label>一天中的時間 <span class="v" id="hrVal"></span></label>
+        <input type="range" id="hr" min="0" max="24" step="0.25" value="8"></div>
+      <div class="tide-bar" id="tideBar"></div>
+      <div class="tide-ax"><span>0 點</span><span>6</span><span>12</span><span>18</span><span>24 點</span></div>
+      <div class="readout">
+        <div class="ro"><div class="k">碼頭邊水深</div><div class="big" id="depth"></div></div>
+        <div class="ro"><div class="k">船需要的水深</div><div class="big">1.5 m</div></div>
+      </div>
+      <div class="verdict" id="v2"></div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>綠色的時段才開得了船，而且潮汐每天大約晚 50 分鐘，所以<b>每天的開船時間都不一樣</b>。威尼斯的潟湖和布里斯本的河都比較深、比較穩，淡水河在這一點吃虧。再加上船比捷運慢、碼頭在堤防外面不好走，大部分的人還是選擇坐捷運。</p>
+    <p>那可不可以把牆拆掉，讓城市重新靠近河呢？回到第 4 站的實驗，按「把堤防拆掉」看看會發生什麼事。日本人想出了另一個辦法，下一站來看。</p>
+  </div>
+
+  <div class="quiz" data-st="6">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="0">為什麼藍色公路很難像捷運一樣排固定班表？
+      <div class="opts"><button class="opt">潮汐讓河水一下深一下淺，而且每天時間不一樣</button><button class="opt">船長不想上班</button><button class="opt">河裡的魚太多</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="1">堤防上的「水門」是做什麼的？
+      <div class="opts"><button class="opt">讓河水流進城市</button><button class="opt">平常讓人走到河邊，颱風時關起來擋水</button><button class="opt">收過路費</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="7">下一站：超級堤防 →</button>
+</section>
+
+<!-- ─────────── 7 ─────────── -->
+<section class="station" id="st7" data-name="超級堤防">
+  <div class="eyebrow">Station 07 · Super Levee</div>
+  <h1 class="title">把牆變成一座小山坡</h1>
+  <p class="subtitle">スーパー堤防 · A levee you can live on.</p>
+  <p class="lede">日本東京和大阪有很多地方比海平面還低，堤防一破就很難救。所以他們發明了<b class="hl">超級堤防</b>（スーパー堤防，正式名稱叫「高規格堤防」）：不只蓋一道牆，而是把牆後面的土地<b>整片墊高</b>，變成一個很寬、很緩的山坡。坡上面照樣蓋房子、學校和公園，走在街上就能直接走到河邊。</p>
+
+  <div class="panel">
+    <div class="panel-hd"><span>實驗 3 · 水漫過堤防的時候</span><span>按「放水」看看</span></div>
+    <div class="panel-bd">
+      <svg class="xs" id="xs3" viewBox="0 0 600 260" role="img" aria-label="普通堤防與超級堤防遇到溢流"></svg>
+      <div class="seg"><button class="btn" id="tNorm" aria-pressed="true">普通堤防</button><button class="btn" id="tSuper" aria-pressed="false">超級堤防</button></div>
+      <div class="ctl"><label>洪水比堤頂高出 <span class="v" id="ovVal"></span></label>
+        <input type="range" id="ov" min="0.2" max="1.5" step="0.1" value="0.6"></div>
+      <div class="btnrow"><button class="btn main" id="pour">放水！</button><button class="btn" id="reset3">重來</button></div>
+      <div class="verdict" id="v3"></div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>普通堤防最怕水<b>漫過去</b>：水從背面的陡坡沖下來，把土一點一點挖走，最後整段堤防<b>破掉</b>，河水一下子灌進城市。超級堤防的背面是很長的緩坡，水只是薄薄一層慢慢流下去，沖不壞。日本國土交通省說，這是唯一能避免堤防潰堤的方法。</p>
+  </div>
+
+  <h2 class="sec">要多寬才夠？<small>30 × height</small></h2>
+  <div class="prose"><p>超級堤防的規則很簡單：<b class="hl">寬度大約是高度的 30 倍</b>。</p></div>
+  <div class="panel">
+    <div class="panel-hd"><span>計算機 · 寬度 = 高度 × 30</span></div>
+    <div class="panel-bd">
+      <div class="ctl"><label>堤防高度 <span class="v" id="hVal"></span></label>
+        <input type="range" id="hgt" min="3" max="12" step="0.5" value="10"></div>
+      <div class="readout">
+        <div class="ro"><div class="k">需要的寬度</div><div class="big" id="wid"></div></div>
+        <div class="ro"><div class="k">等於幾座籃球場排成一排</div><div class="big" id="courts"></div></div>
+        <div class="ro"><div class="k">走過去大約要</div><div class="big" id="walk"></div></div>
+      </div>
+      <div class="verdict" id="v3b"></div>
+    </div>
+  </div>
+  <div class="note"><span class="h">去哪裡看？</span>東京隅田川、荒川、江戶川邊都有。搜尋「スーパー堤防」或「super levee Tokyo」可以看到照片：河邊是一片緩緩的草坡，坡上就是公寓和公園，完全看不到牆。</div>
+
+  <div class="quiz" data-st="7">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="2">超級堤防的寬度大約是高度的幾倍？
+      <div class="opts"><button class="opt">2 倍</button><button class="opt">10 倍</button><button class="opt">30 倍</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="0">普通堤防被水漫過去時，為什麼容易破？
+      <div class="opts"><button class="opt">水從背面陡坡沖下來，把土挖走</button><button class="opt">水太冷把土凍裂</button><button class="opt">魚把洞咬破</button></div>
+      <div class="fb"></div></div>
+  </div>
+  
+  <h2 class="sec">好東西，為什麼這麼少？<small>Why not everywhere?</small></h2>
+  <div class="prose"><p>超級堤防聽起來很棒，可是有一個大問題：堤防後面<b class="hl">本來就住滿了人</b>。要把整片土地墊高，就要先請大家搬走、拆掉房子、填土、等土壓實，再把房子蓋回來。</p></div>
+  <div class="prose">
+    <p>日本從 1987 年開始蓋，原本計畫沿著大河蓋大約 <b>870 公里</b>。2010 年政府檢討花費，差點整個取消；2011 年決定只蓋最危險、比海平面還低的地方，縮小到大約 <b>120 公里</b>。到了 2014 年，真正蓋到「30 倍寬」標準的，只有 <b>3.4 公里</b>。</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-hd"><span>計算機 · 照這個速度要蓋多久？</span></div>
+    <div class="panel-bd">
+      <div class="prose"><p>27 年（1987–2014）完成 3.4 公里，平均每年大約 0.13 公里。</p></div>
+      <div class="ctl"><label>要蓋的長度 <span class="v" id="kmVal"></span></label>
+        <input type="range" id="km" min="10" max="870" step="10" value="120"></div>
+      <div class="ctl"><label>如果速度變快 <span class="v" id="spVal"></span></label>
+        <input type="range" id="sp" min="1" max="20" step="1" value="1"></div>
+      <div class="readout">
+        <div class="ro"><div class="k">需要的時間</div><div class="big" id="yrs"></div></div>
+        <div class="ro"><div class="k">大約是幾代人</div><div class="big" id="gens"></div></div>
+      </div>
+      <div class="verdict" id="v4"></div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>所以超級堤防通常不是單獨蓋的，而是<b>等到一個社區要整個改建時，順便一起墊高</b>。在台北，很多人想到的是<b>社子島</b>：那裡還沒有完全開發，是少數可以從頭規劃堤防、碼頭和社區的地方。</p>
+  </div>
+
+  <div class="quiz" data-st="7">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">超級堤防蓋得很慢，最主要的原因是？
+      <div class="opts"><button class="opt">日本沒有土</button><button class="opt">堤防後面住滿了人，要搬家、拆房子、再重蓋</button><button class="opt">工人不會蓋</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="8">下一站：你是小市長 →</button>
+</section>
+
+<!-- ─────────── 8 ─────────── -->
+<section class="station" id="st8" data-name="你是小市長">
+  <div class="eyebrow">Station 08 · You Are the Mayor</div>
+  <h1 class="title">換你決定：台北的水上公路</h1>
+  <p class="subtitle">Every plan has a cost.</p>
+  <p class="lede">市民想要更靠近河，也想要不淹水。下面五個計畫，選一個看看會怎樣。<b class="hl">沒有完美的計畫</b>，每個都有好處和代價。</p>
+  <div class="plans" id="plans"></div>
+  <div class="panel">
+    <div class="panel-hd"><span>計畫評分</span><span>分數越高越好（花費：越高 = 越省錢）</span></div>
+    <div class="panel-bd">
+      <div class="bars" id="bars"></div>
+      <div class="verdict" id="v5">先選一個計畫。</div>
+    </div>
+  </div>
+  <h2 class="sec">三座城市比一比 <small>Checklist</small></h2>
+  <div class="tbl-wrap"><table class="cmp">
+    <thead><tr><th>條件</th><th>威尼斯</th><th>布里斯本</th><th>台北（淡水河）</th></tr></thead>
+    <tbody>
+      <tr><td>① 水夠深、夠穩</td><td>✓ 平靜的潟湖</td><td>✓ 深河</td><td>△ 潮汐讓水一下深一下淺</td></tr>
+      <tr><td>② 碼頭離人近</td><td>✓ 家門口</td><td>✓ 公園、大學旁</td><td>✗ 碼頭在堤防外面</td></tr>
+      <tr><td>③ 夠快、夠方便</td><td>✓ 沒有車</td><td>△ 部分路線</td><td>✗ 捷運比較快</td></tr>
+      <tr><td>④ 不怕洪水</td><td>△ 海口閘門</td><td>✓ 會浮的碼頭</td><td>✓ 堤防很強，但把人和河隔開</td></tr>
+    </tbody></table></div>
+  <div class="verdict" id="recall">回到第 1 站猜一猜，這裡會顯示你一開始的答案。</div>
+  <div class="prose"><p>想一想：如果你是市長，你會不會把兩個計畫<b>一起做</b>？跟爸爸媽媽說說你的理由。</p></div>
+
+  <h2 class="sec">再多看一點 <small>Explore</small></h2>
+  <div class="res">
+    <div class="card"><div class="tag">官方說明 · 日文</div><h3>高規格堤防 Q&amp;A</h3>
+      <p>日本國土交通省的問答：超級堤防是什麼、為什麼只蓋 120 公里。圖很多，可以和大人一起看圖。</p>
+      <a href="https://www.mlit.go.jp/river/kasen/koukikaku/pdf/qa.pdf" target="_blank" rel="noopener">mlit.go.jp</a></div>
+    <div class="card"><div class="tag">示意圖 · 日文</div><h3>堺市：高規格堤防の概要</h3>
+      <p>有一張很清楚的示意圖，看得出「把土地整片墊高」的樣子，還舉例 10 公尺高要 300 公尺寬。</p>
+      <a href="https://www.city.sakai.lg.jp/shisei/toshi/koukikakuteibo/kokikakugaiyo.html" target="_blank" rel="noopener">city.sakai.lg.jp</a></div>
+    <div class="card"><div class="tag">新聞 · 英文</div><h3>Venice's flood barrier passes first test</h3>
+      <p>2020 年 MOSE 第一次升起來的新聞和照片，可以看到 78 片黃色閘門。</p>
+      <a href="https://www.weforum.org/stories/climate-action/mose-flood-barrier-defence-venice-italy-climate-change/" target="_blank" rel="noopener">World Economic Forum / Reuters</a></div>
+    <div class="card"><div class="tag">官方案例 · 英文</div><h3>Brisbane Ferry Terminals rebuilt</h3>
+      <p>昆士蘭重建局介紹 2011 年被沖壞的 7 個碼頭，怎麼重新設計成不怕洪水的樣子。</p>
+      <a href="https://www.qra.qld.gov.au/news-case-studies/case-studies/brisbane-ferry-terminals-and-riverwalk" target="_blank" rel="noopener">qra.qld.gov.au</a></div>
+    <div class="card"><div class="tag">出門走走</div><h3>大稻埕碼頭＋藍色公路</h3>
+      <p>穿過水門走到河邊，數數看堤防有幾層樓高；坐一趟遊河船，問船長今天為什麼是這個時間開船。</p></div>
+  </div>
+
+  <div class="note"><span class="h">For grown-ups · 給大人</span>這一課刻意簡化了幾件事：
+    <br>① 剖面圖的高度是示意，不是某一段真實堤防；台北各段堤防高度不同，主要堤防大多以 200 年重現期洪水為設計標準。
+    <br>② 潮汐實驗用的是正弦波，振幅與碼頭水深是教學用的假設值，只為了說明「可開船時段每天在移動」。
+    <br>③ 截彎取直的示意圖只表現「變短、存水變少」的方向，百分比不是基隆河的真實數字；威尼斯廣場積水高度、MOSE 升起門檻、布里斯本碼頭的水位都是教學用的簡化值。
+    <br>④ 超級堤防的數字（30 倍寬、870→120 公里、2014 年完成 3.4 公里）出自日本國土交通省資料與國會答詢；之後的進度沒有在這裡更新。</div>
+</section>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const KEY = 'river-city.v1';
+
+/* ---------- progress & tabs ---------- */
+let state = { st: 1, done: [] };
+try { const r = localStorage.getItem(KEY); if (r) state = Object.assign(state, JSON.parse(r)); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} };
+const stations = $$('.station');
+const tabs = $('#tabs');
+stations.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.className = 'tab'; b.setAttribute('role', 'tab'); b.dataset.st = i + 1;
+  b.innerHTML = `<span class="n">${i + 1}</span>${s.dataset.name}`;
+  b.onclick = () => show(i + 1);
+  tabs.appendChild(b);
+});
+function paintTabs() {
+  $$('.tab').forEach(t => {
+    const n = +t.dataset.st;
+    t.setAttribute('aria-selected', n === state.st);
+    t.classList.toggle('done', state.done.includes(n));
+  });
+}
+function markDone(n) { if (!state.done.includes(n)) { state.done.push(n); save(); paintTabs(); } }
+function show(n, scroll = true) {
+  state.st = n; save();
+  stations.forEach((s, i) => s.classList.toggle('on', i + 1 === n));
+  paintTabs();
+  if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  const tb = $$('.tab')[n - 1]; tabs.scrollLeft = tb.offsetLeft - tabs.offsetLeft - 8;
+}
+$$('[data-go]').forEach(b => b.onclick = () => show(+b.dataset.go));
+
+/* ---------- quizzes ---------- */
+const PRAISE = ['答對了！', '沒錯！', '太厲害了！'];
+$$('.quiz').forEach(qz => {
+  const st = +qz.dataset.st;
+  const qs = $$(`.quiz[data-st="${st}"] .q`);
+  qs.forEach(q => {
+    const ans = +q.dataset.ans, fb = q.querySelector('.fb');
+    q.querySelectorAll('.opt').forEach((o, i) => o.onclick = () => {
+      if (i === ans) {
+        o.classList.add('right'); q.dataset.ok = 1;
+        fb.textContent = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+        if (qs.every(x => x.dataset.ok)) markDone(st);
+      } else {
+        o.classList.add('wrong'); fb.textContent = '再想想看，可以回去玩一下上面的互動。';
+      }
+    });
+  });
+});
+
+/* ---------- drawing helpers (SVG, heights in metres) ---------- */
+const Y = h => 220 - h * 15;                 // 1 m = 15 px, h=0 at y=220
+const pts = a => a.map(([x, h]) => `${x},${Y(h).toFixed(1)}`).join(' ');
+const groundAt = (prof, x) => {
+  for (let i = 1; i < prof.length; i++) {
+    const [x0, h0] = prof[i - 1], [x1, h1] = prof[i];
+    if (x <= x1) return h0 + (h1 - h0) * (x - x0) / (x1 - x0);
+  }
+  return prof[prof.length - 1][1];
+};
+// first x (from the river) where the ground rises above level w
+const shoreX = (prof, w) => { for (let x = 0; x <= 600; x += 2) if (groundAt(prof, x) >= w) return x; return 600; };
+const ground = prof => `<polygon points="${pts([[0, -3], ...prof, [600, -3]])} 600,260 0,260" fill="var(--earth)"/>` +
+  `<polyline points="${pts(prof)}" fill="none" stroke="var(--grass)" stroke-width="4" stroke-linejoin="round"/>`;
+const water = (x0, x1, top, op = .85) => x1 > x0 ?
+  `<rect x="${x0}" y="${Y(top).toFixed(1)}" width="${x1 - x0}" height="${(260 - Y(top)).toFixed(1)}" fill="var(--water)" opacity="${op}"/>` : '';
+const house = (x, h, e = '🏠') => `<text x="${x}" y="${Y(h) - 2}" text-anchor="middle" font-size="26">${e}</text>`;
+const label = (x, y, t, c = 'var(--ink-soft)') => `<text x="${x}" y="${y}" font-size="12.5" fill="${c}" font-family="Noto Sans TC,sans-serif">${t}</text>`;
+
+/* ---------- 1. river rises ---------- */
+const CITY = 3, CREST = 9;
+const P_LEVEE = [[0, -2], [170, -2], [215, CREST], [240, CREST], [290, CITY], [600, CITY]];
+const P_FLAT  = [[0, -2], [170, -2], [215, CITY], [600, CITY]];
+let leveeOn = true;
+function draw1() {
+  const w = +$('#w1').value, prof = leveeOn ? P_LEVEE : P_FLAT;
+  const barrier = leveeOn ? CREST : CITY;
+  const flood = w > barrier;
+  $('#w1Val').textContent = w.toFixed(1) + ' 公尺';
+  let g = '';
+  g += water(0, flood ? 600 : shoreX(prof, w), w, .85);
+  g += ground(prof);
+  [340, 420, 500, 570].forEach((x, i) => g += house(x, CITY, i === 1 ? '🏫' : '🏠'));
+  if (flood) g += water(leveeOn ? 290 : 215, 600, w, .7);
+  g += label(14, 24, '淡水河 →（河這邊）') + label(470, 24, '城市（牆那邊）');
+  if (leveeOn) g += label(196, Y(CREST) - 8, '堤防 9 m', 'var(--ink)');
+  g += `<line x1="0" x2="600" y1="${Y(w)}" y2="${Y(w)}" stroke="var(--water)" stroke-dasharray="4 4" opacity=".6"/>`;
+  $('#xs1').innerHTML = g;
+  let msg;
+  if (!leveeOn && w > CITY) msg = `沒有堤防，河水只要比地面高一點，<b>整個城市就淹了</b>。台北的地面離河面不遠，所以真的不能隨便拆。`;
+  else if (!leveeOn) msg = '沒有堤防的時候，平常天氣還好，城市可以直接走到河邊。往右拉，下大雨看看。';
+  else if (flood) msg = '水比堤防還高，<b>漫過去了</b>！這就是「超過設計」的洪水。下一個問題是：漫過去的時候，堤防會不會破？（第 7 站揭曉）';
+  else if (w > 7.5) msg = '好險！水離堤頂只剩一點點。這時候水門全部關閉，抽水站全力把城裡的雨水抽出去。';
+  else msg = '堤防把河水擋在外面，城市是乾的。';
+  $('#v1').innerHTML = msg;
+}
+$('#w1').oninput = draw1;
+$$('[data-w]').forEach(b => b.onclick = () => { $('#w1').value = b.dataset.w; draw1(); });
+$('#lvOn').onclick = () => { leveeOn = true; $('#lvOn').setAttribute('aria-pressed', true); $('#lvOff').setAttribute('aria-pressed', false); draw1(); };
+$('#lvOff').onclick = () => { leveeOn = false; $('#lvOn').setAttribute('aria-pressed', false); $('#lvOff').setAttribute('aria-pressed', true); draw1(); };
+draw1();
+
+/* 1b. 1-in-200 */
+function prob() {
+  const n = +$('#yr').value, p = 1 - Math.pow(0.995, n);
+  $('#yrVal').textContent = n + ' 年';
+  $('#pOne').textContent = (p * 100).toFixed(p < .1 ? 1 : 0) + '%';
+  $('#pClass').textContent = '約 ' + Math.round(p * 30) + ' 人';
+  $('#v1b').innerHTML = n >= 70
+    ? `活到 ${n} 歲，大約每 3 個人就有 1 個會遇到一次「200 年一次」的洪水。所以防洪要做得很保守。`
+    : `住 ${n} 年，遇到的機會是 ${(p * 100).toFixed(1)}%。繼續往右拉到 80 年看看。`;
+}
+$('#yr').oninput = prob; prob();
+
+/* ---------- 2. tide ---------- */
+const BED = -1.2, NEED = 1.5;
+const tideAt = t => 1.1 * Math.sin(2 * Math.PI * (t - 2) / 12.42);   // simplified semidiurnal tide
+const okAt = t => tideAt(t) - BED >= NEED;
+(function paintBar() {
+  let g = '', start = null;
+  for (let t = 0; t <= 24.001; t += 0.05) {
+    const ok = t < 24 && okAt(t);
+    if (ok && start === null) start = t;
+    if (!ok && start !== null) { g += `<i style="left:${start / 24 * 100}%;width:${(t - start) / 24 * 100}%"></i>`; start = null; }
+  }
+  $('#tideBar').innerHTML = g + '<b id="tideNow"></b>';
+})();
+function draw2() {
+  const t = +$('#hr').value, w = tideAt(t), d = w - BED, ok = d >= NEED;
+  const hh = Math.floor(t) % 24, mm = Math.round((t % 1) * 60);
+  $('#hrVal').textContent = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  $('#tideNow').style.left = `calc(${t / 24 * 100}% - 1.5px)`;
+  $('#depth').textContent = d.toFixed(1) + ' m';
+  const Y2 = h => 150 - h * 30;
+  let g = '';
+  g += `<rect x="0" y="${Y2(w)}" width="420" height="${220 - Y2(w)}" fill="var(--water)" opacity=".85"/>`;
+  g += `<polygon points="0,${Y2(BED - .3)} 300,${Y2(BED)} 420,${Y2(BED)} 420,220 0,220" fill="var(--earth)"/>`;
+  g += `<rect x="420" y="${Y2(2.2)}" width="180" height="${220 - Y2(2.2)}" fill="var(--earth-2)"/>`;
+  g += `<rect x="400" y="${Y2(2.2)}" width="34" height="10" fill="var(--ink-faint)"/>`;
+  const boatY = ok ? Y2(w) : Y2(BED) + 4;
+  g += `<text x="${ok ? 360 : 300}" y="${boatY}" text-anchor="middle" font-size="40">⛴️</text>`;
+  g += `<line x1="0" x2="600" y1="${Y2(BED + NEED)}" y2="${Y2(BED + NEED)}" stroke="var(--flame)" stroke-dasharray="5 4"/>`;
+  g += label(10, Y2(BED + NEED) - 6, '船要這麼深才開得進來', 'var(--flame)');
+  g += label(445, Y2(2.2) - 10, '碼頭', 'var(--ink)');
+  g += label(10, 20, w >= 0 ? '漲潮中／高潮' : '退潮中／低潮');
+  $('#xs2').innerHTML = g;
+  $('#v2').innerHTML = ok ? '水夠深，<b>可以開船</b>！' : '水太淺了，船會卡在河底，<b>今天這個時間不能開</b>。';
+}
+$('#hr').oninput = draw2; draw2();
+
+/* ---------- 3. overtopping ---------- */
+let kind = 'norm', anim = null, tt = 0;
+const SUP_TOP = CREST;
+function prof3(e) {
+  if (kind === 'super') return [[0, -2], [170, -2], [215, SUP_TOP], [470, SUP_TOP - .6], [600, SUP_TOP - 1.2]];
+  const c = CREST - 8 * e;                                     // erosion lowers the crest
+  return [[0, -2], [170, -2], [215 + 10 * e, Math.max(c, CITY)], [240, Math.max(c, CITY)], [290 - 20 * e, CITY], [600, CITY]];
+}
+function draw3() {
+  const ov = +$('#ov').value, w = CREST + ov;
+  $('#ovVal').textContent = ov.toFixed(1) + ' 公尺';
+  let g = '';
+  if (kind === 'norm') {
+    const e = Math.min(1, Math.max(0, (tt - .15) / .55));       // erosion progress
+    const prof = prof3(e), crest = prof[2][1];
+    const cityW = e >= 1 ? CITY + (w - CITY) * Math.min(1, (tt - .7) / .3) : CITY + Math.min(.6, tt * 2) * (tt > 0);
+    g += water(0, shoreX(prof, w), w);
+    g += ground(prof);
+    [340, 420, 500, 570].forEach(x => g += house(x, CITY));
+    if (tt > 0) {
+      g += `<polyline points="${pts([[215, crest + .25], [240, crest + .25], [290 - 20 * e, CITY + .25]])}" fill="none" stroke="var(--water)" stroke-width="${3 + 6 * e}" stroke-linecap="round"/>`;
+      if (cityW > CITY + .05) g += water(285, 600, cityW, .7);
+    }
+    if (e > 0 && e < 1) g += label(250, Y(CREST) - 10, '背面的土被沖走了…', 'var(--bad)');
+    if (e >= 1) g += label(250, Y(CREST) - 10, '潰堤！', 'var(--bad)');
+    g += label(14, 24, '普通堤防：背面很陡');
+    $('#v3').innerHTML = tt === 0 ? '按「放水！」讓洪水漫過堤頂。'
+      : e < 1 ? '水從陡坡沖下去，<b>把土一點一點挖走</b>…'
+      : '堤防<b>破了一個大缺口</b>，河水整個灌進城市。這就是最可怕的「潰堤」。';
+  } else {
+    const prof = prof3(0);
+    g += water(0, shoreX(prof, w), w);
+    g += ground(prof);
+    [300, 380, 460, 540].forEach((x, i) => g += house(x, groundAt(prof, x), i === 2 ? '🌳' : '🏢'));
+    if (tt > 0) {
+      const reach = 215 + 385 * Math.min(1, tt * 1.4);
+      g += `<polyline points="${pts([[215, SUP_TOP + .2], [Math.min(reach, 470), groundAt(prof, Math.min(reach, 470)) + .2]].concat(reach > 470 ? [[reach, groundAt(prof, reach) + .2]] : []))}" fill="none" stroke="var(--water)" stroke-width="7" stroke-linecap="round" opacity=".9"/>`;
+    }
+    g += label(14, 24, '超級堤防：後面是一大片緩坡（真的比畫的還寬很多）');
+    $('#v3').innerHTML = tt === 0 ? '按「放水！」讓洪水漫過堤頂。'
+      : '水只是<b>薄薄一層</b>沿著長長的緩坡流下去，沖不出缺口，<b>堤防沒有破</b>。坡上的街道會濕，但不會一下子整個城市被灌滿。';
+  }
+  $('#xs3').innerHTML = g;
+}
+function setKind(k) {
+  kind = k; tt = 0; cancelAnimationFrame(anim);
+  $('#tNorm').setAttribute('aria-pressed', k === 'norm'); $('#tSuper').setAttribute('aria-pressed', k === 'super');
+  draw3();
+}
+$('#tNorm').onclick = () => setKind('norm');
+$('#tSuper').onclick = () => setKind('super');
+$('#ov').oninput = draw3;
+$('#reset3').onclick = () => setKind(kind);
+$('#pour').onclick = () => {
+  cancelAnimationFrame(anim); const t0 = performance.now();
+  const step = now => { tt = Math.min(1, (now - t0) / 4500) || 0.001; draw3(); if (tt < 1) anim = requestAnimationFrame(step); };
+  anim = requestAnimationFrame(step);
+};
+draw3();
+
+/* 3b. 30H */
+function width30() {
+  const h = +$('#hgt').value, w = h * 30;
+  $('#hVal').textContent = h + ' 公尺';
+  $('#wid').textContent = w + ' m';
+  $('#courts').textContent = (w / 28).toFixed(1) + ' 座';
+  $('#walk').textContent = Math.round(w / 70) + ' 分鐘';
+  $('#v3b').innerHTML = `${h} 公尺高的堤防，要往城市裡延伸 <b>${w} 公尺</b>。這一整片地上的房子，都要墊高重蓋。`;
+}
+$('#hgt').oninput = width30; width30();
+
+/* ---------- 4. how long ---------- */
+const RATE = 3.4 / 27;
+function howLong() {
+  const km = +$('#km').value, sp = +$('#sp').value, y = km / (RATE * sp);
+  $('#kmVal').textContent = km + ' 公里'; $('#spVal').textContent = sp + ' 倍';
+  $('#yrs').textContent = Math.round(y).toLocaleString() + ' 年';
+  $('#gens').textContent = (y / 30).toFixed(y / 30 < 10 ? 1 : 0) + ' 代';
+  $('#v4').innerHTML = y > 100
+    ? `照這個速度，要等到西元 <b>${Math.round(2014 + y).toLocaleString()}</b> 年才蓋完。這就是為什麼大家不會「到處」蓋。`
+    : `速度快 ${sp} 倍的話，大約 ${Math.round(y)} 年可以完成。要快這麼多，就需要很多錢、很多居民願意配合。`;
+}
+$('#km').oninput = howLong; $('#sp').oninput = howLong; howLong();
+
+/* ---------- 5. mayor ---------- */
+const PLANS = [
+  { n: '多蓋天橋和水門', d: '牆留著，讓人更容易走到河邊', s: [9, 5, 8, 9],
+    v: '很安全、很快、也不太貴。可是城市跟河中間還是隔著一道牆。很多城市都是先做這個。' },
+  { n: '把堤防拆掉', d: '直接打開，讓城市貼著河', s: [1, 10, 6, 7],
+    v: '河邊變得超美……直到下一個大颱風。台北在盆地裡，這個計畫<b>太危險</b>，沒有市長敢這樣做。' },
+  { n: '社子島做超級堤防', d: '趁新開發，整片土地墊高', s: [10, 9, 2, 2],
+    v: '最安全也最漂亮，但要花很多錢、很多年，還要居民同意搬家再搬回來。' },
+  { n: '學布里斯本：會浮的碼頭', d: '重點碼頭改成會浮、會鬆開的設計，開通勤船', s: [8, 7, 5, 6],
+    v: '碼頭不怕洪水了，但淡水河的潮汐和堤防還在，船還是比捷運慢。比較適合跟河濱公園、學校連在一起的短路線。' },
+  { n: '發展藍色公路', d: '多開幾條觀光航線、改善碼頭', s: [7, 7, 7, 6],
+    v: '讓更多人上船看河，但潮汐限制還在，比較適合週末遊河，不太能取代捷運。' },
+];
+const KEYS = ['安全', '親近河', '花費', '速度'];
+PLANS.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.className = 'plan'; b.setAttribute('aria-pressed', false);
+  b.innerHTML = `<b>${p.n}</b><span>${p.d}</span>`;
+  b.onclick = () => pick(i);
+  $('#plans').appendChild(b);
+});
+function pick(i) {
+  $$('.plan').forEach((b, j) => b.setAttribute('aria-pressed', i === j));
+  $('#bars').innerHTML = KEYS.map((k, j) =>
+    `<div class="bar"><span>${k}</span><span class="tr"><i style="width:${PLANS[i].s[j] * 10}%"></i></span><span class="sc">${PLANS[i].s[j]}</span></div>`).join('');
+  $('#v5').innerHTML = PLANS[i].v;
+  markDone(8);
+}
+
+
+/* ---------- 1. first guess ---------- */
+const GUESS = { yes: '有可能！', some: '只有一部分可以', no: '不可能' };
+function paintGuess() {
+  $$('#guess [data-g]').forEach(b => b.setAttribute('aria-pressed', b.dataset.g === state.guess));
+  if (state.guess) {
+    $('#vGuess').innerHTML = `你猜的是「<b>${GUESS[state.guess]}</b>」。記住這個答案，我們出發吧！`;
+    const r = $('#recall'); if (r) r.innerHTML = `你在第 1 站猜的是「<b>${GUESS[state.guess]}</b>」。走完這一趟，你的答案有沒有改變？為什麼？`;
+  }
+}
+$$('#guess [data-g]').forEach(b => b.onclick = () => { state.guess = b.dataset.g; save(); paintGuess(); markDone(1); });
+paintGuess();
+
+/* ---------- 2. Venice MOSE ---------- */
+let moseOn = true;
+const SQ = 90;                                   // simplified: San Marco starts to flood around here
+function drawV() {
+  const td = +$('#td').value, raised = moseOn && td >= 110, lag = raised ? 80 : td;
+  $('#tdVal').textContent = td + ' 公分';
+  const Yv = c => 200 - c * 0.6;
+  let g = '';
+  g += `<rect x="0" y="${Yv(td)}" width="200" height="${240 - Yv(td)}" fill="var(--water)" opacity=".9"/>`;
+  g += `<rect x="200" y="${Yv(lag)}" width="400" height="${240 - Yv(lag)}" fill="var(--water)" opacity=".8"/>`;
+  g += `<rect x="0" y="222" width="600" height="18" fill="var(--earth)"/>`;
+  g += raised ? `<rect x="194" y="${Yv(td + 12)}" width="12" height="${222 - Yv(td + 12)}" fill="#F2C318" stroke="#8a6d00"/>`
+              : `<rect x="170" y="214" width="60" height="8" fill="#F2C318" stroke="#8a6d00"/>`;
+  g += `<rect x="420" y="${Yv(SQ)}" width="180" height="${240 - Yv(SQ)}" fill="var(--earth-2)"/>`;
+  g += `<text x="470" y="${Yv(SQ) - 2}" text-anchor="middle" font-size="34">🏛️</text><text x="550" y="${Yv(SQ) - 2}" text-anchor="middle" font-size="30">⛪</text>`;
+  if (lag > SQ) g += `<rect x="420" y="${Yv(lag)}" width="180" height="${Yv(SQ) - Yv(lag)}" fill="var(--water)" opacity=".7"/>`;
+  g += `<text x="320" y="${Yv(lag) + 2}" text-anchor="middle" font-size="26">🚤</text>`;
+  g += label(10, 20, '亞得里亞海') + label(230, 20, '潟湖（城裡的運河）') + label(430, 20, '聖馬可廣場');
+  g += label(150, 236, raised ? 'MOSE 升起來了' : 'MOSE 躺在海底', '#8a6d00');
+  $('#xsV').innerHTML = g;
+  let m;
+  if (raised) m = `閘門升起來，海水被擋在外面，潟湖裡的水沒有跟著漲，<b>廣場是乾的</b>。水上巴士在潟湖裡照常開。`;
+  else if (td > SQ && moseOn) m = `潮水高了一點，可是還沒到要升閘門的程度，所以<b>廣場有一點積水</b>。MOSE 只在很高的潮水才升起來。`;
+  else if (td > SQ) m = `沒有閘門，海水直接漲進潟湖，<b>廣場淹了 ${td - SQ} 公分</b>。以前威尼斯人冬天出門要穿雨靴，走臨時架起來的木板步道。`;
+  else m = '平常的潮水，閘門躺在海底，船自由進出。往右拉，讓潮水變高。';
+  $('#vV').innerHTML = m;
+}
+$('#td').oninput = drawV;
+$('#moseOn').onclick = () => { moseOn = true; $('#moseOn').setAttribute('aria-pressed', true); $('#moseOff').setAttribute('aria-pressed', false); drawV(); };
+$('#moseOff').onclick = () => { moseOn = false; $('#moseOn').setAttribute('aria-pressed', false); $('#moseOff').setAttribute('aria-pressed', true); drawV(); };
+drawV();
+
+/* ---------- 3. Brisbane terminal ---------- */
+let bNew = true;
+function drawB() {
+  const f = +$('#bf').value;
+  $('#bfVal').textContent = f.toFixed(1) + ' 公尺';
+  const Yb = h => 190 - h * 16;
+  const bank = [[0, -3], [340, -3], [390, 3], [600, 3]];
+  const P = a => a.map(([x, h]) => `${x},${Yb(h).toFixed(1)}`).join(' ');
+  let g = '';
+  g += `<rect x="0" y="${Yb(f)}" width="600" height="${240 - Yb(f)}" fill="var(--water)" opacity=".85"/>`;
+  g += `<polygon points="${P([[0, -4], ...bank, [600, -4]])} 600,240 0,240" fill="var(--earth)"/>`;
+  g += `<polyline points="${P(bank)}" fill="none" stroke="var(--grass)" stroke-width="4"/>`;
+  if (f > 3) g += `<rect x="390" y="${Yb(f)}" width="210" height="${Yb(3) - Yb(f)}" fill="var(--water)" opacity=".6"/>`;
+  g += `<text x="520" y="${Yb(3) - 2}" text-anchor="middle" font-size="26">🌳</text>`;
+  const pileTop = bNew ? 10.5 : 5;
+  g += `<rect x="268" y="${Yb(pileTop)}" width="14" height="${Yb(-3) - Yb(pileTop)}" fill="var(--ink-faint)"/>`;
+  const shore = [400, 3.3];
+  let msg;
+  if (!bNew && f > 4.5) {
+    g += `<g transform="rotate(-14 140 ${Yb(f)})"><rect x="90" y="${Yb(f) - 10}" width="100" height="14" fill="var(--ink-soft)"/></g>`;
+    g += `<text x="140" y="${Yb(f) - 18}" text-anchor="middle" font-size="22">💥</text>`;
+    g += `<line x1="${shore[0]}" y1="${Yb(shore[1])}" x2="355" y2="${Yb(f) + 6}" stroke="var(--ink-soft)" stroke-width="5"/>`;
+    msg = '水漲得比固定柱還高，平台<b>脫離柱子被沖走</b>，走道也被扯斷。2011 年就有 7 個碼頭這樣被毀掉。';
+  } else {
+    g += `<rect x="225" y="${Yb(f) - 10}" width="100" height="14" rx="3" fill="var(--instr)"/>`;
+    if (bNew && f > 6.5) {
+      g += `<line x1="325" y1="${Yb(f) - 4}" x2="370" y2="${Yb(f) - 4}" stroke="var(--flame)" stroke-width="5" stroke-linecap="round"/>`;
+      g += `<text x="470" y="${Yb(f) - 4}" text-anchor="middle" font-size="22">🪵</text>`;
+      msg = '水太大了！走道在岸邊那頭<b>自己鬆開</b>，轉到跟水流同一個方向，讓漂流的大木頭過去。平台還好好地套在高柱子上。';
+    } else {
+      g += `<line x1="325" y1="${Yb(f) - 4}" x2="${shore[0]}" y2="${Yb(shore[1])}" stroke="var(--flame)" stroke-width="5" stroke-linecap="round"/>`;
+      msg = f > 3 ? '河岸公園已經淹了，可是平台<b>跟著水浮上來</b>，走道變斜，還連著岸邊。' : '平常的河水，旅客從岸邊走下斜坡就能上船。往右拉，讓洪水來。';
+      if (!bNew) msg = f > 3 ? '水快要比柱子高了……再往右拉看看。' : '舊碼頭的柱子比較短，平常沒問題。';
+    }
+    g += `<text x="${bNew && f > 6.5 ? 200 : 180}" y="${Yb(f) - 8}" text-anchor="middle" font-size="26">⛴️</text>`;
+  }
+  g += label(10, 20, '布里斯本河') + label(450, 20, '河岸公園');
+  $('#xsB').innerHTML = g;
+  $('#vB').innerHTML = msg;
+}
+$('#bf').oninput = drawB;
+$('#bOld').onclick = () => { bNew = false; $('#bOld').setAttribute('aria-pressed', true); $('#bNew').setAttribute('aria-pressed', false); drawB(); };
+$('#bNew').onclick = () => { bNew = true; $('#bOld').setAttribute('aria-pressed', false); $('#bNew').setAttribute('aria-pressed', true); drawB(); };
+drawB();
+
+/* ---------- 5. straightening ---------- */
+const riverPts = s => { const a = []; for (let x = 20; x <= 580; x += 4) a.push([x, 120 + (1 - s) * 78 * Math.sin((x - 20) / 560 * 5 * Math.PI)]); return a; };
+const pathLen = p => p.reduce((L, q, i) => i ? L + Math.hypot(q[0] - p[i - 1][0], q[1] - p[i - 1][1]) : 0, 0);
+const L0 = pathLen(riverPts(0));
+function drawM() {
+  const s = +$('#str').value / 100, p = riverPts(s), L = pathLen(p) / L0;
+  $('#stVal').textContent = Math.round(s * 100) + '%';
+  const P = a => a.map(([x, y]) => `${x},${y.toFixed(1)}`).join(' ');
+  let g = `<rect width="600" height="240" fill="var(--grass)" opacity=".18"/>`;
+  if (s > 0) g += `<polyline points="${P(riverPts(0))}" fill="none" stroke="var(--ink-faint)" stroke-width="16" stroke-dasharray="6 6" opacity=".55"/>`;
+  g += `<polyline points="${P(p)}" fill="none" stroke="var(--water)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const nB = Math.round(s * 5);
+  for (let k = 0; k < nB; k++) { const x = 20 + 560 * (k + .5) / 5, y = 120 + 78 * Math.sin((k + .5) * Math.PI); g += `<text x="${x}" y="${y + 10}" text-anchor="middle" font-size="24">🏢</text>`; }
+  g += label(14, 22, '← 往關渡、淡水河') + label(470, 22, '從汐止流來 ←');
+  $('#xsM').innerHTML = g;
+  $('#mLen').textContent = Math.round(L * 100) + '%';
+  $('#mStore').textContent = Math.round(L * 100) + '%';
+  $('#mLand').textContent = nB ? '🏢'.repeat(nB) : '—';
+  $('#vM').innerHTML = s < .2 ? '彎彎的河又長又慢，大雨時像一個長長的水盆，可以先存一些水。往右拉，把它拉直。'
+    : `河道變成原來的 <b>${Math.round(L * 100)}%</b>，舊河彎填起來變成新土地（🏢）。可是水能存的地方也少了，洪水會<b>更快</b>衝到下游。`;
+}
+$('#str').oninput = drawM; drawM();
+
+/* ---------- start ---------- */
+show(Math.min(Math.max(1, state.st | 0), stations.length), false);
+})();
+</script>
+<script>window.KS_FEEDBACK={course:'水上公路',sections:'.station'};</script>
+<script src="../assets/feedback.js" defer></script>
+</body>
+</html>
