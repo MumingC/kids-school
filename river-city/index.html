@@ -131,6 +131,14 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
 
+/* photos */
+.photo{margin:20px 0;background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);max-width:720px}
+.photo img{display:block;width:100%;height:auto;max-height:460px;object-fit:cover;background:var(--surface-2)}
+.photo figcaption{padding:10px 14px 12px;font-size:15px;line-height:1.6}
+.photo .cr{display:block;margin-top:4px;font-size:11.5px;color:var(--ink-faint)}
+.photo .cr a{color:var(--ink-faint)}
+.photo.broken{display:none}
+
 /* maps */
 :root{--land:#EEE8DA;--land-line:#B9AD92}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--land:#1E2B26;--land-line:#3C5148}}
@@ -192,7 +200,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
 .bar .tr i{display:block;height:100%;border-radius:99px;background:var(--instr);transition:width .35s}
 .bar .sc{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);text-align:right}
 .tbl-wrap{overflow-x:auto;margin-top:12px}
-.cmp{border-collapse:collapse;width:100%;min-width:520px;background:var(--surface);font-size:15px}
+.cmp{border-collapse:collapse;width:100%;min-width:720px;background:var(--surface);font-size:15px}
 .cmp th,.cmp td{border-bottom:1px solid var(--line-soft);padding:8px 10px;text-align:left;vertical-align:top}
 .cmp th{background:var(--surface-2);font-size:14px;color:var(--ink-soft)}
 </style>
@@ -216,9 +224,10 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <p class="subtitle">Can Taipei ride the river to school?</p>
   <p class="lede">世界上有些城市，大家每天坐船上學、上班，就像我們坐公車和捷運一樣。台北也有一條大河：淡水河。那為什麼台北人很少坐船呢？</p>
   <div class="prose">
-    <p>這個專題我們先去兩座「坐船的城市」看看：義大利的<b>威尼斯</b>和澳洲的<b>布里斯本</b>。再回到台北，看看颱風、洪水、堤防，還有一條被「拉直」的河。最後換你當市長，自己判斷。</p>
+    <p>這個專題我們先去幾座「坐船的城市」看看：義大利的<b>威尼斯</b>、澳洲的<b>布里斯本</b>，還有我們的鄰居<b>東京</b>和<b>首爾</b>。再回到台北，看看颱風、洪水、堤防，還有一條被「拉直」的河。最後換你當市長，自己判斷。</p>
     <p>一條好的水上公路，至少需要這<b class="hl">四件事</b>。每一站都用它們來檢查：</p>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fermata_del_vaporetto_Ca%27_d%27Oro_Canal_Grande_Venezia.jpg?width=960" alt="威尼斯大運河上的水上巴士站" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>威尼斯大運河上的水上巴士（vaporetto）站。在威尼斯，等船就像我們等公車。<span class="cr">📷 Wolfgang Moroder・授權見原圖頁面・<a href="https://commons.wikimedia.org/wiki/File:Fermata_del_vaporetto_Ca%27_d%27Oro_Canal_Grande_Venezia.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
   <div class="res">
     <div class="card"><div class="tag">條件 ①</div><h3>水夠深、夠穩</h3><p>船要隨時開得動，不會卡在河底，也不會被急流沖走。</p></div>
     <div class="card"><div class="tag">條件 ②</div><h3>碼頭離人很近</h3><p>走幾分鐘就到碼頭，下了船就到學校、公司。</p></div>
@@ -244,6 +253,9 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <p class="lede">威尼斯蓋在海邊一個<b class="hl">潟湖</b>（被沙洲圍起來的淺海灣）裡的一百多個小島上，島和島之間是運河，城裡幾乎沒有汽車。大家坐 <b>vaporetto</b>（水上巴士）出門；救護車、消防車、垃圾車和送貨車，也都是船。</p>
   <div class="prose">
     <p>可是威尼斯也怕水。秋冬有時候會遇到 <b>acqua alta</b>（義大利文「高水」）：大潮、低氣壓加上往岸邊吹的強風，海水就漫上街道。1966 年最嚴重，水比平常高了 194 公分，整個城市都泡在水裡。</p>
+  </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Acqua_alta_in_Piazza_San_Marco.jpg?width=960" alt="淹水的聖馬可廣場" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>2004 年 11 月，「高水」淹進了聖馬可廣場。<span class="cr">📷 Wolfgang Moroder・<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>・<a href="https://commons.wikimedia.org/wiki/File:Acqua_alta_in_Piazza_San_Marco.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
+  <div class="prose">
     <p>威尼斯人<b>沒有</b>沿著每條運河蓋高牆，因為那樣運河就不是運河了。他們在潟湖通往大海的三個入口海底，放了 <b>78 片黃色的大鋼閘門</b>，叫做 <b>MOSE</b>（跟摩西分開紅海的故事同名）。平常閘門灌滿水躺在海底，船照常進出；預報有很高的潮水時，把空氣打進去，閘門就浮起來，把海水擋在外面。</p>
   </div>
 <div class="panel map-panel">
@@ -265,6 +277,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="verdict" id="vV"></div>
     </div>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Il_Mose_alla_Bocca_di_Porto_di_Malamocco.jpg?width=960" alt="MOSE 閘門升出海面" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>2020 年 5 月 31 日，MOSE 在馬拉莫科海口試升。從大海這一側看，一整排黃色閘門浮出了海面。<span class="cr">📷 Fusi Sandro・<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>・<a href="https://commons.wikimedia.org/wiki/File:Il_Mose_alla_Bocca_di_Porto_di_Malamocco.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
   <div class="prose">
     <p>2020 年 10 月 3 日，MOSE 第一次真的升起來，聖馬可廣場那天沒有淹水。不過它花了 17 年才蓋好，花了大約 60 到 70 億歐元，每升起一次也要花很多錢；而且潮水只是「有點高」的時候不會升起，所以廣場偶爾還是會濕。</p>
   </div>
@@ -293,6 +306,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <h1 class="title">布里斯本：會浮起來的碼頭</h1>
   <p class="subtitle">River City · Ferries that ride the flood.</p>
   <p class="lede">布里斯本是澳洲昆士蘭的首府，被叫做「河城」：布里斯本河彎彎曲曲地穿過市中心。市民坐叫做 <b>CityCat</b> 的高速雙體船上班、上學，碼頭就在河邊公園和大學門口。</p>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/CityCat.jpg?width=960" alt="布里斯本河上的 CityCat 雙體船" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>布里斯本河上的 CityCat 高速雙體船，經過市中心的碼頭。<span class="cr">📷 Figaro・公有領域・<a href="https://commons.wikimedia.org/wiki/File:CityCat.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
   <div class="prose">
     <p>可是這座城市蓋在河流的<b>氾濫平原</b>上，歷史上淹過很多次。2011 年 1 月的大洪水是 1974 年以來最高的，河水變成又快又急的急流，<b class="hl">7 個 CityCat 碼頭被整個沖壞</b>，河邊的步道也被沖走了。</p>
     <p>布里斯本沒有把河圍起來，而是辦了一場設計比賽，問大家：<b>怎麼做出不怕洪水的碼頭？</b>得獎的設計有三個聰明的地方：</p>
@@ -317,6 +331,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="verdict" id="vB"></div>
     </div>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Riverside_Ferry_Terminal_from_CityCat_Binkinba_Petrie_Bight_Brisbane_River_P1250024.jpg?width=960" alt="布里斯本 Riverside 碼頭" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>市中心的 Riverside 碼頭。2011 年洪水後修好，2011 年 2 月 14 日重新開放。<span class="cr">📷 John Robert McPherson・<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>・<a href="https://commons.wikimedia.org/wiki/File:Riverside_Ferry_Terminal_from_CityCat_Binkinba_Petrie_Bight_Brisbane_River_P1250024.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
   <div class="prose"><p>2022 年布里斯本又淹了一次大水。這一次，新的碼頭很快就修好，船比 2011 年早很多回到河上。布里斯本的想法是：<b class="hl">不跟河硬碰硬，讓碼頭跟著水走。</b></p></div>
   <div class="note"><span class="h">四個條件檢查</span>① 河很深，大船也能開 ✓　② 碼頭在公園和學校旁邊 ✓　③ 有些路線比塞車的公車快 △　④ 碼頭會浮、會鬆開，洪水後很快恢復 ✓</div>
   <div class="quiz" data-st="3">
@@ -328,12 +343,51 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="opts"><button class="opt">都沒有用高牆把水和城市隔開</button><button class="opt">都從來不淹水</button><button class="opt">都沒有潮汐</button></div>
       <div class="fb"></div></div>
   </div>
-  <button class="btn main next" data-go="4">回到台北 →</button>
+  <button class="btn main next" data-go="4">下一站：東京和首爾 →</button>
 </section>
 
 <!-- ─────────── 4 ─────────── -->
-<section class="station" id="st4" data-name="台北的牆">
-  <div class="eyebrow">Station 04 · Back in Taipei</div>
+<section class="station" id="st4" data-name="東京和首爾">
+  <div class="eyebrow">Station 04 · Tokyo &amp; Seoul</div>
+  <h1 class="title">東京和首爾：鄰居也在試</h1>
+  <p class="subtitle">Two big Asian cities trying river buses.</p>
+  <p class="lede">東京和首爾跟台北很像：人很多、捷運很發達，城市中間也有大河。這兩座城市這幾年都在試「坐船上班」，結果很不一樣，正好可以拿來跟台北比。</p>
+
+  <h2 class="sec">東京：短短的通勤船 <small>Tokyo</small></h2>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Interior_-_Tokyo_Mizube_Line_water_bus_-_Sumida_River%2C_Tokyo%2C_Japan_-_DSC06401.jpg?width=960" alt="東京隅田川水上巴士的船艙" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>東京隅田川水上巴士的船艙，窗外就是河岸。<span class="cr">📷 Daderot・授權見原圖頁面・<a href="https://commons.wikimedia.org/wiki/File:Interior_-_Tokyo_Mizube_Line_water_bus_-_Sumida_River%2C_Tokyo%2C_Japan_-_DSC06401.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
+  <div class="prose">
+    <p>東京的隅田川和東京灣早就有<b>水上巴士</b>，從淺草開到台場，大多是給觀光客坐的。</p>
+    <p>2023 年起，東京都開始試辦「<b>舟旅通勤</b>」：在平日的上下班時間開船，例如<b>日本橋到豐洲</b>，單程 500 日圓。2026 年 4 月起，日本橋到豐洲這條改由民間公司用<b>電動船</b>經營，單程大約 20 分鐘，一天大約 30 班。</p>
+    <p>這艘船有一個很特別的地方：因為要從很多座<b>很低的橋</b>下面鑽過去，船艙只有 1 公尺 90 公分高，個子高的大人會覺得有點擠。<b class="hl">橋的高度</b>也是水上公路要考慮的事，淡水河上一樣有很多橋。</p>
+    <p>東京也是第 8 站「超級堤防」的故鄉，隅田川和荒川邊都看得到。</p>
+  </div>
+
+  <h2 class="sec">首爾：漢江巴士 <small>Seoul</small></h2>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hangang_Bus_Yeouido_20250918_%2801%29.jpg?width=960" alt="首爾汝矣島碼頭的漢江巴士" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>2025 年 9 月 18 日，漢江巴士開航第一天，在汝矣島碼頭。<span class="cr">📷 Wikimedia Commons 使用者・授權見原圖頁面・<a href="https://commons.wikimedia.org/wiki/File:Hangang_Bus_Yeouido_20250918_%2801%29.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
+  <div class="prose">
+    <p>首爾市長看到倫敦泰晤士河上的渡輪，決定在漢江也開船，叫做<b>漢江巴士</b>（한강버스），2025 年 9 月 18 日開航。一開始的目的，就是想幫早上擠不進捷運的人分擔通勤。</p>
+    <p>剛開航時問題不少，停下來檢查、改進，2026 年 3 月才全線恢復。第一年就有超過 <b>70 萬人次</b>搭乘，問卷裡大約 97% 的乘客說滿意。</p>
+    <p>可是批評也很多：<b class="hl">早上 7 點到 9 點的上班時間，一班船都沒有</b>；坐完全程要兩個多小時；一個小時才一班。所以大部分人把它當成看風景的船，而不是上班的交通工具，市政府也還在補貼虧損。市長說之後要把班次加密到 15 分鐘一班。</p>
+  </div>
+
+  <div class="note"><span class="h">四個條件檢查</span><b>東京：</b>① 運河平靜，但橋很低 △　② 碼頭在辦公區旁 ✓　③ 短程 20 分鐘還不錯 △　④ 有超級堤防 ✓<br><b>首爾：</b>① 漢江又寬又深 ✓　② 碼頭在河濱公園，離捷運站有點遠 △　③ 太慢、班次太少 ✗　④ 河岸有堤防 ✓</div>
+  <div class="note"><span class="h">想一想</span>首爾的例子告訴我們：就算河很寬、船很新、坐起來很舒服，如果<b>不夠快、班次不夠多</b>，上班的人還是會選捷運。台北的淡水河會不會也一樣？</div>
+
+  <div class="quiz" data-st="4">
+    <h3>小測驗</h3>
+    <div class="q" data-ans="1">首爾的漢江巴士，最常被批評的是什麼？
+      <div class="opts"><button class="opt">船太小、太擠</button><button class="opt">早上上班時間沒有班次，而且全程太慢</button><button class="opt">漢江的水太淺</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="2">東京日本橋的通勤船，船艙為什麼做得比較矮？
+      <div class="opts"><button class="opt">比較省電</button><button class="opt">日本人比較矮</button><button class="opt">要從很低的橋下面穿過去</button></div>
+      <div class="fb"></div></div>
+  </div>
+  <button class="btn main next" data-go="5">回到台北 →</button>
+</section>
+
+<!-- ─────────── 5 ─────────── -->
+<section class="station" id="st5" data-name="台北的牆">
+  <div class="eyebrow">Station 05 · Back in Taipei</div>
   <h1 class="title">台北為什麼蓋了一道高牆？</h1>
   <p class="subtitle">A city in a bowl needs a levee.</p>
   <p class="lede">台北在一個四面是山的<b class="hl">盆地</b>裡，像一個大臉盆。淡水河、基隆河、新店溪三條河在這裡會合，再從淡水流進大海。颱風一來，山上的雨全部往盆底流，海水又剛好漲潮把河口堵住，河水就會一直漲高。</p>
@@ -341,6 +395,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   <div class="prose">
     <p>1963 年的葛樂禮颱風，讓台北很多地方泡在水裡好幾天。後來政府沿著河邊蓋起又高又長的<b>堤防</b>（levee），很多段跟兩、三層樓一樣高。現在台北市的堤防加起來超過 100 公里，牆後面還有 88 座抽水站，把城裡的雨水抽到河裡。</p>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/%E5%A4%A7%E7%A8%BB%E5%9F%95%E7%A2%BC%E9%A0%AD%E5%85%A5%E5%8F%A3FUJI7696.JPG?width=960" alt="大稻埕碼頭入口夜景" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>大稻埕碼頭的入口。要穿過堤防，才走得到淡水河邊。<span class="cr">📷 Taiwankengo・<a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a>・<a href="https://commons.wikimedia.org/wiki/File:%E5%A4%A7%E7%A8%BB%E5%9F%95%E7%A2%BC%E9%A0%AD%E5%85%A5%E5%8F%A3FUJI7696.JPG" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
 
 <div class="panel map-panel">
     <div class="panel-hd"><span>真實地圖 · 台北的河、堤防和抽水站</span><span>點地圖上的記號</span></div>
@@ -390,7 +445,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
   </div>
   <div class="note"><span class="h">真實的故事</span>2001 年的納莉颱風，雨量超過了當時的設計，基隆河邊的抽水站被水淹壞，連台北車站和捷運都淹了。所以工程師說：堤防可以<b>減少</b>淹水，但沒辦法保證<b>永遠</b>不淹。</div>
 
-  <div class="quiz" data-st="4">
+  <div class="quiz" data-st="5">
     <h3>小測驗</h3>
     <div class="q" data-ans="1">「200 年一次的洪水」意思是？
       <div class="opts"><button class="opt">要等 200 年才會來一次</button><button class="opt">每一年都有 0.5% 的機會來</button><button class="opt">來過一次之後，200 年內不會再來</button></div>
@@ -399,12 +454,12 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="opts"><button class="opt">海水比較冷</button><button class="opt">漲潮會把雨吹走</button><button class="opt">海水把河口堵住，河水流不出去</button></div>
       <div class="fb"></div></div>
   </div>
-  <button class="btn main next" data-go="5">下一站：拉直的河 →</button>
+  <button class="btn main next" data-go="6">下一站：拉直的河 →</button>
 </section>
 
-<!-- ─────────── 5 ─────────── -->
-<section class="station" id="st5" data-name="拉直的河">
-  <div class="eyebrow">Station 05 · Straightening a River</div>
+<!-- ─────────── 6 ─────────── -->
+<section class="station" id="st6" data-name="拉直的河">
+  <div class="eyebrow">Station 06 · Straightening a River</div>
   <h1 class="title">把彎彎的基隆河拉直</h1>
   <p class="subtitle">截彎取直 · Cutting off the bends.</p>
   <p class="lede">基隆河從汐止流進台北，以前在南港、內湖、松山、大直一帶繞了好幾個大彎。河流彎曲的地方最容易淹水，1987 年琳恩颱風就把沿岸淹成一片水鄉。於是台北市從 <b>1991 年</b>開始，花了兩年把這段河道<b class="hl">拉直</b>，叫做「截彎取直」。</p>
@@ -441,9 +496,10 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <p><b>付出：</b>彎彎的河像一個長長的大水盆，大雨時可以先存一些水。拉直以後，河變短、存的水變少，水也更快沖到下游。工程師把河道挖深來補，但風險還在。</p>
     <p>2001 年<b>納莉颱風</b>，雨下得又久又大，又碰上漲潮，基隆河的水漫了出來，成美橋邊的玉成抽水站被淹壞，南港、內湖、松山都淹了。後來政府在上游挖了<b>員山子分洪道</b>：一條 12 公尺高、2.4 公里長的隧道，基隆河水太高時，水會自己流進隧道，直接送到北海岸的大海。到 2026 年，它已經分洪 66 次。</p>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Yuanshanzi_Flood_Diversion_Tunnel_%E5%93%A1%E5%B1%B1%E4%BB%94%E5%88%86%E6%B4%AA%E9%9A%A7%E9%81%93_-_panoramio.jpg?width=960" alt="員山子分洪隧道" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>員山子分洪道。基隆河水太高時，水會從這裡流進隧道，直接送到北海岸。<span class="cr">📷 lienyuan lee・授權見原圖頁面・<a href="https://commons.wikimedia.org/wiki/File:Yuanshanzi_Flood_Diversion_Tunnel_%E5%93%A1%E5%B1%B1%E4%BB%94%E5%88%86%E6%B4%AA%E9%9A%A7%E9%81%93_-_panoramio.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
   <div class="note"><span class="h">跟水上公路有什麼關係？</span>一條河要怎麼用，從來不只是「開不開船」。台北為了不淹水、為了多一點土地，選擇把河拉直、蓋高牆、挖隧道。每一個選擇都讓城市更安全，但也讓城市離河更遠一點。</div>
 
-  <div class="quiz" data-st="5">
+  <div class="quiz" data-st="6">
     <h3>小測驗</h3>
     <div class="q" data-ans="0">基隆河截彎取直的「好處」和「代價」是？
       <div class="opts"><button class="opt">多了新土地，但河能暫時存的水變少</button><button class="opt">河變長了，船可以開更久</button><button class="opt">完全沒有代價</button></div>
@@ -452,18 +508,19 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="opts"><button class="opt">讓船從基隆河開到太平洋</button><button class="opt">水太高時，把基隆河的水用隧道送到海裡</button><button class="opt">把海水送進台北</button></div>
       <div class="fb"></div></div>
   </div>
-  <button class="btn main next" data-go="6">下一站：牆的另一邊 →</button>
+  <button class="btn main next" data-go="7">下一站：牆的另一邊 →</button>
 </section>
 
-<!-- ─────────── 6 ─────────── -->
-<section class="station" id="st6" data-name="牆的另一邊">
-  <div class="eyebrow">Station 06 · The Other Side</div>
+<!-- ─────────── 7 ─────────── -->
+<section class="station" id="st7" data-name="牆的另一邊">
+  <div class="eyebrow">Station 07 · The Other Side</div>
   <h1 class="title">有了牆，就看不到河了</h1>
   <p class="subtitle">Safe from the river, but far from it.</p>
   <p class="lede">堤防保護了城市，可是也把河藏起來了。走在台北街上，你幾乎看不到淡水河，要穿過<b class="hl">水門</b>（堤防上的大門）才走得到河邊。颱風來的時候，水門會關起來。</p>
   <div class="prose">
     <p>以前的大稻埕是熱鬧的港口，船從淡水一路開進來。現在也有「<b>藍色公路</b>」的遊河船，可以從大稻埕坐到關渡、淡水、八里。可是它一直很難變成像捷運那樣的交通工具，最大的原因之一是<b class="hl">潮汐</b>：淡水河靠近大海，海水一天漲兩次、退兩次，河水也跟著一下深一下淺。</p>
   </div>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/%E5%A4%A7%E7%A8%BB%E5%9F%95%E7%A2%BC%E9%A0%AD.JPG?width=960" alt="從大稻埕碼頭上船處看碼頭" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>大稻埕碼頭的上船處。藍色公路的遊河船從這裡出發。<span class="cr">📷 李家宇・<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>・<a href="https://commons.wikimedia.org/wiki/File:%E5%A4%A7%E7%A8%BB%E5%9F%95%E7%A2%BC%E9%A0%AD.JPG" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
 
   <div class="panel">
     <div class="panel-hd"><span>實驗 2 · 船什麼時候開得進來？</span><span>大稻埕碼頭（簡化版）</span></div>
@@ -481,11 +538,11 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     </div>
   </div>
   <div class="prose">
-    <p>綠色的時段才開得了船，而且潮汐每天大約晚 50 分鐘，所以<b>每天的開船時間都不一樣</b>。（碼頭在哪裡？回到<a href="#" data-go="4">第 4 站的地圖</a>，打開「⛴ 碼頭」看看，每一個都在紅色堤防的外面。）威尼斯的潟湖和布里斯本的河都比較深、比較穩，淡水河在這一點吃虧。再加上船比捷運慢、碼頭在堤防外面不好走，大部分的人還是選擇坐捷運。</p>
-    <p>那可不可以把牆拆掉，讓城市重新靠近河呢？回到第 4 站的實驗，按「把堤防拆掉」看看會發生什麼事。日本人想出了另一個辦法，下一站來看。</p>
+    <p>綠色的時段才開得了船，而且潮汐每天大約晚 50 分鐘，所以<b>每天的開船時間都不一樣</b>。（碼頭在哪裡？回到<a href="#" data-go="5">第 5 站的地圖</a>，打開「⛴ 碼頭」看看，每一個都在紅色堤防的外面。）威尼斯的潟湖和布里斯本的河都比較深、比較穩，淡水河在這一點吃虧。再加上船比捷運慢、碼頭在堤防外面不好走，大部分的人還是選擇坐捷運。</p>
+    <p>那可不可以把牆拆掉，讓城市重新靠近河呢？回到第 5 站的實驗，按「把堤防拆掉」看看會發生什麼事。日本人想出了另一個辦法，下一站來看。</p>
   </div>
 
-  <div class="quiz" data-st="6">
+  <div class="quiz" data-st="7">
     <h3>小測驗</h3>
     <div class="q" data-ans="0">為什麼藍色公路很難像捷運一樣排固定班表？
       <div class="opts"><button class="opt">潮汐讓河水一下深一下淺，而且每天時間不一樣</button><button class="opt">船長不想上班</button><button class="opt">河裡的魚太多</button></div>
@@ -494,15 +551,16 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="opts"><button class="opt">讓河水流進城市</button><button class="opt">平常讓人走到河邊，颱風時關起來擋水</button><button class="opt">收過路費</button></div>
       <div class="fb"></div></div>
   </div>
-  <button class="btn main next" data-go="7">下一站：超級堤防 →</button>
+  <button class="btn main next" data-go="8">下一站：超級堤防 →</button>
 </section>
 
-<!-- ─────────── 7 ─────────── -->
-<section class="station" id="st7" data-name="超級堤防">
-  <div class="eyebrow">Station 07 · Super Levee</div>
+<!-- ─────────── 8 ─────────── -->
+<section class="station" id="st8" data-name="超級堤防">
+  <div class="eyebrow">Station 08 · Super Levee</div>
   <h1 class="title">把牆變成一座小山坡</h1>
   <p class="subtitle">スーパー堤防 · A levee you can live on.</p>
   <p class="lede">日本東京和大阪有很多地方比海平面還低，堤防一破就很難救。所以他們發明了<b class="hl">超級堤防</b>（スーパー堤防，正式名稱叫「高規格堤防」）：不只蓋一道牆，而是把牆後面的土地<b>整片墊高</b>，變成一個很寬、很緩的山坡。坡上面照樣蓋房子、學校和公園，走在街上就能直接走到河邊。</p>
+  <figure class="photo"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Super_levee_and_park.jpg?width=960" alt="東京汐入公園的超級堤防" loading="lazy" decoding="async" referrerpolicy="no-referrer"><figcaption>東京荒川區汐入公園的超級堤防：堤防後面整片墊高，變成公園和住宅區，從這裡看不到一道牆。<span class="cr">📷 Wikimedia Commons 使用者・授權見原圖頁面・<a href="https://commons.wikimedia.org/wiki/File:Super_levee_and_park.jpg" target="_blank" rel="noopener">Wikimedia Commons 原圖</a></span></figcaption></figure>
 
   <div class="panel">
     <div class="panel-hd"><span>實驗 3 · 水漫過堤防的時候</span><span>按「放水」看看</span></div>
@@ -534,9 +592,8 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="verdict" id="v3b"></div>
     </div>
   </div>
-  <div class="note"><span class="h">去哪裡看？</span>東京隅田川、荒川、江戶川邊都有。搜尋「スーパー堤防」或「super levee Tokyo」可以看到照片：河邊是一片緩緩的草坡，坡上就是公寓和公園，完全看不到牆。</div>
 
-  <div class="quiz" data-st="7">
+  <div class="quiz" data-st="8">
     <h3>小測驗</h3>
     <div class="q" data-ans="2">超級堤防的寬度大約是高度的幾倍？
       <div class="opts"><button class="opt">2 倍</button><button class="opt">10 倍</button><button class="opt">30 倍</button></div>
@@ -571,18 +628,18 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <p>所以超級堤防通常不是單獨蓋的，而是<b>等到一個社區要整個改建時，順便一起墊高</b>。在台北，很多人想到的是<b>社子島</b>：那裡還沒有完全開發，是少數可以從頭規劃堤防、碼頭和社區的地方。</p>
   </div>
 
-  <div class="quiz" data-st="7">
+  <div class="quiz" data-st="8">
     <h3>小測驗</h3>
     <div class="q" data-ans="1">超級堤防蓋得很慢，最主要的原因是？
       <div class="opts"><button class="opt">日本沒有土</button><button class="opt">堤防後面住滿了人，要搬家、拆房子、再重蓋</button><button class="opt">工人不會蓋</button></div>
       <div class="fb"></div></div>
   </div>
-  <button class="btn main next" data-go="8">下一站：你是小市長 →</button>
+  <button class="btn main next" data-go="9">下一站：你是小市長 →</button>
 </section>
 
-<!-- ─────────── 8 ─────────── -->
-<section class="station" id="st8" data-name="你是小市長">
-  <div class="eyebrow">Station 08 · You Are the Mayor</div>
+<!-- ─────────── 9 ─────────── -->
+<section class="station" id="st9" data-name="你是小市長">
+  <div class="eyebrow">Station 09 · You Are the Mayor</div>
   <h1 class="title">換你決定：台北的水上公路</h1>
   <p class="subtitle">Every plan has a cost.</p>
   <p class="lede">市民想要更靠近河，也想要不淹水。下面五個計畫，選一個看看會怎樣。<b class="hl">沒有完美的計畫</b>，每個都有好處和代價。</p>
@@ -594,14 +651,14 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="verdict" id="v5">先選一個計畫。</div>
     </div>
   </div>
-  <h2 class="sec">三座城市比一比 <small>Checklist</small></h2>
+  <h2 class="sec">五座城市比一比 <small>Checklist</small></h2>
   <div class="tbl-wrap"><table class="cmp">
-    <thead><tr><th>條件</th><th>威尼斯</th><th>布里斯本</th><th>台北（淡水河）</th></tr></thead>
+    <thead><tr><th>條件</th><th>威尼斯</th><th>布里斯本</th><th>東京</th><th>首爾</th><th>台北（淡水河）</th></tr></thead>
     <tbody>
-      <tr><td>① 水夠深、夠穩</td><td>✓ 平靜的潟湖</td><td>✓ 深河</td><td>△ 潮汐讓水一下深一下淺</td></tr>
-      <tr><td>② 碼頭離人近</td><td>✓ 家門口</td><td>✓ 公園、大學旁</td><td>✗ 碼頭在堤防外面</td></tr>
-      <tr><td>③ 夠快、夠方便</td><td>✓ 沒有車</td><td>△ 部分路線</td><td>✗ 捷運比較快</td></tr>
-      <tr><td>④ 不怕洪水</td><td>△ 海口閘門</td><td>✓ 會浮的碼頭</td><td>✓ 堤防很強，但把人和河隔開</td></tr>
+      <tr><td>① 水夠深、夠穩</td><td>✓ 平靜的潟湖</td><td>✓ 深河</td><td>△ 橋很低</td><td>✓ 寬深的漢江</td><td>△ 潮汐讓水一下深一下淺</td></tr>
+      <tr><td>② 碼頭離人近</td><td>✓ 家門口</td><td>✓ 公園、大學旁</td><td>✓ 辦公區旁</td><td>△ 離捷運遠</td><td>✗ 碼頭在堤防外面</td></tr>
+      <tr><td>③ 夠快、夠方便</td><td>✓ 沒有車</td><td>△ 部分路線</td><td>△ 短程可以</td><td>✗ 太慢、班次少</td><td>✗ 捷運比較快</td></tr>
+      <tr><td>④ 不怕洪水</td><td>△ 海口閘門</td><td>✓ 會浮的碼頭</td><td>✓ 超級堤防</td><td>✓ 河岸堤防</td><td>✓ 堤防很強，但把人和河隔開</td></tr>
     </tbody></table></div>
   <div class="verdict" id="recall">回到第 1 站猜一猜，這裡會顯示你一開始的答案。</div>
   <div class="prose"><p>想一想：如果你是市長，你會不會把兩個計畫<b>一起做</b>？跟爸爸媽媽說說你的理由。</p></div>
@@ -629,7 +686,9 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <br>② 潮汐實驗用的是正弦波，振幅與碼頭水深是教學用的假設值，只為了說明「可開船時段每天在移動」。
     <br>③ 截彎取直的示意圖只表現「變短、存水變少」的方向，百分比不是基隆河的真實數字；威尼斯廣場積水高度、MOSE 升起門檻、布里斯本碼頭的水位都是教學用的簡化值。
     <br>④ 地圖是用真實地理資料畫的（來源寫在每張地圖下面），碼頭位置是約略位置；1904 年老地圖要連到中研院的伺服器才看得到。
-    <br>⑤ 超級堤防的數字（30 倍寬、870→120 公里、2014 年完成 3.4 公里）出自日本國土交通省資料與國會答詢；之後的進度沒有在這裡更新。</div>
+    <br>⑤ 照片都來自 Wikimedia Commons，直接從 Commons 載入（需要網路），作者和授權寫在每張照片下面；沒寫授權的，請點「原圖」看授權頁面。
+    <br>⑥ 東京與首爾的資料：東京都都市整備局「舟旅通勤」資料、2026 年三井不動產電動船新聞；首爾漢江巴士的乘客數與批評來自 2026 年韓國媒體報導。
+    <br>⑦ 超級堤防的數字（30 倍寬、870→120 公里、2014 年完成 3.4 公里）出自日本國土交通省資料與國會答詢；之後的進度沒有在這裡更新。</div>
 </section>
 
 </main>
@@ -731,7 +790,7 @@ function draw1() {
   let msg;
   if (!leveeOn && w > CITY) msg = `沒有堤防，河水只要比地面高一點，<b>整個城市就淹了</b>。台北的地面離河面不遠，所以真的不能隨便拆。`;
   else if (!leveeOn) msg = '沒有堤防的時候，平常天氣還好，城市可以直接走到河邊。往右拉，下大雨看看。';
-  else if (flood) msg = '水比堤防還高，<b>漫過去了</b>！這就是「超過設計」的洪水。下一個問題是：漫過去的時候，堤防會不會破？（第 7 站揭曉）';
+  else if (flood) msg = '水比堤防還高，<b>漫過去了</b>！這就是「超過設計」的洪水。下一個問題是：漫過去的時候，堤防會不會破？（第 8 站揭曉）';
   else if (w > 7.5) msg = '好險！水離堤頂只剩一點點。這時候水門全部關閉，抽水站全力把城裡的雨水抽出去。';
   else msg = '堤防把河水擋在外面，城市是乾的。';
   $('#v1').innerHTML = msg;
@@ -900,7 +959,7 @@ function pick(i) {
   $('#bars').innerHTML = KEYS.map((k, j) =>
     `<div class="bar"><span>${k}</span><span class="tr"><i style="width:${PLANS[i].s[j] * 10}%"></i></span><span class="sc">${PLANS[i].s[j]}</span></div>`).join('');
   $('#v5').innerHTML = PLANS[i].v;
-  markDone(8);
+  markDone(9);
 }
 
 
@@ -1015,6 +1074,13 @@ function drawM() {
     : `河道變成原來的 <b>${Math.round(L * 100)}%</b>，舊河彎填起來變成新土地（🏢）。可是水能存的地方也少了，洪水會<b>更快</b>衝到下游。`;
 }
 $('#str').oninput = drawM; drawM();
+
+/* ---------- photos: hide any that cannot load ---------- */
+$$('.photo img').forEach(im => {
+  const off = () => im.closest('.photo').classList.add('broken');
+  if (im.complete && im.naturalWidth === 0 && im.currentSrc) off();
+  im.addEventListener('error', off);
+});
 
 /* ---------- real maps ---------- */
 $$('.map-panel').forEach(pn => {
