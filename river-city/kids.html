@@ -4,17 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>坐船去上學？· 小學生版｜台北的水上公路</title>
-<meta name="description" content="給國小中年級的水上公路專題：威尼斯、布里斯本和台北，有地圖、照片、小實驗和注音。">
+<meta name="description" content="給國小中年級的水上公路專題：威尼斯、布里斯本和台北，有地圖、照片和小實驗。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B4%3C/text%3E%3C/svg%3E">
 <style>
 :root{--bg:#E6F2F7;--card:#FFFFFF;--ink:#17324A;--ink2:#4F6B82;--line:#BFD6E3;--water:#2F7FC1;--water-soft:#D8E9F7;
   --sun:#F2A531;--good:#3C9A5F;--bad:#C8473A;--earth:#B08E5E;--grass:#6E9F4D;--land:#EEE8DA;--land-line:#B9AD92;
   --surface:#FFFFFF;--surface-2:#F1F6F9;--flame:#D2431C;--instr:#0B7F8E;--ink-soft:#4F6B82;--ink-faint:#8AA0B6}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);font-size:20px;line-height:2.05;padding-bottom:40px}
-.zy{display:inline-flex;align-items:center;vertical-align:baseline}
-.zy .b{writing-mode:vertical-rl;font-size:.46em;line-height:1.05;color:var(--ink2);margin-left:.06em;letter-spacing:-.04em;font-weight:400}
-body.no-bopomofo .zy .b{display:none}
+body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--bg);font-size:20px;line-height:1.8;padding-bottom:40px}
 header{background:linear-gradient(#2F7FC1,#215F93);color:#fff;text-align:center;padding:20px 14px 16px;border-bottom:5px solid var(--sun)}
 header h1{font-size:1.55rem;letter-spacing:.05em}
 header .sub{font-size:.85rem;opacity:.9}
@@ -86,7 +83,6 @@ ol.steps li{margin:6px 0}
   <div class="topbar">
     <a href="./">看完整版</a>
     <a href="../">Kids School</a>
-    <button id="bpmf-toggle">ㄅㄆㄇ 注音：開</button>
   </div>
 </header>
 <nav id="dots" aria-label="分集"></nav>
@@ -241,33 +237,6 @@ let st = { ep: 0, done: [], guess: '' };
 try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
 
-/* ===== 注音：只標比較難的詞 ===== */
-const BPMF = [
- ['淡水河','ㄉㄢˋ|ㄕㄨㄟˇ|ㄏㄜˊ'],['大稻埕','ㄉㄚˋ|ㄉㄠˋ|ㄔㄥˊ'],['布里斯本','ㄅㄨˋ|ㄌㄧˇ|ㄙ|ㄅㄣˇ'],['威尼斯','ㄨㄟ|ㄋㄧˊ|ㄙ'],
- ['抽水站','ㄔㄡ|ㄕㄨㄟˇ|ㄓㄢˋ'],['堤防','ㄉㄧ|ㄈㄤˊ'],['閘門','ㄓㄚˊ|ㄇㄣˊ'],['碼頭','ㄇㄚˇ|ㄊㄡˊ'],['潟湖','ㄒㄧˋ|ㄏㄨˊ'],
- ['漲潮','ㄓㄤˇ|ㄔㄠˊ'],['退潮','ㄊㄨㄟˋ|ㄔㄠˊ'],['颱風','ㄊㄞˊ|ㄈㄥ'],['盆地','ㄆㄣˊ|ㄉㄧˋ'],['運河','ㄩㄣˋ|ㄏㄜˊ'],
- ['引力','ㄧㄣˇ|ㄌㄧˋ'],['避難','ㄅㄧˋ|ㄋㄢˋ'],['捷運','ㄐㄧㄝˊ|ㄩㄣˋ'],['淹水','ㄧㄢ|ㄕㄨㄟˇ'],['茶葉','ㄔㄚˊ|ㄧㄝˋ']
-];
-function addBopomofo(root) {
-  const skip = new Set(['SCRIPT','STYLE','BUTTON','TITLE','TEXT','SVG','TSPAN','A','SMALL']);
-  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => {
-    for (let p = n.parentNode; p && p !== root; p = p.parentNode) if (skip.has(p.nodeName.toUpperCase())) return NodeFilter.FILTER_REJECT;
-    return NodeFilter.FILTER_ACCEPT; } });
-  const texts = []; let n; while ((n = w.nextNode())) texts.push(n);
-  texts.forEach(node => {
-    let html = null; const s = node.nodeValue;
-    for (const [word, py] of BPMF) {
-      if ((html ?? s).indexOf(word) < 0) continue;
-      if (html === null) html = s;
-      const parts = py.split('|');
-      html = html.split(word).join([...word].map((c, i) => '<span class="zy">' + c + '<span class="b">' + (parts[i] || '') + '</span></span>').join(''));
-    }
-    if (html !== null) { const sp = document.createElement('span'); sp.innerHTML = html; node.parentNode.replaceChild(sp, node); }
-  });
-}
-addBopomofo($('main'));
-const bb = $('#bpmf-toggle');
-bb.onclick = () => { const off = document.body.classList.toggle('no-bopomofo'); bb.textContent = 'ㄅㄆㄇ 注音：' + (off ? '關' : '開'); bb.classList.toggle('off', off); };
 
 /* ===== 分集 ===== */
 const eps = $$('.ep'), dots = $('#dots');

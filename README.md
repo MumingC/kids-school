@@ -14,7 +14,7 @@ A small collection of static learning websites I build for my kids.
 | 05 | [`village-chief/`](village-chief/) | Village Chief · 小小村長 | 英文介面的六角格經濟策略遊戲：探索、建城、供需與價格、交換與合作。可跟電腦玩或兩人輪流。圖片清單見 [`ART.md`](village-chief/ART.md)。 |
 | 06 | [`detective/`](detective/) | 環球小偵探 · World Detective | 類似《Carmen Sandiego》的世界追緝遊戲：跟著線索追怪盜飛遍 38 座城市，點真實照片找秘密、讀文化圖鑑、認國旗；飛行時間照真實距離計算。照片授權見 [`CREDITS.md`](detective/CREDITS.md)。 |
 | 07 | [`relativity/`](relativity/) | 時間變慢實驗室 · Relativity | 5 站相對論入門（小二起）：光速賽跑到月球、光子鐘看時間膨脹、雙胞胎太空旅行計算機、緲子雨與 GPS 的證據，最後是延伸遊戲、影片與書單。 |
-| 08 | [`river-city/`](river-city/) | 台北的水上公路 · River City | 9 站專題：台北能不能有通勤用的水上公路？從威尼斯的 MOSE 閘門、布里斯本會浮的碼頭、東京和首爾的通勤船，到台北的堤防與 200 年洪水、基隆河截彎取直、潮汐與藍色公路、日本的超級堤防，最後當市長做選擇。另有[國小中年級簡單版](river-city/kids.html)（有注音）和[教師／家長手冊](river-city/teacher.html)。地圖用真實地理資料繪製；照片直接從 Wikimedia Commons 載入，作者與授權標在每張照片下。 |
+| 08 | [`river-city/`](river-city/) | 台北的水上公路 · River City | 9 站專題：台北能不能有通勤用的水上公路？從威尼斯的 MOSE 閘門、布里斯本會浮的碼頭、東京和首爾的通勤船，到台北的堤防與 200 年洪水、基隆河截彎取直、潮汐與藍色公路、日本的超級堤防，最後當市長做選擇。另有[國小中年級簡單版](river-city/kids.html)和[教師／家長手冊](river-city/teacher.html)。地圖用真實地理資料繪製；照片直接從 Wikimedia Commons 載入，作者與授權標在每張照片下。 |
 
 ## How it works
 
