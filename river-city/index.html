@@ -138,6 +138,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
 .photo .cr{display:block;margin-top:4px;font-size:11.5px;color:var(--ink-faint)}
 .photo .cr a{color:var(--ink-faint)}
 .photo.broken{display:none}
+.ctl[hidden]{display:none}
 
 /* maps */
 :root{--land:#EEE8DA;--land-line:#B9AD92}
@@ -158,7 +159,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
 .map .city-l{font-size:15px;font-weight:700;fill:var(--ink-soft)}
 .map .sea-l{font-size:13px;fill:var(--water);stroke:var(--water-soft)}
 .map .zone{font-size:13px;font-weight:700;fill:var(--flame)}
-.map .mk{cursor:pointer}
+.map .mk{cursor:pointer}.map.measuring{cursor:crosshair}.map .measure circle{fill:var(--flame);stroke:#fff;stroke-width:2}.map .measure line{stroke:var(--flame);stroke-width:3;stroke-dasharray:8 5}
 .map .mk circle{fill:var(--flame);stroke:var(--surface);stroke-width:1.5}
 .map .mk-l{font-size:12.5px;font-weight:700;fill:var(--ink)}
 .map .mk-e{font-size:17px;stroke:none}
@@ -168,7 +169,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
 .map .flow line{stroke:var(--water);stroke-width:2.5}.map .flow text{font-size:12px;fill:var(--water)}
 .map #arr path{fill:var(--water)}
 .map.hide-levee .ly-levee,.map.hide-pump .ly-pump,.map.hide-dock .ly-dock{display:none}
-.map.oldmap .river{opacity:.35}.map.oldmap .ly-levee{opacity:.5}
+.map .swipe-line{stroke:var(--flame);stroke-width:3}.map .swipe-tag{font-size:13px;font-weight:700;fill:var(--flame);stroke:#fff;stroke-width:4px}
 .mapinfo{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:15px;min-height:3em}
 .mapsrc{margin-top:6px;font-size:11.5px;color:var(--ink-faint);line-height:1.5}
 .maptools{margin-top:10px}
@@ -405,6 +406,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
         <button class="btn" data-layer="levee" aria-pressed="true">🟥 堤防</button>
         <button class="btn" data-layer="pump" aria-pressed="true">🟢 抽水站</button>
         <button class="btn" data-layer="dock" aria-pressed="true">⛴ 碼頭</button>
+        <button class="btn" id="measureBtn" aria-pressed="false">📏 量距離</button>
       </div>
       <div class="mapinfo" aria-live="polite">紅線是台北市的堤防，幾乎把整條河包起來了；綠點是抽水站。藍色的河從右下流到左上，在淡水流進大海。</div>
       <div class="mapsrc">河川範圍：經濟部水利署 RIVERPOLY；堤防、抽水站：臺北市政府（Taipei City Dashboard 開放資料）；市界：g0v twgeojson（CC0）；陸地與海岸線：© OpenStreetMap 貢獻者（ODbL）；碼頭為約略位置</div>
@@ -443,6 +445,11 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <div class="verdict" id="v1b"></div>
     </div>
   </div>
+  <div class="note"><span class="h">我們家可以做什麼？ · 防災小任務</span>
+    ① 颱風要來時，一起看氣象署的颱風警報和淹水警戒。<br>
+    ② 台北在颱風前常會封閉河濱公園，請停在河濱停車場的車子移走，因為那裡在堤防外面，河水一漲就會淹。看到廣播時，不要去河邊玩。<br>
+    ③ 找出家裡附近的避難處所（通常是學校或活動中心），跟家人說好走哪條路過去。<br>
+    ④ 準備一個防災包：手電筒、水、餅乾、常吃的藥、行動電源。</div>
   <div class="note"><span class="h">真實的故事</span>2001 年的納莉颱風，雨量超過了當時的設計，基隆河邊的抽水站被水淹壞，連台北車站和捷運都淹了。所以工程師說：堤防可以<b>減少</b>淹水，但沒辦法保證<b>永遠</b>不淹。</div>
 
   <div class="quiz" data-st="5">
@@ -469,9 +476,11 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <div class="panel-bd">
       <div class="mapbox"><svg class="map" id="mapKeelung" viewBox="0 0 600 442" role="img" aria-label="基隆河截彎取直河段附近的地圖" data-bb="121.515,25.04,121.605,25.1"><rect class="sea" width="600" height="442"/><path class="land" d="M0,515.2L-13,513.8L-25.5,509.6L-37,502.8L-47.1,493.6L-55.4,482.5L-61.6,469.8L-65.4,456L-66.3,448.8L-66.3,-7.2L-63.8,-21.4L-58.8,-34.7L-51.5,-46.7L-42.3,-56.9L-37,-61.2L-25.5,-68L-13,-72.2L0,-73.6L600,-73.6L613,-72.2L625.5,-68L631.4,-64.9L642.3,-56.9L651.5,-46.7L658.8,-34.7L661.6,-28.2L665.4,-14.4L666.7,0L666.7,441.6L665.4,456L661.6,469.8L658.8,476.3L651.5,488.3L642.3,498.5L637,502.8L625.5,509.6L613,513.8L600,515.2L0,515.2Z"/><path class="river" d="M-49.6,24.2L-43.1,26.5L-32,34.1L-29,33.3L-30.2,29.7L-29.5,28.4L-27.1,28.5L-27.4,29.8L-25.8,29.5L-26.2,30.7L-25.2,30.6L-23.2,33.8L-30.2,36L-21.8,43L-14.9,51.2L-10.7,58.2L-7.1,67.8L-5.6,75.7L-13.3,81.5L-18,66L-23.3,56.3L-29.6,48.6L-44.7,35.8L-50.6,33.3L-50.4,36.8L-53.1,32.7L-66.7,30.4L-66.7,22.2L-49.6,24.2ZM-26.3,31.3L-28.8,29.7L-28.8,31.2L-27.3,32.2L-26.3,31.3ZM-66.7,361.5L-66.5,359.5L-65.4,357.8L-66.7,361.5ZM-51.2,321.2L-58.5,337.2L-64.9,356.3L-66.7,359L-66.7,267.1L-56.9,268.6L-62.3,288.8L-56.9,268.4L-43.5,271L-45.4,284.1L-45.6,301.3L-47.3,309.9L-45.4,311.3L-45.2,313L-45.6,313.8L-47.6,313.2L-48.4,318.2L-51.2,321.2ZM372.3,287.4L377.2,306.4L378.4,327.2L372.8,330.2L371.7,304.9L365.3,281.8L362.2,275.7L360.4,277L362.1,275.5L358.9,268.2L362.7,266.6L363.2,269.5L369.4,280.1L372.3,287.4ZM125.8,210.6L127,208.7L134.1,230L134.6,232.9L133.2,232.9L125.8,210.6ZM-66.7,263.7L-66.7,261.4L-66,258.9L-66.7,257.2L-66.7,255.2L-64.5,229.5L-65,216.3L-66.3,209.2L-66.7,209.1L-66.7,164.2L-49.9,162.8L-47.6,177.8L-42.6,191.8L-40,213.2L-40,225L-43.2,256.9L-43.2,268L-56,265.5L-54.5,260.3L-55.9,265.3L-66.7,263.7ZM-53,221.8L-53.1,221L-54.5,260.3L-53,221.8ZM126.7,208L125.5,209.6L125.1,208.7L126.4,206.9L126.7,208ZM126.2,206.2L124.8,207.8L124,201.9L126,201.7L126.2,206.2ZM126,200L124,200.2L124,198.3L125.9,198.9L126,200ZM76.1,197.8L83.6,195.3L84.8,191.2L89.7,193.2L89.2,196.3L96,199.2L91.1,201.8L91.9,199.3L87,198.3L85.4,202.3L88.9,202.7L85.3,204.6L81.5,204.7L76.1,197.8ZM64.8,192.3L68.7,190.4L79.7,204.5L69.4,200.2L64.8,192.3ZM123.9,194.5L125.4,195.3L125.9,198.4L124,197.7L123.9,194.5ZM303.3,202.1L256.5,178L244.3,180.7L214.6,179.5L214.9,183.7L213.1,185.7L213.8,187.3L216,188.2L218.2,190.8L223,193.7L231.4,195.2L231.9,196.2L225.3,194.8L219.8,192.2L213.7,187.6L212.8,185.4L214.6,183.4L213.7,179.3L196.3,178.3L196.5,168.9L214.1,170.1L215.2,168L217.5,168L214.9,170.2L247.7,175.1L252.7,174.5L255.8,171.3L259.5,171.8L306.7,196.1L309,200.4L316.2,182.4L318,179.4L318.1,177.1L319,178.2L320.6,177.2L316.6,182.6L309.6,200.6L312.5,200.8L315.9,200L356.9,173.5L361.2,172.3L365.3,172.7L370,175.3L377.6,188.1L379.8,187.7L377.9,188.9L378.9,191.6L380.6,191.1L380.8,191.9L379.3,192.4L382,201.5L383.2,202.9L386.3,202.4L383.1,204.7L383.2,213.5L378,212.9L377.2,207.3L369,189.2L366.9,186.2L362.3,183.6L356.9,184.7L322.3,206.5L314.7,208L307.7,205.8L303.3,202.1ZM68.2,188.7L64,190.6L60.5,184.4L56,179.1L66.4,183.4L68.2,188.7ZM106.1,174.5L90.7,178.1L88.6,183.3L90.1,190.9L83.7,188.1L82.2,176L84.2,172.4L90.6,167.6L98.6,164.2L108.3,163L180.6,167.4L193.4,169.1L194.6,167.5L195.2,178.2L126.7,175.5L125.6,176.3L125.2,187.3L128.4,190.1L124.7,189.4L125.5,194.6L123.9,193.9L123.5,188L124.3,175.9L106.1,174.5ZM46.2,161.4L58,170.2L62.2,175L64.8,180.3L53.6,175.8L40.1,166.6L42.4,159.8L46.2,161.4ZM-64.7,109.9L-58.2,122.1L-51.8,144.7L-49.9,146.1L-50.7,147.1L-49.9,148.3L-50.5,155.5L-48.5,157.6L-50.2,158.4L-50.4,159.9L-66.7,161.4L-66.7,109.4L-64.7,109.9ZM-12.9,87L-12.9,84.2L-5.2,78.4L-2.5,97.1L-1.6,112.7L2.4,128.5L12,141.2L13.7,141.8L18.7,140.2L14.3,143.2L21.1,149.6L40.9,158.8L38.6,165.9L25.1,161.5L12.2,153.9L10,156.1L8.9,155.8L8.8,154.6L10.7,152.8L1.2,143.5L-7,122L-12.9,87ZM-40.8,52.3L-42.1,51.9L-41.8,48.4L-45.2,43.3L-41.6,47.8L-40.8,52.3ZM-22.3,29.8L-26.1,27.1L-12.3,21L-10.9,24.8L-19.1,27.5L-22.3,29.8ZM433.2,372.2L433.5,370L431.1,365.9L432,365.6L434.6,369.5L435.2,372.2L433.2,372.2ZM430.7,365.1L433.1,357.8L434.4,357.7L431.9,364.8L430.7,365.1ZM433.1,357.4L433.2,352.5L434.4,352.2L434.4,357.3L433.1,357.4ZM430.2,350L390.9,359.6L381.1,358.9L375.7,356.4L380.8,353.4L389.1,354.1L410.1,347.6L451.3,339.7L452.6,344.4L441.2,347.6L439.6,349.9L438,348.5L435.2,348.4L433.9,350.1L434.3,351.6L433,351.9L432.6,350.6L430.2,350ZM372.8,348.9L373.5,348.3L372.8,331.8L378.4,328.8L378.2,344.6L377.3,349.7L379.6,352.2L374.4,355.4L372.8,348.9ZM514.4,303.7L514,305.7L489.3,329.1L475.4,337.2L454.1,344.2L452.5,339.2L475.2,330.5L488.5,322.3L503.3,309.1L512.1,299.1L514.4,303.7ZM658.6,262.8L651.5,264L647.8,272.6L645,269.7L647.3,263.6L645.6,264.9L642.8,265L641.6,261.9L644.4,264.5L648.3,262.9L650.9,260L657,258.5L661.9,259L666.7,260.5L666.7,265.3L658.6,262.8ZM517.2,292.9L524.2,295.5L516.7,299.5L515.4,301.4L513.3,297.2L517.2,292.9ZM525.4,295.3L517.7,292.4L524.8,289.1L534.3,289L545.8,295.1L561.2,300.4L594.3,298.3L614.5,294.5L622.6,291.7L635.4,283.1L644.4,271.3L647.1,274.2L639.5,284.2L627.8,293.4L604,300.6L590.8,303.1L557.6,305.5L543.5,301.2L538.4,298.9L535.2,295.9L529.8,294.6L525.4,295.3ZM362.7,264.8L358.6,266.3L359.4,262.4L369.6,243.6L376.4,223.3L377.9,214.5L383.3,215.4L381.5,228.5L374.6,246.5L363.7,261.8L362.7,264.8ZM402.8,208.3L403.8,207.5L402.9,208.5L401.9,207.9L402.8,208.3ZM407.8,206.9L407.3,207.1L406.7,207L407.3,207L407.8,206.9ZM405.8,205.7L406.3,206.4L404.1,206.8L405.2,205.7L405.8,205.7ZM409.4,204.2L408.5,204.9L408.8,204.2L409.4,204L414.1,204.9L409.4,204.2ZM397.8,203.9L397.4,203L398.3,203.7L403.1,201.5L404,201.3L404.3,201.8L403.8,205L402.3,207.1L403.9,204L404,201.6L398.8,203.8L397.8,203.9ZM414.7,204.4L415.8,202.4L415.7,200.2L416.2,198.1L416.1,202.4L414.7,204.4ZM397.3,200.6L397.3,202.2L396.4,200.3L393.5,202.3L396.3,200.1L397,200.1L397.3,200.6Z"/><g class="ly ly-levee"><path d="M288.3,170.1L314.8,176.2L330,176.4L332.9,175.9L336.2,174.9L354.2,168.4L359.6,168.4L367.6,171L370.5,172.6L372.8,175.2L375.4,179L381.3,188.6L383.1,192.4L385.1,198.4L385.9,203L386.2,211.3L386,220L385.6,223.4L385.5,226.4L384.8,229.6L381,241.6L380.4,245.3L380.3,247.7L382.1,270.3L392.7,338.9L393.8,341.4L396.7,344.5L402.9,346.3L406.7,346.9L408.6,346.6L441.7,339L448.3,334.2L467.5,324.9L479.9,318.4L485.8,314.9L500.2,303.9L513.9,292.5L518.9,289.6L523.9,288.2L527.7,287.5L530.7,287.2L534.2,287.5L541.2,289.4L548.5,292.8L552.4,294.3L558.1,295.4L562.3,295.6L581.1,294.5L587.5,293.5L596.9,292.6L604.9,291.1L623.2,285.5L626.2,283.7L633.5,277.8L642.1,266.8L644,262.7L645.2,261.1L649.5,257.3L652.7,255.8L656.5,255.1L659.7,255.2L666.7,257.1"><title>內湖堤防</title></path><path d="M80.2,182.5L80.6,175.6L80.9,174.4L82.5,172.4L89.2,166.7L91.1,165.4L95.8,163.7L108.8,161.8L117.8,162.6L120.9,163.3L124,162.7L187.8,166.5L213,167L281.3,169L288.2,170.1"><title>大直堤防</title></path><path d="M-66.7,46.7L-59.5,47.7L-42.5,51.1L-37.6,53.8L-32.1,58L-27,63.4L-23.3,69.3L-21.7,72.2L-19.1,85.7"><title>社子堤防</title></path><path d="M-11.9,15.1L-26.5,20.4L-27.8,21.2L-28.4,22.1L-29.1,24.3L-28.4,26.8L-27.8,27.6L-17.4,37.3L-15.4,39.3L-11.8,43.9L-6.7,51.5L-4.7,55.3L-3.2,58.9L0.5,68.8L6.8,113.8L8.1,119.6L10.7,126.4L15.5,135.3L19.4,140.6L23,144.6L28.3,149.1L40.7,156.6L58.1,169.2L60.4,171.6L63.1,175.3L66.5,180.8L69,186"><title>士林堤防</title></path><path d="M-66.7,20.1L-60.6,20.8L-54.1,20.9L-44.5,19.5L-13.9,8.6"><title>洲美堤防</title></path><path d="M18,-0.3L19.1,-2.6L19.3,-3.9L18.9,-5.8L18.2,-7.7L18.2,-8.7L24.1,-24.7L24.7,-25.8L32.2,-28.9L33.4,-30.1L42.5,-49.7L43,-52.4L41.5,-64L42,-65.1L43.1,-65.8L50.3,-68.6L51.3,-70.9L51.6,-73.6M15.5,-0.1L16.8,-1.8L17.6,-3.8L16.5,-7.4L16.6,-9.2L23,-26.1L24.4,-27.4L32.1,-30.7L32.6,-32.4L33.7,-34.3L41.3,-50.9L41.2,-54.2L40.2,-61.9L40.2,-65L41.6,-66.7L48.1,-69.6L49.2,-70.6L49.8,-71.9L49.8,-73.6"><title>磺溪堤防</title></path><path d="M64.6,193.4L68.8,199.7L70,200.7L79.2,205.3L81,205.5L82,205.2L89.9,201.5"><title>新生擋水牆</title></path><path d="M530.6,300.7L534,300.5L538,300.9L540.4,301.4L550.9,305.1L555,306.1L557.8,306.3L578.8,306L583.4,305.6L598.9,303.5L612.9,300.9L626.3,296.5L630.8,294.7L634.5,291.9L642.1,284.6L651.8,272.2L656.1,269.2L662.1,268L666.7,268.7"><title>南港堤防</title></path><path d="M-19.1,85.8L-12.8,118.3L-10.1,127.9L-7.9,133.4L-5,138.9L-1.9,143.8L1.1,147.6L6.8,152.9L9.1,153.7L11.7,155.7L12.2,156.8L15.3,159.5L22.8,164.5L41.3,172.9L51.2,176.1L55.6,178.3L59.3,183.4L64.6,193.3"><title>圓山堤防</title></path><path d="M-66.7,102.7L-60.9,113.4L-53.9,129.3L-49.3,145.1"><title>渡頭堤防</title></path><path d="M-49.4,145.3L-47.8,152.7L-46.1,158.8L-42.7,175.1L-41.6,186.2L-41.3,193.2L-39.4,212.5L-39.2,218L-39.3,223.4L-41,237.6L-42.5,255.3L-42.5,268.7"><title>大龍峒堤防</title></path><path d="M-42.4,268.9L-44.7,286.9L-44.3,298.5L-44.6,303.6L-44.5,310.6L-45.4,316.6L-50.6,336.1L-53.6,352.8L-56.2,362L-58,366.9L-60.2,371.5L-64.5,378.7L-66.7,381.7"><title>大稻埕堤防</title></path><path d="M89.9,201.5L96.1,198.4L99.3,194.7L101,192.1L104.5,191.5L108.8,189.1L119.3,189L122.3,186.4L127.6,186.4L129.1,187.3L130.1,189.2L131.7,190L142.7,190.7L144.4,191.2L150,194.3L155.8,194.5L166.4,193.7L167.4,193.5L167.7,192.6L168.4,192.5L184.4,193L185.8,191.5L186.9,191.3L192.1,191.6L198.5,192.8L223.1,193.3L230.3,192.4L233.3,193.7L240.9,193.7L242.8,193.1L245.7,193L248.3,193.2L252.3,194.1L253.6,195L254.5,195.2L255.5,194.3L268.3,194.7L281.3,196.9L286.8,200L289.1,200.1L290.5,200.5L296.1,202.8L300.5,205.3L304.1,207L309.5,208.5L313.2,209.1L319.6,209.6L336.6,210.2L359,210.1"><title>松山堤防</title></path><path d="M359,210.4L358.5,223.3L354.6,253L354.8,255.4L357.6,273.8L360,276.4L361,278.6L360.9,283.4L365.6,313.7L368.1,332.1L370,344.7L372.2,354.1L373.9,357.3"><title>撫遠擋水牆</title></path><path d="M374,357.3L376.1,359.2L380,360.8L387.5,361.6L393.5,361.2L405.7,358.5L446.1,348.5L452.2,346.9L472.3,340.6L475.7,339.3L485.7,333.7L491.3,330.2L496.9,325.8L502.9,319.8L510.1,311.8L512.2,308.5L514.2,306.8L515.5,306.5L517.3,305.3L523.3,302.3L530.5,300.7"><title>玉成堤防</title></path><path d="M-11.8,15.1L-5.1,13.2L3,10.4L20.8,7.6L25.1,7.3L28.6,7.8L32.3,9.3L35.6,11.5L38.9,13.1L41.9,14L44.5,14.3L47.4,14.2L50.3,13.7L54.4,12.5L61.6,8.5L68.1,3.7L69.5,3.4L85.7,1.5L88.2,1.8L100.5,5.6L102.2,5.9L114.4,-0.5L116.8,-1.4L127,-2.5L134.4,-2.3L137,-1.9L140,-0.8L143.3,1.2L149.6,3.8L157.6,9.5L163.8,13.3L170.2,15.9L175.8,17.2L178.8,18.4L180.4,19.5L183.6,22.1L189,28.2L191.7,30.5L194,31.6L200.6,31.1L212.5,37.9L217.1,40L218.4,40.1L222.6,39.2L227.9,35.4L229.6,33.8L230.4,31.7L233,26.9L233.8,21L235.9,12.8L238.4,8.3L241.6,3.7L243.6,1.7L245.9,0L247.2,-1.5L249.9,-3.9L250.6,-5.1L252.8,-6.9L256.3,-8.7L259.5,-9.9L263.5,-10.4L265.5,-12.2L267.8,-16.2L270.2,-19L271.3,-19.5L276.9,-20L280.6,-24.1L283.9,-29L285,-32L285.7,-37.5L285.4,-45.6L285.8,-49.2L285.5,-56.5L286.5,-61.7L286.2,-63.9L285.4,-66.4"><title>雙溪左岸堤防</title></path><path d="M283.2,-66.1L284.1,-63L283.7,-60.7L283.9,-55.2L283.4,-47.9L284,-38.2L283.5,-33.2L282.9,-30.8L282,-28.8L279.5,-25.1L275.6,-21.3L273.7,-20.8L271.4,-21.2L269.2,-19.8L267.9,-18.4L264.9,-13.8L263.2,-11.9L257.9,-10.6L254.6,-8.9L251.2,-7.9L248.5,-4.7L243.9,-1.7L240.4,2.3L236.6,7.6L235.2,10.2L234.4,12L232.1,20.7L231.2,26.1L228.2,32.2L225.2,34.5L224.3,35.5L221.8,37.3L219.9,37.5L215.2,36.6L206.2,31.9L203.2,29.8L202.4,29.8L201.2,29.3L199,28.8L197.7,29.3L195.6,29.4L193.6,29L184.4,18.7L181.5,16.5L174,13.7L162.3,8.3L160,6.4L157.5,5L155.6,2.9L152.5,-1.3L149.9,-3.5L140.8,-8.6L137.9,-9.4L131.2,-9.5L122.5,-8.7L121.1,-9.4L116.9,-9.2L113.8,-8.5L111.2,-7.4L104.3,-3.7L101.1,-2.5L88,-5.9L85,-6.1L67.8,-4L62.8,-1.8L56.8,2.9L53.3,4.7L50.1,5.7L45.3,6.7L42.7,6.3L40.4,5.4L34,1.6L31.4,0.7L29.2,0.1L23.6,-0.2L9.1,1.4L1.2,2.7L-9.7,6.3L-13.8,8.5"><title>雙溪右岸堤防</title></path><path d="M637.8,502.2L640.2,499.2L640.9,497.9L640.9,496.9L639.9,494.2L635.7,489.4L634.4,485.9L634.7,485L636.8,484.3L644.9,484.3L648.6,483.5L651.5,480.8L652.1,479.5L653.6,473.6L655,472.2L656.2,471.8L660.3,472.7M666.5,446.2L664.8,444L663.2,435.7L662.3,434L661,432.8L659,432.7L655.9,431.7L654.5,430.4L652.5,427.1L651.4,426.3L650.4,424.9L650,423.7L649.8,421.5L650.3,415.5L650,409.1L649.1,398.2L648.7,386.4L648.8,382.8L649.8,379.3L651.2,376.5L653.2,375.5L660.5,376.8L666.7,377M666.7,375.8L661.1,375.6L654.5,374.4L652.2,374.7L650.5,375.8L649.3,377.6L647.9,382.2L647.6,385.2L647.9,398.2L648.7,405.1L649.2,415.1L648.7,420.7L649,424.1L649.6,425.7L650.6,427.1L652.1,428.2L653.2,430.7L655.3,432.7L660.5,433.9L661.7,434.9L662.3,436.8L663.7,444.6L666.4,448.2M660.8,471.6L657.2,470.7L656,470.7L655,470.9L653.3,472.1L652.5,473.2L651,479.3L650.4,480.2L648.1,482.3L644.4,483.2L636.6,483.1L634.2,484.1L633.5,485L633.3,486.1L633.5,487L634.3,488.7L635.7,490.6L639.5,494.8L640.2,496.4L640.2,498.1L638.9,500.3L633.4,505.2"><title>四分溪堤防</title></path></g><g class="ly ly-pump"><circle class="pump" cx="649.3" cy="278.9" r="3.2" data-info="南港抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>南港抽水站</title></circle><circle class="pump" cx="638.7" cy="268.6" r="3.2" data-info="南湖抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>南湖抽水站</title></circle><circle class="pump" cx="542.0" cy="287.8" r="3.2" data-info="長壽抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>長壽抽水站</title></circle><circle class="pump" cx="541.3" cy="304.7" r="3.2" data-info="成功抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>成功抽水站</title></circle><circle class="pump" cx="456.7" cy="327.5" r="3.2" data-info="成美抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>成美抽水站</title></circle><circle class="pump" cx="450.0" cy="351.1" r="3.2" data-info="玉成抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>玉成抽水站</title></circle><circle class="pump" cx="381.3" cy="362.9" r="3.2" data-info="南京抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>南京抽水站</title></circle><circle class="pump" cx="368.0" cy="334.9" r="3.2" data-info="松山抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>松山抽水站</title></circle><circle class="pump" cx="389.3" cy="304.7" r="3.2" data-info="新民權抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>新民權抽水站</title></circle><circle class="pump" cx="358.7" cy="277.5" r="3.2" data-info="撫遠抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>撫遠抽水站</title></circle><circle class="pump" cx="392.0" cy="210.5" r="3.2" data-info="陽光抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>陽光抽水站</title></circle><circle class="pump" cx="386.0" cy="188.4" r="3.2" data-info="港漧抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>港漧抽水站</title></circle><circle class="pump" cx="318.0" cy="170.8" r="3.2" data-info="環山抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>環山抽水站</title></circle><circle class="pump" cx="272.0" cy="163.4" r="3.2" data-info="北安抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>北安抽水站</title></circle><circle class="pump" cx="231.3" cy="202.4" r="3.2" data-info="濱江抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>濱江抽水站</title></circle><circle class="pump" cx="213.3" cy="166.3" r="3.2" data-info="大直抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>大直抽水站</title></circle><circle class="pump" cx="127.3" cy="191.4" r="3.2" data-info="中山抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>中山抽水站</title></circle><circle class="pump" cx="92.7" cy="203.1" r="3.2" data-info="建國抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>建國抽水站</title></circle><circle class="pump" cx="89.3" cy="204.6" r="3.2" data-info="新生抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>新生抽水站</title></circle><circle class="pump" cx="92.0" cy="208.3" r="3.2" data-info="新生二抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>新生二抽水站</title></circle><circle class="pump" cx="82.7" cy="211.2" r="3.2" data-info="圓山抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>圓山抽水站</title></circle><circle class="pump" cx="22.0" cy="137.6" r="3.2" data-info="劍潭抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>劍潭抽水站</title></circle><circle class="pump" cx="8.0" cy="156.8" r="3.2" data-info="大龍抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>大龍抽水站</title></circle><circle class="pump" cx="-42.7" cy="53.0" r="3.2" data-info="社子抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>社子抽水站</title></circle><circle class="pump" cx="-25.3" cy="28.7" r="3.2" data-info="士林抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>士林抽水站</title></circle><circle class="pump" cx="-25.3" cy="28.7" r="3.2" data-info="士林二抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>士林二抽水站</title></circle><circle class="pump" cx="112.0" cy="396.7" r="3.2" data-info="林森抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>林森抽水站</title></circle><circle class="pump" cx="19.3" cy="-19.1" r="3.2" data-info="文林抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>文林抽水站</title></circle><circle class="pump" cx="81.3" cy="348.1" r="3.2" data-info="新長安抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>新長安抽水站</title></circle><circle class="pump" cx="18.0" cy="-18.4" r="3.2" data-info="文林二抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>文林二抽水站</title></circle><circle class="pump" cx="86.0" cy="347.4" r="3.2" data-info="長春抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>長春抽水站</title></circle><circle class="pump" cx="79.3" cy="306.9" r="3.2" data-info="民生抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>民生抽水站</title></circle><circle class="pump" cx="-19.3" cy="6.6" r="3.2" data-info="洲美抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>洲美抽水站</title></circle><circle class="pump" cx="84.7" cy="303.2" r="3.2" data-info="民權抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>民權抽水站</title></circle><circle class="pump" cx="85.3" cy="284.1" r="3.2" data-info="錦州抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>錦州抽水站</title></circle><circle class="pump" cx="-57.3" cy="368.7" r="3.2" data-info="忠孝抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>忠孝抽水站</title></circle><circle class="pump" cx="-45.3" cy="314.3" r="3.2" data-info="六館抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>六館抽水站</title></circle><circle class="pump" cx="-48.0" cy="145.7" r="3.2" data-info="迪化抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>迪化抽水站</title></circle><circle class="pump" cx="88.0" cy="-8.1" r="3.2" data-info="芝山抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>芝山抽水站</title></circle><circle class="pump" cx="92.7" cy="4.4" r="3.2" data-info="福德抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>福德抽水站</title></circle><circle class="pump" cx="75.3" cy="-19.1" r="3.2" data-info="福林抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>福林抽水站</title></circle><circle class="pump" cx="31.3" cy="-1.5" r="3.2" data-info="文昌抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>文昌抽水站</title></circle><circle class="pump" cx="48.7" cy="-72.1" r="3.2" data-info="東華抽水站：大雨時把堤防裡面的雨水抽到河裡。"><title>東華抽水站</title></circle></g><text class="lb rv" x="273.3" y="187.7" text-anchor="middle" transform="rotate(-8 273.3 187.7)">基隆河（拉直後）</text><text class="lb zone" x="240.0" y="121.4" text-anchor="middle">大直重劃區</text><text class="lb zone" x="420.0" y="143.5" text-anchor="middle">內湖科技園區</text><text class="lb sm" x="206.7" y="290.7" text-anchor="middle">松山機場</text><g class="mk pin" tabindex="0" role="button" data-info="玉成抽水站：2001 年納莉颱風時被洪水淹壞。現在把冷卻設備架高，擋水閘板也加高到 2.5 公尺。"><circle cx="450.0" cy="351.1" r="5"/><text class="mk-l" x="458.0" y="367.1" text-anchor="start">玉成抽水站</text></g><g class="scale"><line x1="14" y1="428" x2="80.1" y2="428"/><line x1="14" y1="424" x2="14" y2="432"/><line x1="80.1" y1="424" x2="80.1" y2="432"/><text x="47.1" y="422" text-anchor="middle">1 公里</text></g><g class="north"><path d="M578,14L571,34L578,29L585,34Z"/><text x="578" y="48" text-anchor="middle">N</text></g></svg></div>
       <div class="seg maptools" data-for="mapKeelung">
-        <button class="btn" id="oldMapBtn" aria-pressed="false">🗺 疊上 1904 年的老地圖</button>
+        <button class="btn" id="oldMapBtn" aria-pressed="false">🗺 打開 1904 年的老地圖</button>
       </div>
-      <div class="mapinfo" aria-live="polite">現在的基隆河在這裡幾乎是一條直線。按上面的按鈕，疊上 1904 年畫的老地圖，找找看以前的河彎在哪裡？大直重劃區和內湖科技園區以前是什麼？</div>
+      <div class="ctl" id="swipeBox" hidden><label>← 1904 年　｜　現在 → <span class="v" id="swipeVal"></span></label>
+        <input type="range" id="swipe" min="0" max="100" step="1" value="60" aria-label="拉動比較老地圖和現在"></div>
+      <div class="mapinfo" aria-live="polite">現在的基隆河在這裡幾乎是一條直線。按上面的按鈕打開 1904 年畫的老地圖，再拉動滑桿比一比：左邊是 1904 年，右邊是現在。</div>
       <div class="mapsrc">1904 年地圖：日治二萬分之一臺灣堡圖，中央研究院人社中心 GIS 專題中心「臺灣百年歷史地圖」圖磚服務（需要網路）；河川範圍：經濟部水利署；堤防、抽水站：臺北市政府</div>
     </div>
   </div>
@@ -542,10 +551,32 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
     <p>那可不可以把牆拆掉，讓城市重新靠近河呢？回到第 5 站的實驗，按「把堤防拆掉」看看會發生什麼事。日本人想出了另一個辦法，下一站來看。</p>
   </div>
 
+
+  <h2 class="sec">一百多年前的水上公路 <small>History</small></h2>
+  <div class="prose">
+    <p>台北其實<b>有過</b>水上公路。1860 年淡水開港以後，新店溪、大漢溪、基隆河沿岸的貨物，先用小船運到艋舺和大稻埕整理打包，再沿著淡水河送到淡水，換上大輪船運到世界各地。</p>
+    <p>那時候最重要的貨物是<b>茶葉</b>。外國商人在大稻埕開洋行、設茶廠，大約 1869 到 1895 年是大稻埕茶葉生意最熱鬧的時候。大稻埕會取代艋舺，也是因為艋舺的河港<b>越來越淺</b>（泥沙淤積），大船開不進去。</p>
+    <p>後來鐵路、公路和捷運越來越方便，河上的貨船就慢慢少了。這也提醒我們：<b class="hl">一條河能不能當公路，要看水夠不夠深，也要看有沒有更快的路可以走。</b></p>
+  </div>
+
+  <h2 class="sec">潮汐跟月亮有關 <small>Tides &amp; the Moon</small></h2>
+  <div class="prose">
+    <p>為什麼海水會一天漲兩次、退兩次？主要是<b>月球的引力</b>拉著地球上的海水。月亮每天大約晚 50 分鐘升起，所以漲潮的時間也每天大約晚 50 分鐘。滿月和新月的時候，太陽和月亮排成一直線，潮水漲得特別高、退得特別低，叫做<b>大潮</b>。</p>
+  </div>
+  <div class="note"><span class="h">真實資料任務</span>打開<b>中央氣象署</b>網站的「潮汐預報」，選<b>新北市淡水區</b>，找出今天的「滿潮」和「乾潮」時間，寫下來。明天再查一次，看看是不是晚了快一個小時？再跟上面的實驗比一比，今天幾點適合開船？<br><a href="https://www.cwa.gov.tw/" target="_blank" rel="noopener">中央氣象署網站</a></div>
+
+  <h2 class="sec">河變乾淨了嗎？ <small>River health</small></h2>
+  <div class="prose">
+    <p>以前淡水河非常髒，甚至有白鷺鷥的羽毛被油汙染黑，被誤以為是新品種的「黑色白鷺鷥」。這幾十年來，政府和民間一起整治，民間團體從 2019 年開始調查淡水河的魚，2025 年已經有三種魚通過檢驗評估。</p>
+    <p>想要人坐船、在河邊玩，河水也要<b>乾淨</b>。這是水上公路的第五個條件，很容易被忘記。</p>
+  </div>
   <div class="quiz" data-st="7">
     <h3>小測驗</h3>
     <div class="q" data-ans="0">為什麼藍色公路很難像捷運一樣排固定班表？
       <div class="opts"><button class="opt">潮汐讓河水一下深一下淺，而且每天時間不一樣</button><button class="opt">船長不想上班</button><button class="opt">河裡的魚太多</button></div>
+      <div class="fb"></div></div>
+    <div class="q" data-ans="0">為什麼漲潮的時間每天都會晚一點？
+      <div class="opts"><button class="opt">因為月亮每天大約晚 50 分鐘升起</button><button class="opt">因為船長每天晚起</button><button class="opt">因為河水越來越多</button></div>
       <div class="fb"></div></div>
     <div class="q" data-ans="1">堤防上的「水門」是做什麼的？
       <div class="opts"><button class="opt">讓河水流進城市</button><button class="opt">平常讓人走到河邊，颱風時關起來擋水</button><button class="opt">收過路費</button></div>
@@ -681,7 +712,7 @@ input[type=range]{width:100%;accent-color:var(--instr);height:28px}
       <p>穿過水門走到河邊，數數看堤防有幾層樓高；坐一趟遊河船，問船長今天為什麼是這個時間開船。</p></div>
   </div>
 
-  <div class="note"><span class="h">For grown-ups · 給大人</span>這一課刻意簡化了幾件事：
+  <div class="note"><span class="h">For grown-ups · 給大人</span><a href="teacher.html"><b>👩‍🏫 教師／家長手冊：課綱對照、每站目標、討論題、動手實驗和戶外學習單</b></a><br>這一課刻意簡化了幾件事：
     <br>① 剖面圖的高度是示意，不是某一段真實堤防；台北各段堤防高度不同，主要堤防大多以 200 年重現期洪水為設計標準。
     <br>② 潮汐實驗用的是正弦波，振幅與碼頭水深是教學用的假設值，只為了說明「可開船時段每天在移動」。
     <br>③ 截彎取直的示意圖只表現「變短、存水變少」的方向，百分比不是基隆河的真實數字；威尼斯廣場積水高度、MOSE 升起門檻、布里斯本碼頭的水位都是教學用的簡化值。
@@ -1098,22 +1129,28 @@ $$('.maptools[data-for] [data-layer]').forEach(b => b.onclick = () => {
 });
 $$('a[data-go]').forEach(a => a.addEventListener('click', e => e.preventDefault()));
 
-// 1904 Taiwan map tiles (Academia Sinica) laid under the Keelung map
+// 1904 Taiwan map tiles (Academia Sinica), shown left of a swipe line
 (function () {
-  const svgEl = $('#mapKeelung'), btn = $('#oldMapBtn');
+  const svgEl = $('#mapKeelung'), btn = $('#oldMapBtn'), box = $('#swipeBox'), sw = $('#swipe');
   if (!svgEl || !btn) return;
   const NS = 'http://www.w3.org/2000/svg';
   const [x0, y0, x1, y1] = svgEl.dataset.bb.split(',').map(Number);
-  const c = Math.cos((y0 + y1) / 2 * Math.PI / 180), k = 600 / ((x1 - x0) * c);
+  const VW = svgEl.viewBox.baseVal.width, VH = svgEl.viewBox.baseVal.height;
+  const c = Math.cos((y0 + y1) / 2 * Math.PI / 180), k = VW / ((x1 - x0) * c);
   const X = lon => (lon - x0) * c * k, Y = lat => (y1 - lat) * k;
   const Z = 15, n = 2 ** Z;
   const tx = lon => Math.floor((lon + 180) / 360 * n);
   const ty = lat => Math.floor((1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * n);
   const lonOf = t => t / n * 360 - 180;
   const latOf = t => Math.atan(Math.sinh(Math.PI * (1 - 2 * t / n))) * 180 / Math.PI;
-  let g = null, failed = 0, loaded = 0;
+  let g = null, clip = null, line = null, tag = null, loaded = 0, failed = 0;
   function build() {
-    g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'oldtiles');
+    const defs = document.createElementNS(NS, 'defs');
+    const cp = document.createElementNS(NS, 'clipPath'); cp.id = 'oldClip';
+    clip = document.createElementNS(NS, 'rect'); clip.setAttribute('x', 0); clip.setAttribute('y', 0); clip.setAttribute('height', VH);
+    cp.appendChild(clip); defs.appendChild(cp); svgEl.insertBefore(defs, svgEl.firstChild);
+    g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'oldtiles'); g.setAttribute('clip-path', 'url(#oldClip)');
+    const bg = document.createElementNS(NS, 'rect'); bg.setAttribute('width', VW); bg.setAttribute('height', VH); bg.setAttribute('fill', '#f4efe2'); g.appendChild(bg);
     for (let i = tx(x0); i <= tx(x1); i++) for (let j = ty(y1); j <= ty(y0); j++) {
       const im = document.createElementNS(NS, 'image');
       const L = X(lonOf(i)), T = Y(latOf(j));
@@ -1126,24 +1163,72 @@ $$('a[data-go]').forEach(a => a.addEventListener('click', e => e.preventDefault(
       im.setAttribute('href', `https://gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-${Z}-${i}-${j}`);
       g.appendChild(im);
     }
-    svgEl.querySelector('.land').after(g);
+    // the old map sits above today's river and levees, below the labels
+    const firstLabel = svgEl.querySelector('.lb, .mk, .scale');
+    svgEl.insertBefore(g, firstLabel);
+    line = document.createElementNS(NS, 'line');
+    line.setAttribute('y1', 0); line.setAttribute('y2', VH); line.setAttribute('class', 'swipe-line');
+    tag = document.createElementNS(NS, 'text'); tag.setAttribute('class', 'swipe-tag'); tag.setAttribute('y', 22);
+    tag.textContent = '1904 ｜ 現在';
+    svgEl.insertBefore(line, firstLabel); svgEl.insertBefore(tag, firstLabel);
     setTimeout(check, 8000);
+  }
+  function place() {
+    const x = sw.value / 100 * VW;
+    clip.setAttribute('width', x); line.setAttribute('x1', x); line.setAttribute('x2', x);
+    tag.setAttribute('x', Math.min(Math.max(x, 60), VW - 60)); tag.setAttribute('text-anchor', 'middle');
+    $('#swipeVal').textContent = sw.value + '%';
   }
   function check() {
     if (loaded === 0 && failed > 0) {
-      const inf = btn.closest('.panel-bd').querySelector('.mapinfo');
-      inf.innerHTML = '老地圖現在載入不了（可能沒有網路）。可以請大人打開 <a href="https://gis.sinica.edu.tw/tileserver/" target="_blank" rel="noopener">臺灣百年歷史地圖圖磚服務</a>，選「1904 日治臺灣堡圖」，找大直和內湖。';
+      btn.closest('.panel-bd').querySelector('.mapinfo').innerHTML = '老地圖現在載入不了（可能沒有網路）。可以請大人打開 <a href="https://gis.sinica.edu.tw/tileserver/" target="_blank" rel="noopener">臺灣百年歷史地圖圖磚服務</a>，選「1904 日治臺灣堡圖」，找大直和內湖。';
     }
   }
+  sw.addEventListener('input', () => g && place());
   btn.onclick = () => {
     const on = btn.getAttribute('aria-pressed') !== 'true';
     btn.setAttribute('aria-pressed', on);
     if (on && !g) build();
-    if (g) g.style.display = on ? '' : 'none';
+    [g, line, tag].forEach(e => e && (e.style.display = on ? '' : 'none'));
+    box.hidden = !on;
+    if (on) place();
     svgEl.classList.toggle('oldmap', on);
     btn.closest('.panel-bd').querySelector('.mapinfo').innerHTML = on
-      ? '這是 1904 年（日本時代）畫的地圖。淡淡的藍色是<b>現在</b>的河。看到老地圖上彎來彎去的河道了嗎？那些彎後來被填平，變成大直和內湖的新土地。'
+      ? '<b>找找看：</b>老地圖上黑白的<b>雙線</b>就是 1904 年的河。把滑桿慢慢往右拉，看看以前的基隆河在大直和松山繞了幾個大彎？那些河彎後來被填平，變成大直和內湖的新土地。<br><small>這是日本時代畫的地圖，字是舊的寫法，看不懂沒關係，看河的形狀就好。</small>'
       : '現在的基隆河在這裡幾乎是一條直線。';
+  };
+})();
+
+/* ---------- distance tool (Taipei map) ---------- */
+(function () {
+  const svgEl = $('#mapTaipei'), btn = $('#measureBtn');
+  if (!svgEl || !btn) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const [x0, y0, x1, y1] = svgEl.dataset.bb.split(',').map(Number);
+  const c = Math.cos((y0 + y1) / 2 * Math.PI / 180), k = svgEl.viewBox.baseVal.width / ((x1 - x0) * c);
+  const info = btn.closest('.panel-bd').querySelector('.mapinfo');
+  let on = false, pts = [], g = null;
+  const toSvg = e => { const p = svgEl.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svgEl.getScreenCTM().inverse()); };
+  function draw() {
+    if (!g) { g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'measure'); svgEl.appendChild(g); }
+    g.innerHTML = pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="6"/>`).join('') +
+      (pts.length === 2 ? `<line x1="${pts[0].x}" y1="${pts[0].y}" x2="${pts[1].x}" y2="${pts[1].y}"/>` : '');
+  }
+  svgEl.addEventListener('click', e => {
+    if (!on) return;
+    e.stopPropagation();
+    if (pts.length === 2) pts = [];
+    pts.push(toSvg(e)); draw();
+    if (pts.length === 1) { info.innerHTML = '再點第二個地方。'; return; }
+    const km = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) / k * 111.32;
+    const boat = km / 20 * 60;   // assumed boat speed 20 km/h
+    info.innerHTML = `直線距離大約 <b>${km.toFixed(1)} 公里</b>。` +
+      `如果船每小時開 20 公里，大約要 <b>${Math.round(boat)} 分鐘</b>（河道是彎的，真正的路會更長）。`;
+  }, true);
+  btn.onclick = () => {
+    on = !on; btn.setAttribute('aria-pressed', on); pts = []; draw();
+    svgEl.classList.toggle('measuring', on);
+    info.innerHTML = on ? '<b>量距離：</b>在地圖上點兩個地方（例如大稻埕碼頭和淡水碼頭），看看相距幾公里。左下角的比例尺就是這樣用的。' : '紅線是台北市的堤防；綠點是抽水站。';
   };
 })();
 
