@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>家庭小電視</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📺</text></svg>">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fbf7f0; --surface: #ffffff; --line: #ece4d6; --text: #2b2620; --text-2: #6d655a;
+  --accent: #ff8a3d; --accent-2: #3a9bdc; --good: #3fae6b; --shadow: 0 2px 10px rgba(60,40,10,.08);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.45 "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, .tile:focus-visible { outline: 4px solid var(--accent-2); outline-offset: 3px; }
+.hidden { display: none !important; }
+
+/* profile picker */
+#pick { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; gap: 28px; }
+#pick h1 { margin: 0; font-size: 34px; }
+.profiles { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+.prof { width: 200px; padding: 26px 12px; border-radius: 28px; background: var(--surface); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 6px; border: 4px solid transparent; }
+.prof:hover { border-color: var(--accent); }
+.prof .emo { font-size: 72px; line-height: 1; }
+.prof b { font-size: 24px; }
+.prof span { color: var(--text-2); font-size: 15px; }
+.prof .left { margin-top: 4px; font-size: 14px; color: var(--good); }
+.parent-link { color: var(--text-2); font-size: 14px; padding: 8px 14px; text-decoration: none; }
+a.pill { color: inherit; text-decoration: none; }
+
+/* browse */
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 16px 8px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.pill { padding: 10px 18px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow); font-size: 17px; white-space: nowrap; }
+.pill.on { background: var(--accent); color: #fff; }
+.pill.tv { background: var(--accent-2); color: #fff; }
+.who { font-size: 22px; font-weight: 700; margin-right: auto; display: flex; align-items: center; gap: 8px; }
+.clock { font-size: 16px; color: var(--good); font-weight: 600; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 12px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chips .pill { font-size: 15px; padding: 8px 14px; }
+.grid { display: grid; gap: 18px; padding: 4px 16px 40px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+body.big-tiles .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.tile { text-align: left; background: var(--surface); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); position: relative; display: block; width: 100%; }
+.tile img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #eadfcd; }
+.tile .meta { padding: 8px 12px 12px; }
+.tile .t { font-size: 15px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile .c { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+.tile .dur { position: absolute; right: 8px; top: 8px; background: rgba(0,0,0,.7); color: #fff; font-size: 13px; padding: 2px 8px; border-radius: 8px; }
+.tile.seen img { opacity: .55; }
+.tile.seen::after { content: "✓ 看過"; position: absolute; left: 8px; top: 8px; background: var(--good); color: #fff; font-size: 13px; padding: 2px 8px; border-radius: 8px; }
+body.big-tiles .tile .meta .t { font-size: 14px; }
+.tile .hide-btn { position: absolute; right: 8px; bottom: 8px; background: #d64545; color: #fff; padding: 6px 12px; border-radius: 10px; font-size: 14px; }
+.more { display: block; margin: 0 auto 40px; }
+.empty { padding: 40px 16px; text-align: center; color: var(--text-2); }
+
+/* player */
+#player { position: fixed; inset: 0; background: #000; z-index: 20; display: flex; flex-direction: column; }
+#frameWrap { position: relative; flex: 1; }
+#frameWrap iframe, #yt { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+#shield { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; }
+#shield .big { font-size: 110px; color: #fff; opacity: 0; transition: opacity .25s; text-shadow: 0 2px 20px rgba(0,0,0,.6); pointer-events: none; }
+#shield.paused .big { opacity: .9; }
+.pbar { height: 8px; background: #333; }
+.pbar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.close { position: absolute; z-index: 3; top: 14px; left: 14px; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.9); font-size: 30px; }
+.tvtag { position: absolute; z-index: 3; top: 22px; right: 18px; color: #fff; background: rgba(58,155,220,.85); padding: 6px 12px; border-radius: 10px; font-size: 15px; }
+.skip { position: absolute; z-index: 3; bottom: 26px; right: 18px; color: #fff; background: rgba(255,255,255,.2); padding: 12px 18px; border-radius: 14px; font-size: 17px; }
+
+/* full-screen messages */
+.screen { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 16px; text-align: center; }
+.screen .emo { font-size: 110px; line-height: 1; }
+.screen h2 { margin: 0; font-size: 32px; }
+.screen p { margin: 0; color: var(--text-2); font-size: 18px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.btn { padding: 16px 28px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 20px; font-weight: 600; }
+.btn.alt { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+/* parent panel */
+#parent { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.panel { background: var(--surface); border-radius: 20px; padding: 22px; width: min(520px, 100%); max-height: 90vh; overflow: auto; }
+.panel h3 { margin: 0 0 12px; }
+.panel label { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.panel input[type=number] { width: 90px; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+.panel input[type=password] { font: inherit; padding: 10px; width: 160px; letter-spacing: 6px; text-align: center; border: 1px solid var(--line); border-radius: 10px; }
+.panel .small { font-size: 13px; color: var(--text-2); }
+.panel .btn { font-size: 16px; padding: 10px 18px; border-radius: 12px; }
+</style>
+</head>
+<body>
+
+<section id="pick">
+  <h1>📺 誰要看？</h1>
+  <div class="profiles" id="profiles"></div>
+  <div class="row"><a class="parent-link" href="../">← 回 Kids School</a><button class="parent-link" id="parentOpen">家長設定</button></div>
+</section>
+
+<section id="browse" class="hidden">
+  <header>
+    <a class="pill" href="../" aria-label="回 Kids School 首頁">🏠</a>
+    <button class="pill" id="back">← 換人</button>
+    <div class="who" id="who"></div>
+    <span class="clock" id="clock"></span>
+    <button class="pill tv" id="tvBtn">▶ 電視模式</button>
+  </header>
+  <div class="chips" id="langChips"></div>
+  <div class="chips" id="chChips"></div>
+  <div class="grid" id="grid"></div>
+  <button class="pill more hidden" id="more">再多一些</button>
+</section>
+
+<section id="player" class="hidden">
+  <div id="frameWrap">
+    <div id="yt"></div>
+    <div id="shield"><span class="big" id="bigIcon">⏸</span></div>
+    <button class="close" id="closeBtn" aria-label="關閉">✕</button>
+    <span class="tvtag hidden" id="tvTag">電視模式</span>
+    <button class="skip hidden" id="skipBtn">下一部 ⏭</button>
+  </div>
+  <div class="pbar"><i id="pbar"></i></div>
+</section>
+
+<section class="screen hidden" id="doneScreen">
+  <div class="emo">🎉</div>
+  <h2>看完囉！</h2>
+  <p id="doneMsg"></p>
+  <div class="row">
+    <button class="btn" id="doneBack">回去選</button>
+  </div>
+</section>
+
+<section class="screen hidden" id="lockScreen">
+  <div class="emo">🌙</div>
+  <h2>今天的時間用完囉</h2>
+  <p>明天再來看，現在去玩別的吧！</p>
+  <div class="row"><button class="btn alt" id="lockParent">家長</button></div>
+</section>
+
+<section class="screen hidden" id="loadScreen"><p>載入中…</p></section>
+
+<div id="parent" class="hidden"><div class="panel" id="panel"></div></div>
+
+<script>
+"use strict";
+// ---------- config ----------
+const PROFILES = [
+  { key: "s", name: "小小孩", emo: "🐣", age: "2–4 歲", zones: ["toddler"], limit: 20, bigTiles: true, tvDefault: false },
+  { key: "m", name: "中孩",   emo: "🦊", age: "5–8 歲", zones: ["middle"],  limit: 40, bigTiles: false, tvDefault: true },
+  { key: "b", name: "大孩",   emo: "🚀", age: "9–12 歲", zones: ["big", "middle"], limit: 60, bigTiles: false, tvDefault: true },
+];
+const PAGE = 48;
+
+// ---------- storage (never trusted to exist) ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("kt." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("kt." + k, JSON.stringify(v)); } catch {} },
+};
+const today = () => new Date().toLocaleDateString("sv");
+function settings() {
+  const s = store.get("settings", {});
+  s.limits = s.limits || {};
+  PROFILES.forEach(p => { if (s.limits[p.key] == null) s.limits[p.key] = p.limit; });
+  return s;
+}
+function usedSec(pk) { const u = store.get("used", {}); return (u.date === today() && u[pk]) || 0; }
+function addUsed(pk, sec) {
+  let u = store.get("used", {}); if (u.date !== today()) u = { date: today() };
+  u[pk] = (u[pk] || 0) + sec; store.set("used", u);
+}
+function leftSec(pk) { const lim = settings().limits[pk]; return lim <= 0 ? Infinity : Math.max(0, lim * 60 - usedSec(pk)); }
+const seen = () => new Set(store.get("seen", []));
+function markSeen(id) { const s = store.get("seen", []); if (!s.includes(id)) { s.push(id); store.set("seen", s.slice(-3000)); } }
+const hiddenSet = () => new Set(store.get("hidden", []));
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const show = (el, on = true) => el.classList.toggle("hidden", !on);
+const fmtDur = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+const fmtLeft = s => s === Infinity ? "不限時" : `還有 ${Math.ceil(s / 60)} 分鐘`;
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function seeded(seedStr) { let h = 2166136261; for (const c of seedStr) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1e6) / 1e6; }; }
+
+// ---------- state ----------
+let ALL = [], prof = null, lang = "all", chan = "all", list = [], shown = 0, parentMode = false;
+let tv = false, current = null, ytp = null, ytReady = false, tick = null;
+
+// ---------- profile picker ----------
+function renderPick() {
+  $("profiles").innerHTML = PROFILES.map(p =>
+    `<button class="prof" data-k="${p.key}"><span class="emo">${p.emo}</span><b>${p.name}</b><span>${p.age}</span>
+     <span class="left">${fmtLeft(leftSec(p.key))}</span></button>`).join("");
+  $("profiles").querySelectorAll(".prof").forEach(b => b.onclick = () => openProfile(b.dataset.k));
+}
+function goPick() { show($("browse"), false); show($("pick")); renderPick(); }
+
+// ---------- browse ----------
+function openProfile(k) {
+  prof = PROFILES.find(p => p.key === k); lang = "all"; chan = "all";
+  document.body.classList.toggle("big-tiles", prof.bigTiles);
+  $("who").innerHTML = `<span>${prof.emo}</span>${prof.name}`;
+  show($("pick"), false); show($("browse"));
+  if (leftSec(prof.key) <= 0) return lock();
+  buildList(); renderChips(); renderGrid(true); updateClock();
+  window.scrollTo(0, 0);
+}
+function pool() {
+  const hid = hiddenSet();
+  return ALL.filter(v => v.z.some(z => prof.zones.includes(z)) && !hid.has(v.id));
+}
+function buildList() {
+  const s = seen(), rnd = seeded(prof.key + today());
+  let vs = pool().filter(v => (lang === "all" || v.lang === lang) && (chan === "all" || v.ch === chan));
+  vs = vs.map(v => [v, rnd()]).sort((a, b) => a[1] - b[1]).map(a => a[0]);
+  list = vs.filter(v => !s.has(v.id)).concat(vs.filter(v => s.has(v.id)));
+}
+function renderChips() {
+  const p = pool();
+  const langs = [["all", "全部"], ["zh", "中文"], ["en", "English"]].filter(([l]) => l === "all" || p.some(v => v.lang === l));
+  $("langChips").innerHTML = langs.map(([l, n]) => `<button class="pill ${l === lang ? "on" : ""}" data-l="${l}">${n}</button>`).join("");
+  $("langChips").querySelectorAll("button").forEach(b => b.onclick = () => { lang = b.dataset.l; chan = "all"; buildList(); renderChips(); renderGrid(true); });
+  const chans = [...new Set(p.filter(v => lang === "all" || v.lang === lang).map(v => v.ch))];
+  $("chChips").innerHTML = [`<button class="pill ${chan === "all" ? "on" : ""}" data-c="all">所有頻道</button>`]
+    .concat(chans.map(c => `<button class="pill ${c === chan ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`)).join("");
+  $("chChips").querySelectorAll("button").forEach(b => b.onclick = () => { chan = b.dataset.c; buildList(); renderChips(); renderGrid(true); });
+}
+function tileHTML(v, s) {
+  return `<button class="tile ${s.has(v.id) ? "seen" : ""}" data-id="${v.id}">
+    <img loading="lazy" alt="" src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg">
+    <span class="dur">${fmtDur(v.d)}</span>
+    <div class="meta"><div class="t">${esc(v.t)}</div><div class="c">${esc(v.ch)}</div></div>
+    ${parentMode ? `<span class="hide-btn" data-hide="${v.id}">隱藏</span>` : ""}</button>`;
+}
+function renderGrid(reset) {
+  const g = $("grid"), s = seen();
+  if (reset) { g.innerHTML = ""; shown = 0; }
+  if (!list.length) { g.innerHTML = `<div class="empty">這裡還沒有影片</div>`; show($("more"), false); return; }
+  g.insertAdjacentHTML("beforeend", list.slice(shown, shown + PAGE).map(v => tileHTML(v, s)).join(""));
+  shown = Math.min(list.length, shown + PAGE);
+  show($("more"), shown < list.length);
+}
+$("grid").addEventListener("click", e => {
+  const h = e.target.closest("[data-hide]");
+  if (h) { e.stopPropagation(); const hs = store.get("hidden", []); hs.push(h.dataset.hide); store.set("hidden", hs);
+    h.closest(".tile").remove(); list = list.filter(v => v.id !== h.dataset.hide); return; }
+  const t = e.target.closest(".tile"); if (!t) return;
+  tv = false; play(ALL.find(v => v.id === t.dataset.id));
+});
+$("more").onclick = () => renderGrid(false);
+$("back").onclick = goPick;
+$("tvBtn").onclick = () => { tv = true; play(nextTV()); };
+window.addEventListener("scroll", () => {
+  if (!$("browse").classList.contains("hidden") && shown < list.length &&
+      window.innerHeight + window.scrollY > document.body.offsetHeight - 600) renderGrid(false);
+});
+function updateClock() { if (prof) $("clock").textContent = fmtLeft(leftSec(prof.key)); }
+function nextTV() {
+  const s = seen(); const cand = list.filter(v => !s.has(v.id) && v.id !== (current && current.id));
+  const src = cand.length ? cand : list.filter(v => v.id !== (current && current.id));
+  return src[Math.floor(Math.random() * src.length)];
+}
+
+// ---------- player ----------
+function loadYT() {
+  if (window.YT && YT.Player) return Promise.resolve();
+  return new Promise(res => {
+    window.onYouTubeIframeAPIReady = res;
+    const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s);
+  });
+}
+async function play(v) {
+  if (!v) return;
+  if (leftSec(prof.key) <= 0) return lock();
+  current = v; show($("player")); show($("tvTag"), tv); show($("skipBtn"), tv);
+  $("shield").classList.remove("paused"); $("pbar").style.width = "0";
+  try { const el = $("player"); (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); } catch {}
+  await loadYT();
+  if (ytp && ytReady) { ytp.loadVideoById(v.id); return; }
+  ytp = new YT.Player("yt", {
+    host: "https://www.youtube-nocookie.com", videoId: v.id,
+    playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3, fs: 0, disablekb: 1, cc_load_policy: 0, origin: location.origin },
+    events: {
+      onReady: e => { ytReady = true; e.target.playVideo(); },
+      onStateChange: onState,
+      onError: () => { if (tv) play(nextTV()); else closePlayer(); },
+    },
+  });
+}
+function onState(e) {
+  clearInterval(tick); tick = null;
+  if (e.data === YT.PlayerState.PLAYING) {
+    $("shield").classList.remove("paused");
+    let last = Date.now();
+    tick = setInterval(() => {
+      const now = Date.now(), dt = Math.round((now - last) / 1000); if (dt < 1) return; last = now;
+      addUsed(prof.key, dt);
+      try { const d = ytp.getDuration(), t = ytp.getCurrentTime(); if (d) $("pbar").style.width = (100 * t / d) + "%";
+        if (d && t > d * 0.8) markSeen(current.id); } catch {}
+      if (leftSec(prof.key) <= 0) { try { ytp.pauseVideo(); } catch {} lock(); }
+    }, 1000);
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    $("shield").classList.add("paused");
+  } else if (e.data === YT.PlayerState.ENDED) {
+    markSeen(current.id);
+    if (tv && leftSec(prof.key) > 0) play(nextTV());
+    else { hidePlayer(); $("doneMsg").textContent = fmtLeft(leftSec(prof.key)); show($("doneScreen")); }
+  }
+}
+function togglePause() {
+  if (!ytp || !ytReady) return;
+  const st = ytp.getPlayerState();
+  if (st === YT.PlayerState.PLAYING) ytp.pauseVideo(); else ytp.playVideo();
+}
+function hidePlayer() {
+  clearInterval(tick); tick = null;
+  try { ytp && ytp.stopVideo(); } catch {}
+  show($("player"), false);
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
+}
+function closePlayer() { hidePlayer(); buildList(); renderGrid(true); updateClock(); }
+$("shield").onclick = togglePause;
+$("closeBtn").onclick = closePlayer;
+$("skipBtn").onclick = () => play(nextTV());
+$("doneBack").onclick = () => { show($("doneScreen"), false); closePlayer(); };
+document.addEventListener("keydown", e => {
+  if ($("player").classList.contains("hidden")) return;
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); togglePause(); }
+  if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); closePlayer(); }
+});
+
+// ---------- lock ----------
+function lock() { hidePlayer(); show($("lockScreen")); }
+$("lockParent").onclick = () => openParent();
+
+// ---------- parent ----------
+function openParent() {
+  const pin = store.get("pin", null), panel = $("panel");
+  show($("parent"));
+  panel.innerHTML = pin
+    ? `<h3>家長密碼</h3><p class="small">輸入四位數密碼</p><input type="password" inputmode="numeric" maxlength="8" id="pinIn" autocomplete="off">
+       <div class="row" style="margin-top:14px;justify-content:flex-start"><button class="btn" id="pinOk">確定</button><button class="btn alt" id="pinX">取消</button></div><p class="small" id="pinErr"></p>`
+    : `<h3>先設一組家長密碼</h3><p class="small">只存在這台裝置。孩子沒有密碼就不能加時間、改設定。</p><input type="password" inputmode="numeric" maxlength="8" id="pinIn" autocomplete="off">
+       <div class="row" style="margin-top:14px;justify-content:flex-start"><button class="btn" id="pinOk">設定</button><button class="btn alt" id="pinX">取消</button></div><p class="small" id="pinErr"></p>`;
+  $("pinX").onclick = () => show($("parent"), false);
+  $("pinOk").onclick = () => {
+    const v = $("pinIn").value.trim();
+    if (!/^\d{4,8}$/.test(v)) { $("pinErr").textContent = "請輸入 4–8 位數字"; return; }
+    if (!pin) store.set("pin", v); else if (v !== pin) { $("pinErr").textContent = "密碼不對"; return; }
+    parentPanel();
+  };
+  setTimeout(() => { const i = $("pinIn"); if (i) i.focus(); }, 50);
+}
+function parentPanel() {
+  const s = settings(), hid = store.get("hidden", []);
+  $("panel").innerHTML = `<h3>家長設定</h3>
+    <p class="small">每天可看幾分鐘（0 = 不限）。今天已看：${PROFILES.map(p => `${p.name} ${Math.round(usedSec(p.key) / 60)} 分`).join("、")}</p>
+    ${PROFILES.map(p => `<label>${p.emo} ${p.name}<span><input type="number" min="0" max="600" step="5" value="${s.limits[p.key]}" data-lim="${p.key}"> 分</span></label>`).join("")}
+    <div class="row" style="margin:14px 0;justify-content:flex-start">
+      <button class="btn alt" id="plus15">今天每人 +15 分</button>
+      <button class="btn alt" id="resetToday">今天時間歸零</button>
+    </div>
+    <label>選片時顯示「隱藏」按鈕<input type="checkbox" id="pm" ${parentMode ? "checked" : ""}></label>
+    <p class="small">已隱藏 ${hid.length} 部（只在這台裝置）。<button class="pill" id="unhide" style="font-size:13px;padding:4px 10px">全部恢復</button></p>
+    <p class="small">片單更新：${window.BUILT || "?"}　共 ${ALL.length} 部</p>
+    <div class="row" style="justify-content:flex-start;margin-top:10px"><button class="btn" id="pSave">儲存</button><button class="btn alt" id="pinReset">改密碼</button></div>`;
+  $("plus15").onclick = () => { PROFILES.forEach(p => addUsed(p.key, -15 * 60)); $("plus15").textContent = "已加 15 分 ✓"; };
+  $("resetToday").onclick = () => { store.set("used", { date: today() }); $("resetToday").textContent = "已歸零 ✓"; };
+  $("unhide").onclick = () => { store.set("hidden", []); $("unhide").textContent = "已恢復 ✓"; };
+  $("pinReset").onclick = () => { store.set("pin", null); openParent(); };
+  $("pSave").onclick = () => {
+    $("panel").querySelectorAll("[data-lim]").forEach(i => s.limits[i.dataset.lim] = Math.max(0, +i.value || 0));
+    store.set("settings", s); parentMode = $("pm").checked;
+    show($("parent"), false); show($("lockScreen"), false);
+    if (prof && !$("browse").classList.contains("hidden")) { buildList(); renderGrid(true); updateClock(); } else goPick();
+  };
+}
+$("parentOpen").onclick = openParent;
+$("parent").addEventListener("click", e => { if (e.target.id === "parent") show($("parent"), false); });
+
+// ---------- boot ----------
+(async function boot() {
+  show($("loadScreen"));
+  try {
+    const r = await fetch("videos.json", { cache: "no-cache" }); const d = await r.json();
+    ALL = d.videos; window.BUILT = d.built;
+  } catch { $("loadScreen").innerHTML = "<p>片單讀不到，請稍後再試</p>"; return; }
+  show($("loadScreen"), false);
+  const want = new URLSearchParams(location.search).get("p");
+  if (PROFILES.some(p => p.key === want)) openProfile(want); else goPick();
+  setInterval(() => { if (!$("browse").classList.contains("hidden")) updateClock(); }, 30000);
+})();
+</script>
+</body>
+</html>

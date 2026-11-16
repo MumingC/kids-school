@@ -16,6 +16,13 @@ A small collection of static learning websites I build for my kids.
 | 07 | [`relativity/`](relativity/) | 時間變慢實驗室 · Relativity | 5 站相對論入門（小二起）：光速賽跑到月球、光子鐘看時間膨脹、雙胞胎太空旅行計算機、緲子雨與 GPS 的證據，最後是延伸遊戲、影片與書單。 |
 | 08 | [`river-city/`](river-city/) | 台北的水上公路 · River City | 9 站專題：台北能不能有通勤用的水上公路？從威尼斯的 MOSE 閘門、布里斯本會浮的碼頭、東京和首爾的通勤船，到台北的堤防與 200 年洪水、基隆河截彎取直、潮汐與藍色公路、日本的超級堤防，最後當市長做選擇。另有[國小中年級簡單版](river-city/kids.html)和[教師／家長手冊](river-city/teacher.html)。地圖用真實地理資料繪製；照片直接從 Wikimedia Commons 載入，作者與授權標在每張照片下。 |
 
+## Kids TV 家庭小電視（`tv/`）
+
+首頁也是孩子的上網首頁：最上面是 [`tv/`](tv/) 家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
+
+- 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。
+- 限時、PIN、隱藏影片都存在各裝置的 `localStorage`（key 前綴 `kt.`）。
+
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.
@@ -43,3 +50,4 @@ Settings → Pages → Source: `Deploy from a branch` → Branch `main` / `(root
 - World Detective: `https://mumingc.github.io/kids-school/detective/`
 - Relativity: `https://mumingc.github.io/kids-school/relativity/`
 - River City: `https://mumingc.github.io/kids-school/river-city/`
+- Kids TV: `https://mumingc.github.io/kids-school/tv/`

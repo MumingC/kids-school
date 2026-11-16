@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kids School</title>
-<meta name="description" content="為孩子做的自學網站：火箭、二次世界大戰、核分裂、人工智慧發展史、相對論，以及台北的河流與城市。">
+<meta name="description" content="孩子的上網首頁：家長挑過的影片小電視，加上火箭、二戰、核分裂、AI 史、經濟、地理、相對論與台北河流城市的自學網站。">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Kids School">
-<meta property="og:description" content="為孩子做的自學網站：火箭、二次世界大戰、核分裂、人工智慧發展史、相對論，以及台北的河流與城市。">
+<meta property="og:description" content="孩子的上網首頁：家長挑過的影片小電視，加上火箭、二戰、核分裂、AI 史、經濟、地理、相對論與台北河流城市的自學網站。">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -70,20 +70,60 @@ main{max-width:940px;margin:0 auto;padding:0 24px 90px}
 .soon h2,.soon .num{color:var(--ink-faint)}
 .note{margin-top:44px;border-left:3px solid var(--instr);background:var(--instr-soft);padding:16px 20px;border-radius:0 10px 10px 0;font-size:15.5px;color:var(--ink-soft)}
 .note strong{color:var(--ink)}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.now{text-align:right;font-family:"IBM Plex Mono",monospace;color:#C2D5E4}
+.now b{display:block;font-family:"Chakra Petch",sans-serif;font-size:clamp(34px,6vw,52px);color:#fff;line-height:1.1}
+.tv{margin-top:-38px;background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;box-shadow:var(--shadow);
+  padding:22px 24px;display:flex;flex-wrap:wrap;gap:18px 24px;align-items:center}
+.tv .lead{flex:1 1 240px}
+.tv .num{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.18em;color:var(--flame);text-transform:uppercase}
+.tv h2{font-size:24px;margin:6px 0 0}
+.tv p{color:var(--ink-soft);font-size:15px;margin:6px 0 0}
+.kids{display:flex;flex-wrap:wrap;gap:12px}
+.kid{display:flex;flex-direction:column;align-items:center;min-width:110px;padding:12px 14px;border-radius:14px;text-decoration:none;color:inherit;
+  background:var(--surface-2);border:2px solid var(--line-soft);transition:transform .18s,border-color .18s}
+.kid:hover{transform:translateY(-3px);border-color:var(--instr)}
+.kid .e{font-size:40px;line-height:1.1}
+.kid b{font-size:17px}
+.kid small{font-size:12.5px;color:var(--instr);font-weight:600}
+.kid.out small{color:var(--ink-faint)}
+.last{margin:22px 0 0;font-size:15px;color:var(--ink-soft)}
+.last a{color:var(--instr);font-weight:700;text-decoration:none}
+.grid.subjects{margin-top:22px}
+@media (max-width:560px){.now{text-align:left}.kids{width:100%}.kid{flex:1 1 0;min-width:0;padding:10px 6px}.kid .e{font-size:34px}.kid small{font-size:11.5px;text-align:center}}
 footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var(--ink-faint);font-size:13px}
 :focus-visible{outline:2px solid var(--instr);outline-offset:2px}
 </style>
 
 <header class="hero">
   <div class="in">
-    <div class="eyebrow">Kids School · Built by Dad</div>
-    <h1>孩子的自學小學校</h1>
-    <p>一個一個科目慢慢加。每一門都從孩子已經懂的事情開始，用可以動手玩的東西把數學、科學和英文一起帶進去。</p>
+    <div class="top">
+      <div>
+        <div class="eyebrow">Kids School · Built by Dad</div>
+        <h1><span id="greet">你好</span>！</h1>
+      </div>
+      <div class="now"><b id="clock"></b><span id="date"></span></div>
+    </div>
+    <p>想看影片，點下面的小電視；想玩想學，就從科目裡挑一個。每一門都從你已經懂的事情開始，用可以動手玩的東西把數學、科學和英文帶進去。</p>
   </div>
 </header>
 
 <main>
-  <div class="grid">
+  <section class="tv" aria-label="家庭小電視">
+    <div class="lead">
+      <div class="num">Kids TV · 家庭小電視</div>
+      <h2>📺 看影片</h2>
+      <p>爸爸媽媽挑過的頻道，每天有固定的時間。點自己的名字進去。</p>
+    </div>
+    <div class="kids" id="kids">
+      <a class="kid" href="tv/?p=s" data-k="s"><span class="e">🐣</span><b>小小孩</b><small>2–4 歲</small></a>
+      <a class="kid" href="tv/?p=m" data-k="m"><span class="e">🦊</span><b>中孩</b><small>5–8 歲</small></a>
+      <a class="kid" href="tv/?p=b" data-k="b"><span class="e">🚀</span><b>大孩</b><small>9–12 歲</small></a>
+    </div>
+  </section>
+  <p class="last" id="last" hidden></p>
+
+  <div class="grid subjects">
     <a class="subj" href="rocket/">
       <div class="num">Subject 01 · Rocketry</div>
       <h2>從地面到軌道</h2>
@@ -158,10 +198,52 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
     </a>
   </div>
 
-  <div class="note"><strong>給大人的說明：</strong>這裡的每一門課都是純靜態網頁，不需要登入、不收集任何資料。學習進度存在孩子自己的瀏覽器裡，換一台裝置就會重新開始。部分課程有動手實驗，請依課程內的安全提示由大人陪同進行。</div>
+  <div class="note"><strong>給大人的說明：</strong>這裡的每一門課都是純靜態網頁，不需要登入、不收集任何資料。小電視只播家長挑過的 YouTube 頻道；每天的觀看時間、家長密碼與隱藏的影片都存在這台裝置上（從小電視的「家長設定」修改）。學習進度存在孩子自己的瀏覽器裡，換一台裝置就會重新開始。部分課程有動手實驗，請依課程內的安全提示由大人陪同進行。</div>
 </main>
 
 <footer>Kids School · 為自己的孩子做的學習網站</footer>
+
+<script>
+(function(){
+  "use strict";
+  var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
+  var set = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+  // clock + greeting
+  function tickNow(){
+    var d = new Date(), h = d.getHours();
+    var g = h < 5 ? "夜深了，該睡覺囉" : h < 11 ? "早安" : h < 13 ? "午安" : h < 18 ? "下午好" : "晚安";
+    document.getElementById("clock").textContent = d.toLocaleTimeString("zh-TW", {hour:"2-digit", minute:"2-digit", hour12:false});
+    document.getElementById("date").textContent = d.toLocaleDateString("zh-TW", {month:"long", day:"numeric", weekday:"long"});
+    document.getElementById("greet").textContent = g;
+  }
+  tickNow(); setInterval(tickNow, 15000);
+  // TV minutes left today (same keys as tv/index.html)
+  var DEF = {s:20, m:40, b:60};
+  function tvLeft(){
+    var st = get("kt.settings", {}), lim = st.limits || {}, used = get("kt.used", {});
+    var today = new Date().toLocaleDateString("sv");
+    document.querySelectorAll(".kid").forEach(function(a){
+      var k = a.dataset.k, L = lim[k] == null ? DEF[k] : lim[k];
+      var u = used.date === today ? (used[k] || 0) : 0;
+      var small = a.querySelector("small");
+      if (L <= 0) { small.textContent = "不限時"; return; }
+      var left = Math.max(0, L * 60 - u);
+      a.classList.toggle("out", left <= 0);
+      small.textContent = left <= 0 ? "今天看完了" : "還有 " + Math.ceil(left / 60) + " 分鐘";
+    });
+  }
+  tvLeft(); window.addEventListener("pageshow", tvLeft);
+  // remember last subject
+  var last = get("ks.last", null), el = document.getElementById("last");
+  if (last && last.href && last.title) {
+    var a = document.createElement("a"); a.href = last.href; a.textContent = last.title + " →";
+    el.textContent = "上次去的地方："; el.appendChild(a); el.hidden = false;
+  }
+  document.querySelectorAll("a.subj").forEach(function(a){
+    a.addEventListener("click", function(){ set("ks.last", {href: a.getAttribute("href"), title: a.querySelector("h2").textContent}); });
+  });
+})();
+</script>
 
 </body>
 </html>
