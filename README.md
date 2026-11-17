@@ -22,6 +22,13 @@ A small collection of static learning websites I build for my kids.
 
 - 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。
 - 限時、PIN、隱藏影片都存在各裝置的 `localStorage`（key 前綴 `kt.`）。
+- **連續故事**（`channels.json` 的 `series`，目前是 GEN-Z Media 的 *The Six Minutes*，205 集）：照集數順序播、播完自動接下一集，不混進隨機的「電視模式」；進度存在 `kt.series`。
+
+### 每個孩子自己的首頁
+
+- `mid/`（＝`?k=m`，🦊 中孩）：只顯示中孩的小電視＋「帶小小孩看」、The Six Minutes 捷徑；二戰與 River City 連到簡單版；不顯示核分裂與小小村長。
+- `big/`（＝`?k=b`，🚀 大孩）：全部科目（完整版）。
+- 根目錄不帶參數：全部內容。新科目卡片要只給大孩就加 `data-k="b"`，有簡單版就加 `data-m-href="…"`。
 
 ## How it works
 

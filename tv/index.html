@@ -56,6 +56,14 @@ body.big-tiles .grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1f
 body.big-tiles .tile .meta .t { font-size: 14px; }
 .tile .hide-btn { position: absolute; right: 8px; bottom: 8px; background: #d64545; color: #fff; padding: 6px 12px; border-radius: 10px; font-size: 14px; }
 .more { display: block; margin: 0 auto 40px; }
+.series { display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 12px; scrollbar-width: none; }
+.series::-webkit-scrollbar { display: none; }
+.ser { flex: 0 0 auto; display: flex; align-items: center; gap: 14px; text-align: left; padding: 10px 18px 10px 10px; border-radius: 20px;
+  background: linear-gradient(135deg, #2f3d7a, #6b3fa0); color: #fff; box-shadow: var(--shadow); }
+.ser img { width: 112px; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; background: #333; }
+.ser small { display: block; opacity: .8; font-size: 13px; }
+.ser b { display: block; font-size: 18px; }
+.ser .go { font-size: 15px; font-weight: 700; color: #ffd36b; }
 .empty { padding: 40px 16px; text-align: center; color: var(--text-2); }
 
 /* player */
@@ -107,6 +115,7 @@ body.big-tiles .tile .meta .t { font-size: 14px; }
     <span class="clock" id="clock"></span>
     <button class="pill tv" id="tvBtn">▶ 電視模式</button>
   </header>
+  <div class="series" id="series"></div>
   <div class="chips" id="langChips"></div>
   <div class="chips" id="chChips"></div>
   <div class="grid" id="grid"></div>
@@ -173,8 +182,13 @@ function addUsed(pk, sec) {
 }
 function leftSec(pk) { const lim = settings().limits[pk]; return lim <= 0 ? Infinity : Math.max(0, lim * 60 - usedSec(pk)); }
 const seen = () => new Set(store.get("seen", []));
-function markSeen(id) { const s = store.get("seen", []); if (!s.includes(id)) { s.push(id); store.set("seen", s.slice(-3000)); } }
+function markSeen(id) {
+  const v = ALL.find(x => x.id === id); if (v && v.s && serNext(v.s) <= v.n) serSet(v.s, v.n + 1); const s = store.get("seen", []); if (!s.includes(id)) { s.push(id); store.set("seen", s.slice(-3000)); } }
 const hiddenSet = () => new Set(store.get("hidden", []));
+// serialized shows: kt.series = { "<series name>": next episode number }
+const serNext = name => (store.get("series", {})[name] || 1);
+function serSet(name, n) { const s = store.get("series", {}); s[name] = n; store.set("series", s); }
+const nextEp = v => v && v.s ? ALL.find(x => x.s === v.s && x.n === v.n + 1) : null;
 
 // ---------- helpers ----------
 const $ = id => document.getElementById(id);
@@ -214,11 +228,24 @@ function pool() {
 }
 function buildList() {
   const s = seen(), rnd = seeded(prof.key + today());
-  let vs = pool().filter(v => (lang === "all" || v.lang === lang) && (chan === "all" || v.ch === chan));
+  let vs = pool().filter(v => (lang === "all" || v.lang === lang) && (chan === "all" ? !v.s : v.ch === chan));
+  if (vs.length && vs[0].s) { list = vs.sort((a, b) => a.n - b.n); return; }
   vs = vs.map(v => [v, rnd()]).sort((a, b) => a[1] - b[1]).map(a => a[0]);
   list = vs.filter(v => !s.has(v.id)).concat(vs.filter(v => s.has(v.id)));
 }
+function renderSeries() {
+  const names = [...new Set(pool().filter(v => v.s).map(v => v.s))];
+  $("series").innerHTML = names.map(n => {
+    const eps = ALL.filter(v => v.s === n), want = serNext(n);
+    const v = eps.find(x => x.n === want) || eps.find(x => x.n === 1);
+    return `<button class="ser" data-id="${v.id}"><img alt="" src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg">
+      <span><small>📻 連續故事 · 共 ${eps.length} 集</small><b>${esc(n)}</b><span class="go">▶ ${v.n === 1 && want === 1 ? "從第 1 集開始" : "繼續聽第 " + v.n + " 集"}</span></span></button>`;
+  }).join("");
+  show($("series"), names.length > 0);
+  $("series").querySelectorAll(".ser").forEach(b => b.onclick = () => { tv = false; play(ALL.find(v => v.id === b.dataset.id)); });
+}
 function renderChips() {
+  renderSeries();
   const p = pool();
   const langs = [["all", "全部"], ["zh", "中文"], ["en", "English"]].filter(([l]) => l === "all" || p.some(v => v.lang === l));
   $("langChips").innerHTML = langs.map(([l, n]) => `<button class="pill ${l === lang ? "on" : ""}" data-l="${l}">${n}</button>`).join("");
@@ -306,7 +333,9 @@ function onState(e) {
     $("shield").classList.add("paused");
   } else if (e.data === YT.PlayerState.ENDED) {
     markSeen(current.id);
-    if (tv && leftSec(prof.key) > 0) play(nextTV());
+    const nx = nextEp(current);
+    if (nx && leftSec(prof.key) > 0) play(nx);
+    else if (tv && leftSec(prof.key) > 0) play(nextTV());
     else { hidePlayer(); $("doneMsg").textContent = fmtLeft(leftSec(prof.key)); show($("doneScreen")); }
   }
 }
@@ -321,7 +350,7 @@ function hidePlayer() {
   show($("player"), false);
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch {}
 }
-function closePlayer() { hidePlayer(); buildList(); renderGrid(true); updateClock(); }
+function closePlayer() { hidePlayer(); buildList(); renderSeries(); renderGrid(true); updateClock(); }
 $("shield").onclick = togglePause;
 $("closeBtn").onclick = closePlayer;
 $("skipBtn").onclick = () => play(nextTV());

@@ -90,6 +90,16 @@ main{max-width:940px;margin:0 auto;padding:0 24px 90px}
 .last{margin:22px 0 0;font-size:15px;color:var(--ink-soft)}
 .last a{color:var(--instr);font-weight:700;text-decoration:none}
 .grid.subjects{margin-top:22px}
+.six{display:flex;align-items:center;gap:16px;margin-top:16px;padding:14px 20px;border-radius:14px;text-decoration:none;color:#fff;
+  background:linear-gradient(135deg,#2f3d7a,#6b3fa0);box-shadow:var(--shadow);transition:transform .18s}
+.six:hover{transform:translateY(-3px)}
+.six .e{font-size:40px}.six small{display:block;opacity:.8;font-size:13px}.six b{display:block;font-size:21px;font-family:"Chakra Petch",sans-serif}
+.six .go{font-size:15px;font-weight:700;color:#ffd36b}
+.six[hidden],.subj[hidden],.kid[hidden]{display:none}
+.mine{margin:10px 0 0;font-size:14px;color:var(--ink-faint)}
+.mine a{color:var(--instr);text-decoration:none;font-weight:600}
+body.k-m{--sky-top:#5b2a86;--sky-bot:#e0773a;--flame:#c2410c}
+body.k-b{--sky-top:#0b1d3a;--sky-bot:#1f6f78}
 @media (max-width:560px){.now{text-align:left}.kids{width:100%}.kid{flex:1 1 0;min-width:0;padding:10px 6px}.kid .e{font-size:34px}.kid small{font-size:11.5px;text-align:center}}
 footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var(--ink-faint);font-size:13px}
 :focus-visible{outline:2px solid var(--instr);outline-offset:2px}
@@ -121,7 +131,9 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
       <a class="kid" href="tv/?p=b" data-k="b"><span class="e">🚀</span><b>大孩</b><small>9–12 歲</small></a>
     </div>
   </section>
+  <a class="six" id="six" href="tv/?p=m" hidden><span class="e">📻</span><span><small>連續故事 · 每集約 6 分鐘</small><b>The Six Minutes</b><span class="go" id="sixGo">從第 1 集開始</span></span></a>
   <p class="last" id="last" hidden></p>
+  <p class="mine" id="mine">設成孩子自己的首頁：<a href="mid/">🦊 中孩版</a> · <a href="big/">🚀 大孩版</a></p>
 
   <div class="grid subjects">
     <a class="subj" href="rocket/">
@@ -133,7 +145,7 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
         <span class="chip">化學</span><span class="chip">Space English</span>
       </div>
     </a>
-    <a class="subj" href="ww2/">
+    <a class="subj" href="ww2/" data-m-href="ww2/kids.html">
       <div class="num">Subject 02 · History</div>
       <h2>小小歷史家：二次世界大戰</h2>
       <p>從「為什麼會打起來」講到 1945 年。會動的戰爭地圖、1931–1945 歷史大軸線、老照片、武器圖鑑，還有當年小學生的一天。也有一份專為國小中低年級寫的簡單版。</p>
@@ -142,7 +154,7 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
         <span class="chip">互動地圖</span><span class="chip">臺灣篇</span>
       </div>
     </a>
-    <a class="subj" href="fission/">
+    <a class="subj" href="fission/" data-k="b">
       <div class="num">Subject 03 · Nuclear</div>
       <h2>核分裂實驗室</h2>
       <p>8 站。從「原子裡面有什麼」開始，走過同位素、半衰期、一顆中子如何劈開 U-235，到連鎖反應的臨界質量；最後看同一個原理怎麼分岔成反應爐與核彈。</p>
@@ -160,7 +172,7 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
         <span class="chip">AI 倫理</span>
       </div>
     </a>
-    <a class="subj" href="village-chief/">
+    <a class="subj" href="village-chief/" data-k="b">
       <div class="num">Subject 05 · Economics</div>
       <h2>Village Chief 小小村長</h2>
       <p>六角格地圖的經濟策略遊戲。探索地圖、建立城市、蓋建築、做買賣，跟鄰村交換和合蓋大橋；顧問們會給互相衝突的建議，讓孩子自己判斷。可以跟電腦玩，或兩人輪流玩。</p>
@@ -187,7 +199,7 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
         <span class="chip">太空</span><span class="chip">GPS</span>
       </div>
     </a>
-    <a class="subj" href="river-city/">
+    <a class="subj" href="river-city/" data-m-href="river-city/kids.html">
       <div class="num">Subject 08 · Cities &amp; Rivers</div>
       <h2>台北的水上公路</h2>
       <p>台北能不能像威尼斯、布里斯本一樣坐船上學？9 站專題：海口閘門、會浮起來的碼頭、東京和首爾的通勤船、台北的堤防與 200 年洪水、基隆河截彎取直、潮汐、超級堤防，配上真實地圖、1904 年老地圖對照和照片，最後換你當市長做決定。附教師／家長手冊（課綱對照、實驗、學習單）。</p>
@@ -209,14 +221,14 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
   var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
   var set = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
   // clock + greeting
-  function tickNow(){
+  var tickNow = function(){
     var d = new Date(), h = d.getHours();
     var g = h < 5 ? "夜深了，該睡覺囉" : h < 11 ? "早安" : h < 13 ? "午安" : h < 18 ? "下午好" : "晚安";
     document.getElementById("clock").textContent = d.toLocaleTimeString("zh-TW", {hour:"2-digit", minute:"2-digit", hour12:false});
     document.getElementById("date").textContent = d.toLocaleDateString("zh-TW", {month:"long", day:"numeric", weekday:"long"});
     document.getElementById("greet").textContent = g;
-  }
-  tickNow(); setInterval(tickNow, 15000);
+  };
+  tickNow(); setInterval(function(){ tickNow(); }, 15000);
   // TV minutes left today (same keys as tv/index.html)
   var DEF = {s:20, m:40, b:60};
   function tvLeft(){
@@ -233,14 +245,38 @@ footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var
     });
   }
   tvLeft(); window.addEventListener("pageshow", tvLeft);
-  // remember last subject
-  var last = get("ks.last", null), el = document.getElementById("last");
+  // per-kid view: ?k=m (middle) or ?k=b (big); no k = everything
+  var K = new URLSearchParams(location.search).get("k");
+  if (K !== "m" && K !== "b") K = null;
+  var NAME = {m: "🦊 中孩", b: "🚀 大孩"};
+  if (K) {
+    document.body.classList.add("k-" + K);
+    document.getElementById("mine").hidden = true;
+    var g0 = tickNow; tickNow = function(){ g0(); document.getElementById("greet").textContent = NAME[K] + "，" + document.getElementById("greet").textContent; };
+    tickNow();
+    document.querySelectorAll(".kid").forEach(function(a){ a.hidden = !(a.dataset.k === K || a.dataset.k === "s"); });
+    var tod = document.querySelector('.kid[data-k="s"] b'); if (tod) tod.textContent = "帶小小孩看";
+    document.querySelectorAll("a.subj").forEach(function(a){
+      if (a.dataset.k && a.dataset.k !== K) a.hidden = true;
+      if (K === "m" && a.dataset.mHref) a.setAttribute("href", a.dataset.mHref);
+    });
+    document.title = NAME[K].slice(3) + "的首頁 · Kids School";
+  }
+  // The Six Minutes shortcut (middle kid, and the all-in-one page)
+  if (K !== "b") {
+    var n = (get("kt.series", {})["The Six Minutes"]) || 1, six = document.getElementById("six");
+    document.getElementById("sixGo").textContent = n > 1 ? "▶ 繼續聽第 " + n + " 集" : "▶ 從第 1 集開始";
+    six.hidden = false;
+  }
+  // remember last subject (per kid)
+  var LK = "ks.last" + (K ? "." + K : "");
+  var last = get(LK, null), el = document.getElementById("last");
   if (last && last.href && last.title) {
     var a = document.createElement("a"); a.href = last.href; a.textContent = last.title + " →";
     el.textContent = "上次去的地方："; el.appendChild(a); el.hidden = false;
   }
   document.querySelectorAll("a.subj").forEach(function(a){
-    a.addEventListener("click", function(){ set("ks.last", {href: a.getAttribute("href"), title: a.querySelector("h2").textContent}); });
+    a.addEventListener("click", function(){ set(LK, {href: a.getAttribute("href"), title: a.querySelector("h2").textContent}); });
   });
 })();
 </script>
