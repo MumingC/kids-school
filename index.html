@@ -106,7 +106,7 @@ footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacit
     <noscript>
       <div class="plain">
         <p>這一頁需要 JavaScript 才會出現島嶼地圖。也可以直接去：</p>
-        <p><a href="tv/">家庭小電視</a> · <a href="rocket/">火箭</a> · <a href="relativity/">相對論</a> · <a href="fission/">核分裂</a> · <a href="ww2/">二戰</a> · <a href="detective/">環球小偵探</a> · <a href="river-city/">台北的水上公路</a> · <a href="ai-history/">AI 的故事</a> · <a href="village-chief/">小小村長</a></p>
+        <p><a href="tv/">家庭小電視</a> · <a href="rocket/">火箭</a> · <a href="relativity/">相對論</a> · <a href="fission/">核分裂</a> · <a href="ww2/">二戰</a> · <a href="detective/">環球小偵探</a> · <a href="river-city/">台北的水上公路</a> · <a href="trip-planner/">旅行規劃師</a> ·<a href="ai-history/">AI 的故事</a> · <a href="village-chief/">小小村長</a></p>
       </div>
     </noscript>
   </main>
@@ -144,7 +144,8 @@ var ISLANDS = [
     items:[
       { id:"detective", emo:"🕵️", short:"小偵探", title:"環球小偵探", age:"小三到小六", desc:"跟著線索追怪盜飛遍 38 座城市，認國旗、看文化圖鑑。", href:"detective/" },
       { id:"river", emo:"🌉", short:"河流城市", title:"台北的水上公路", age:"9 站專題", desc:"台北能不能有通勤用的水上公路？最後當市長做選擇。", href:"river-city/", mHref:"river-city/kids.html" }
-    ], ideas:["🧳 旅行規劃師","🗾 臺灣地圖"] },
+      ,{ id:"trip", emo:"🧳", short:"旅行規劃", title:"旅行規劃師", age:"兩種難度 · 8 站", desc:"學會排行程：願望、地圖、時間、交通、預算、行李、備案，最後幫全家排出淡水一日遊。", href:"trip-planner/", mHref:"trip-planner/?lv=easy" }
+    ], ideas:["🗾 臺灣地圖"] },
   { id:"computer", name:"電腦島", emblem:"💻", lead:"電腦和 AI 是怎麼被做出來的？", ground:["city","violet","city"], scenery:["💡","🛰️"],
     items:[
       { id:"ai", emo:"🤖", short:"AI 的故事", title:"AI 是怎麼長大的？", age:"親子共讀", desc:"從 AlphaGo 回到圖靈、感知器與 ELIZA，用人物故事看 AI 的歷史。", href:"ai-history/" }
