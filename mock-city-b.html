@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Kids School 小鎮地圖（試作 B）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="mock-city.css">
+<style>
+#stage{background:#b9dd9a}
+.lab{font-size:25px;stroke-width:6px}
+.lab.soft{font-size:21px}
+.dname{font-size:28px}
+</style>
+</head>
+<body>
+<div id="stage"><svg id="city" role="group" aria-label="Kids School 小鎮地圖"><g id="world"></g></svg></div>
+<script src="mock-city-common.js"></script>
+<script>
+(function(){
+"use strict";
+/* Version B: a storybook town seen from above. Each district is a neighbourhood; each subject is a house.
+   New districts take the next dashed plot, so the town spreads outward as content is added. */
+var K = window.KS, el = K.el, D = K.DISTRICTS, world = document.getElementById("world"), stage = document.getElementById("stage");
+var COLS = 3, CW = 760, CH = 520, GAP = 90, OX = 180, OY = 190;
+var ROWS = Math.ceil(D.length / COLS), TOWN_W = COLS * (CW + GAP) - GAP, TOWN_H = ROWS * (CH + GAP) - GAP;
+var W = OX * 2 + TOWN_W + CW + GAP, H = OY + TOWN_H + 520;
+function cell(i){ return [OX + (i % COLS) * (CW + GAP), OY + Math.floor(i / COLS) * (CH + GAP)]; }
+
+K.hud("🏡 Kids School 小鎮", "👆 拖著地圖走走看，點房子進去");
+
+// ground, river, roads
+el("rect", { x:-600, y:-600, width:W + 1200, height:H + 1200, fill:"#b9dd9a" }, world);
+for (var t = 0; t < 90; t++){ var tx = K.rnd(t, 1) * (W + 800) - 400, ty = K.rnd(t, 2) * (H + 800) - 400;
+  var inTown = tx > OX - 60 && tx < OX + TOWN_W + 60 && ty > OY - 60 && ty < OY + TOWN_H + 60;
+  if (!inTown && !(ty > H - 420 && ty < H - 150)) el("text", { x:tx, y:ty, "font-size":38 + K.rnd(t, 3) * 16, "pointer-events":"none" }, world, K.rnd(t, 4) > .5 ? "🌳" : "🌲"); }
+var ry = OY + TOWN_H + 230;
+el("path", { d:"M-600 " + (ry + 40) + " C " + W * .25 + " " + (ry - 110) + ", " + W * .55 + " " + (ry + 150) + ", " + (W + 600) + " " + (ry - 30), fill:"none", stroke:"#f0e2b0", "stroke-width":230, "stroke-linecap":"round" }, world);
+el("path", { d:"M-600 " + (ry + 40) + " C " + W * .25 + " " + (ry - 110) + ", " + W * .55 + " " + (ry + 150) + ", " + (W + 600) + " " + (ry - 30), fill:"none", stroke:"#7cc4e8", "stroke-width":170, "stroke-linecap":"round" }, world);
+function road(d){ el("path", { d:d, fill:"none", stroke:"#c9b98f", "stroke-width":72, "stroke-linecap":"round", "stroke-linejoin":"round" }, world);
+  el("path", { d:d, fill:"none", stroke:"#f7efdc", "stroke-width":60, "stroke-linecap":"round", "stroke-linejoin":"round" }, world);
+  el("path", { d:d, fill:"none", stroke:"#d9cba6", "stroke-width":4, "stroke-dasharray":"22 22" }, world); }
+var x0 = OX - GAP / 2, x1 = OX + TOWN_W + GAP / 2, y0 = OY - GAP / 2, y1 = OY + TOWN_H + GAP / 2, i, r, c;
+for (r = 0; r <= ROWS; r++){ var yy = OY - GAP / 2 + r * (CH + GAP); road("M" + (x0 - 500) + " " + yy + " H" + (x1 + CW + 300)); }
+for (c = 0; c <= COLS; c++){ var xx = OX - GAP / 2 + c * (CW + GAP); road("M" + xx + " " + (y0 - 400) + " V" + (c === 1 ? ry + 260 : y1)); }
+// bridge + plaza
+var bx = OX - GAP / 2 + (CW + GAP);
+el("rect", { x:bx - 46, y:ry - 120, width:92, height:250, rx:14, fill:"#d9b382", stroke:"#a9805a", "stroke-width":5 }, world);
+el("circle", { cx:bx, cy:OY - GAP / 2 + CH + GAP, r:80, fill:"#f7efdc", stroke:"#c9b98f", "stroke-width":6 }, world);
+el("text", { x:bx, y:OY - GAP / 2 + CH + GAP + 22, "text-anchor":"middle", "font-size":64, "pointer-events":"none" }, world, "⛲");
+
+function house(g, x, base, w, h, roof, wall, dashed){
+  var st = dashed ? { fill:"#fff", "fill-opacity":.5, stroke:roof, "stroke-width":3, "stroke-dasharray":"9 7" } : null;
+  el("ellipse", { cx:x, cy:base + 4, rx:w * .62, ry:14, fill:"#000", opacity:.12 }, g);
+  var body = el("g", { "class":"body" }, g);
+  el("rect", Object.assign({ x:x - w / 2, y:base - h, width:w, height:h, rx:8 }, st || { fill:wall, stroke:K.shade(wall, .75), "stroke-width":3 }), body);
+  el("path", Object.assign({ d:"M" + (x - w / 2 - 16) + " " + (base - h + 6) + " L" + x + " " + (base - h - 62) + " L" + (x + w / 2 + 16) + " " + (base - h + 6) + " Z", "stroke-linejoin":"round" }, st || { fill:roof, stroke:K.shade(roof, .75), "stroke-width":3 }), body);
+  if (!dashed){
+    el("rect", { x:x - 15, y:base - 40, width:30, height:40, rx:6, fill:K.shade(roof, .8) }, body);
+    el("rect", { x:x - w / 2 - 6, y:base - h - 66, width:w + 12, height:h + 70, rx:16, "class":"ring" }, body);
+  }
+  return body;
+}
+D.forEach(function(d, i){
+  var p = cell(i), cx = p[0], cy = p[1];
+  el("rect", { x:cx, y:cy, width:CW, height:CH, rx:56, fill:d.ground, stroke:K.shade(d.ground, .85), "stroke-width":5 }, world);
+  el("rect", { x:cx + 16, y:cy + 16, width:CW - 32, height:CH - 32, rx:44, fill:"none", stroke:"#fff", "stroke-opacity":.7, "stroke-width":3, "stroke-dasharray":"3 12", "stroke-linecap":"round" }, world);
+  d.deco.forEach(function(e, k){ for (var j = 0; j < 3; j++) el("text", { x:cx + 70 + K.rnd(i * 7 + k, j) * (CW - 140), y:cy + 150 + ((k + j) % 2) * 235 + K.rnd(j, i + k) * 30, "font-size":40, "pointer-events":"none" }, world, e); });
+  var w = d.name.length * 26 + 80;
+  el("rect", { x:cx + CW / 2 - w / 2, y:cy - 22, width:w, height:46, rx:23, fill:d.roof, stroke:"#fff", "stroke-width":4 }, world);
+  el("text", { x:cx + CW / 2, y:cy + 10, "text-anchor":"middle", "class":"dname" }, world, d.emo + " " + d.name);
+  K.lots(d).slice(0, 6).forEach(function(e, k){
+    var x = cx + 135 + (k % 3) * 245, base = cy + 235 + Math.floor(k / 3) * 235;
+    if (e.idea){ var g0 = el("g", {}, world); house(g0, x, base, 130, 80, d.roof, d.wall, true);
+      el("text", { x:x, y:base - 26, "text-anchor":"middle", "font-size":38, "pointer-events":"none" }, g0, "🏗️");
+      el("text", { x:x, y:base + 32, "text-anchor":"middle", "class":"lab soft" }, g0, e.idea); return; }
+    var it = e.it, lk = K.locked(it), h = it.tall ? 130 : 92;
+    var g = el("g", { "class":"bld", tabindex:0, role:"button", "aria-label":it.title + (lk ? "（長大一點再來）" : "") }, world);
+    var body = house(g, x, base, 140, h, lk ? "#aeb6c2" : d.roof, lk ? "#e3e7ec" : d.wall);
+    el("circle", { cx:x, cy:base - h + 28, r:30, fill:"#fff", stroke:K.shade(d.wall, .75), "stroke-width":3 }, body);
+    el("text", { x:x, y:base - h + 42, "text-anchor":"middle", "font-size":38, "pointer-events":"none" }, body, lk ? "☁️" : it.emo);
+    el("text", { x:x, y:base + 32, "text-anchor":"middle", "class":"lab" }, g, (lk ? "🔒 " : "") + it.short);
+    g._d = d; g._it = it;
+  });
+});
+// plots for the next neighbourhoods
+for (r = 0; r < ROWS; r++){ var px = OX + COLS * (CW + GAP), py = OY + r * (CH + GAP);
+  el("rect", { x:px, y:py, width:CW, height:CH, rx:56, fill:"#fff", "fill-opacity":.28, stroke:"#7a9a5c", "stroke-width":5, "stroke-dasharray":"18 14" }, world);
+  el("text", { x:px + CW / 2, y:py + CH / 2 - 10, "text-anchor":"middle", "font-size":70, "pointer-events":"none" }, world, "🚧");
+  el("text", { x:px + CW / 2, y:py + CH / 2 + 50, "text-anchor":"middle", "class":"lab" }, world, r ? "小鎮還在長大" : "下一個社區會蓋在這裡"); }
+// a boat and a little train of ducks
+function mover(e, a, b, sec, size){ var m = el("text", { "font-size":size, "text-anchor":"middle", "pointer-events":"none" }, world, e);
+  if (K.calm){ m.setAttribute("x", (a[0] + b[0]) / 2); m.setAttribute("y", (a[1] + b[1]) / 2); return; }
+  el("animateTransform", { attributeName:"transform", type:"translate", from:a.join(" "), to:b.join(" "), dur:sec + "s", repeatCount:"indefinite" }, m); }
+mover("⛵", [-300, ry + 30], [W + 300, ry + 30], 70, 54);
+mover("🚌", [x0 - 300, y1 + 14], [x1 + CW, y1 + 14], 40, 44);
+
+var cam = K.camera(stage, world, { bounds:[0, 0, W, H], min:.28, max:1.6,
+  onPick:function(g, a){ var b = g.getBBox(); a.fly(b.x + b.width / 2, b.y + b.height / 2 + 90 / Math.max(a.cam.s, .8), Math.max(a.cam.s, .8)); } });
+function home(now){ var hx = OX + TOWN_W / 2, hy = OY + TOWN_H / 2 + 40, s = Math.max(.4, Math.min(1, stage.clientWidth / (TOWN_W + 260)));
+  if (now) cam.set(hx, hy, s); else cam.fly(hx, hy, s); }
+document.getElementById("zhome").onclick = function(){ K.closeSheet(); home(); };
+K.chips(function(d){ var p = cell(D.indexOf(d)); cam.fly(p[0] + CW / 2, p[1] + CH / 2, Math.min(1.05, stage.clientWidth / (CW + 60))); });
+home(true);
+})();
+</script>
+</body>
+</html>
