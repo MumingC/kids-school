@@ -19,11 +19,11 @@ A small collection of static learning websites I build for my kids.
 
 ## Kids TV 家庭小電視（`tv/`）
 
-首頁也是孩子的上網首頁，畫成一張有六座分類島的海圖（科學、自然、歷史、地理、電腦、娛樂）。每個有字的六角格是一個可以去的地方，點島或格子，下方碼頭會列出那座島的選項。
+首頁也是孩子的上網首頁，畫成一座可以拖著逛、可以放大縮小的城市，有六個區（科學、歷史、電腦、自然、地理、遊樂）。每一棟房子是一個可以去的地方，點房子會從下方滑出說明和「進去」按鈕；上方的按鈕可以直接飛到某一區。
 
-**新增科目要加到首頁**：在 `index.html` 的 `ISLANDS` 裡，把一筆 `{ id, emo, short, title, age, desc, href }` 加進對應島的 `items`（每座島最多 6 格）。只給大孩加 `only:"b"`（中孩會看到上鎖）；有簡單版加 `mHref:"…"`；還沒做的題目寫在 `ideas`，會顯示成虛線空地。
+**新增科目要加到首頁**：在 `index.html` 的 `DISTRICTS` 裡，把一筆 `{ id, img, emo, short, title, age, desc, href }` 加進對應區的 `items`（每區 6 塊地）。`img` 是 `assets/city/` 裡的圖檔名（尺寸登記在 `SPR`）；圖是用 Canva 產生的黏土風建築，新的房子可以先借用現有的圖。只給大孩加 `only:"b"`（中孩會看到上鎖的灰房子）；有簡單版加 `mHref:"…"`；還沒做的題目寫在 `ideas`，會顯示成工地。新增一個區就在 `DISTRICTS` 加一筆，會佔下一個街廓；六個街廓滿了就把 `COLS` 加一，城市會往右長。
 
-娛樂島上的 [`tv/`](tv/) 是家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
+遊樂街上的 [`tv/`](tv/) 是家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
 
 - 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。
 - 限時、PIN、隱藏影片都存在各裝置的 `localStorage`（key 前綴 `kt.`）。
@@ -35,9 +35,9 @@ A small collection of static learning websites I build for my kids.
 - `big/`（＝`?k=b`，🚀 大孩）：全部科目（完整版），不顯示 The Six Minutes。
 - 根目錄不帶參數：全部內容。
 
-### 用 Google 登入切換首頁（選用，預設關閉）
+### 用 Google 登入切換首頁（已啟用）
 
-首頁可以加一顆「使用 Google 帳戶登入」的按鈕：孩子登入後，首頁自動變成他自己的版本（等同 `?k=m`／`?k=b`），並記在那台裝置的 `localStorage`（`ks.who`，只存 `m`／`b`／`p` 一個字母，不存 email）。標題下方會出現「🦊 中孩的海圖　換人」，按「換人」就登出回到全部內容。
+首頁可以加一顆「使用 Google 帳戶登入」的按鈕：孩子登入後，首頁自動變成他自己的版本（等同 `?k=m`／`?k=b`），並記在那台裝置的 `localStorage`（`ks.who`，只存 `m`／`b`／`p` 一個字母，不存 email）。標題旁邊會出現「🦊 中孩的城市　換人」，按「換人」就登出回到全部內容。
 
 **它不是權限控管。** 這是公開的靜態網站，沒有後端，ID token 只在瀏覽器裡解開讀 email、沒有驗簽章；任何人照樣可以直接開 `?k=b` 或任何一門課。它只是省掉「選自己是誰」這一步，不保護任何內容。
 
