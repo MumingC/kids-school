@@ -120,7 +120,7 @@ footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacit
   </main>
 
   <p class="mine" id="mine">設成孩子自己的首頁：<a href="mid/">🦊 中孩版</a> · <a href="big/">🚀 大孩版</a></p>
-  <div class="note"><strong>給大人的說明：</strong>這裡的每一門課都是純靜態網頁，不需要登入、不收集任何資料。小電視只播家長挑過的 YouTube 頻道；每天的觀看時間、家長密碼與隱藏的影片都存在這台裝置上（從小電視的「家長設定」修改）。學習進度存在孩子自己的瀏覽器裡，換一台裝置就會重新開始。部分課程有動手實驗，請依課程內的安全提示由大人陪同進行。虛線的格子是還沒蓋好的空位。</div>
+  <div class="note"><strong>給大人的說明：</strong>這裡的每一門課都是純靜態網頁，不登入也能用、不收集任何資料。首頁的 Google 登入只用來決定顯示誰的海圖：瀏覽器只記住「中孩、大孩或爸媽」，不儲存帳號；沒登入時頁面會向 Google 載入登入按鈕。小電視只播家長挑過的 YouTube 頻道；每天的觀看時間、家長密碼與隱藏的影片都存在這台裝置上（從小電視的「家長設定」修改）。學習進度存在孩子自己的瀏覽器裡，換一台裝置就會重新開始。部分課程有動手實驗，請依課程內的安全提示由大人陪同進行。虛線的格子是還沒蓋好的空位。</div>
   <footer>Kids School · 為自己的孩子做的學習網站</footer>
 </div>
 
@@ -133,9 +133,13 @@ footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacit
    Never write a real email address here: hashes only. Get a hash by opening this page with ?hash=1.
    Example (fake): "fox@example.com" -> 359fec6b87bd004eb3d6d1cb2fd2b18a113e9b5f128c97fbae5656d5ec8fc59f */
 window.KS_AUTH = {
-  GOOGLE_CLIENT_ID: "",
+  GOOGLE_CLIENT_ID: "58307936708-iaq9fqnvidmk0shc2aqdkda01nnrto47.apps.googleusercontent.com",
   ROLES: {
     // "359fec6b87bd004eb3d6d1cb2fd2b18a113e9b5f128c97fbae5656d5ec8fc59f": "m",
+    "708d6808de7e41311e88faec3348e9538a137d2456a5b97be062f87a697cb732": "m",
+    "b2bb02d76a983839f5ff629a69d3f94e2f7642a28b88c50a73307b655e90e69c": "b",
+    "d7bca5588175a5e21fe9d240a78219dea51199d6ae8e99d923c74f95652a53bf": "p",
+    "eb1f9bb8c337a37298d70e2f9573ab5d3b898e420fa0077eef26af3360fe245e": "p",
   }
 };
 </script>
