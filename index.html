@@ -162,7 +162,7 @@ var DISTRICTS = [
     ], ideas:["⌨️ 寫程式入門","🔐 密碼與暗號"] },
   { id:"nature", name:"自然公園", emo:"🌿", roof:"#4f9d5d", ground:"#bfe3a8", deco:["tree","bench","pine"],
     items:[], ideas:["🦖 恐龍與化石","🐛 昆蟲觀察","🌦️ 天氣與颱風"] },
-  { id:"geo", name:"地理港口", emo:"🌍", roof:"#d99a2b", ground:"#f3e7c0", deco:["lighthouse","palm"],
+  { id:"geo", name:"地理港口", emo:"🌍", roof:"#d99a2b", ground:"#f3e7c0", deco:["palm"],
     items:[
       { id:"detective", img:"detective", emo:"🕵️", short:"小偵探", title:"環球小偵探", age:"小三到小六", desc:"跟著線索追怪盜飛遍 38 座城市，認國旗、看文化圖鑑。", href:"detective/" },
       { id:"river", img:"ferry", emo:"🌉", short:"河流城市", title:"台北的水上公路", age:"9 站專題", desc:"台北能不能有通勤用的水上公路？最後當市長做選擇。", href:"river-city/", mHref:"river-city/kids.html" },
@@ -179,9 +179,20 @@ var DISTRICTS = [
 // pictures in assets/city/<name>.webp : [width, height] of the file
 var SPR = { rocket:[279,360], clock:[278,360], atom:[345,360], school:[345,360], museum:[360,329], robot:[360,339], detective:[233,360], ferry:[360,295], station:[360,352],
   tv:[293,360], news:[303,360], radio:[324,360], village:[279,360], site:[351,360], carousel:[314,360], tree:[329,360], pine:[259,360], fountain:[360,333],
-  telescope:[308,360], vase:[216,360], dish:[279,360], palm:[302,360], lighthouse:[181,360], ferris:[304,360], bus:[360,315], boat:[278,360], bench:[360,271] };
+  telescope:[308,360], vase:[216,360], dish:[279,360], palm:[302,360], lighthouse:[181,360], ferris:[304,360], bus:[360,315], boat:[278,360], bench:[360,271],
+  ship:[360,295], crane:[324,360], fishboat:[360,272], gate:[320,360], pond:[360,263], flowers:[360,295], chip:[288,360], balloon:[246,360], cart:[294,360] };
 // how big scenery is drawn (longest side, in map pixels); buildings use BUILD
-var SIZE = { tree:78, pine:80, fountain:84, telescope:62, vase:58, dish:66, palm:92, lighthouse:120, ferris:128, carousel:112, bench:72, site:104, bus:66, boat:70 };
+var SIZE = { tree:78, pine:80, fountain:84, telescope:62, vase:58, dish:66, palm:92, lighthouse:120, ferris:128, carousel:112, bench:72, site:104, bus:66, boat:70,
+  ship:170, crane:150, fishboat:100, gate:118, pond:126, flowers:76, chip:96, balloon:96, cart:84 };
+// what makes each district its own place: extra scenery on the tiles between the lots [dx, dy, picture]
+// (lots sit on even dx and dy, so use spots where dx + dy is odd or they hide a building's name)
+var EXTRA = {
+  history:[[1,2,"gate"]],
+  computer:[[2,1,"chip"]],
+  nature:[[2,1,"pond"],[1,0,"flowers"],[3,2,"flowers"],[0,1,"tree"],[1,2,"pine"],[4,1,"pine"],[3,0,"tree"]],
+  geo:[[2,1,"palm"]],
+  fun:[[4,1,"cart"],[2,1,"balloon"]]
+};
 var BUILD = [134, 176];
 
 // whose page: ?k=m (middle kid) or ?k=b (big kid); anything else = everyone ("a")
@@ -214,7 +225,12 @@ function rnd(x, y){ var s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return
 function shade(hex, f){ var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
   function c(v){ return Math.max(0, Math.min(255, Math.round(v * f))); } return "rgb(" + c(r) + "," + c(g) + "," + c(b) + ")"; }
 
+var PORT = DISTRICTS.filter(function(d){ return d.id === "geo" && d.oy + BD === Y1; })[0];   // the port needs the waterfront row
 function tileType(x, y){
+  if (PORT && x >= PORT.ox && x < PORT.ox + BW){
+    if (y === Y1 + 1) return "quay";
+    if (y === RIVER && (x === PORT.ox + 1 || x === PORT.ox + 3)) return "pier";
+  }
   if (y === RIVER || y === RIVER + 1) return "river";
   var onX = x >= M - 1 && x <= X1, onY = y >= M - 1 && y <= Y1;
   if (onY && onX && ((x - (M - 1)) % (BW + 1) === 0 || (y - (M - 1)) % (BD + 1) === 0)) return "road";
@@ -255,8 +271,10 @@ function build(){
     else if (t === "plot") tile(x, y, "#e6ecd9", "#b9c4a2", { "stroke-dasharray":"6 6" });
     else if (t === "grass"){ tile(x, y, (x + y) % 2 ? "#a8d68c" : "#a1d184");
       if (rnd(x, y) > .8 && y !== RIVER - 1) things.push({ z:x + y, draw:deco.bind(null, x, y, rnd(y, x) > .5 ? "tree" : "pine", 58 + rnd(x * 3, y) * 26) }); }
-    else tile(x, y, t.ground, shade(t.ground, .93));
+    else if (t === "quay" || t === "pier"){ tile(x, y, "#d2a877", "#b98d5c"); plank(x, y); }
+    else ground(t, x, y);
   }
+  DISTRICTS.forEach(marks);
   // dashed centre lines on the roads
   var r, c, a, b;
   for (r = 0; r <= ROWS; r++){ a = iso(M - 1, M - .5 + r * (BD + 1)); b = iso(X1 + 1, M - .5 + r * (BD + 1)); line(a, b); }
@@ -268,17 +286,67 @@ function build(){
       if (!e) things.push({ z:x + y, draw:deco.bind(null, x, y, d.deco[(i - list.length) % d.deco.length], 0) });
       else things.push({ z:x + y, draw:(e.it ? building : site).bind(null, d, e.it || e.idea, x, y) });
     });
+    (EXTRA[d.id] || []).forEach(function(e){ things.push({ z:d.ox + e[0] + d.oy + e[1] + .01, draw:(e[2] === "balloon" ? floater : deco).bind(null, d.ox + e[0], d.oy + e[1], e[2], 0) }); });
     sign(d);
   });
+  if (PORT) [[1, RIVER, "lighthouse"], [3, Y1 + 1, "crane"], [2, RIVER, "ship"], [4, RIVER, "fishboat"], [0, Y1 + 1, "palm"]].forEach(function(e){
+    things.push({ z:PORT.ox + e[0] + e[1], draw:deco.bind(null, PORT.ox + e[0], e[1], e[2], 0) }); });
   // the next block to be built
   things.push({ z:X1 + 4 + M + 2, draw:function(){ var o = sprite(gThings, "site", X1 + 4, M + 2, 150);
     label(o.cx, o.foot + 22, "城市還在長大：下一區會蓋在這裡"); } });
   things.sort(function(a, b){ return a.z - b.z; }).forEach(function(t){ t.draw(); });
-  mover("boat", iso(-1, RIVER + .6), iso(GX, RIVER + .6), 70);
+  mover("boat", iso(-1, RIVER + 1.1), iso(GX, RIVER + 1.1), 70);
   mover("bus", iso(M - 1, Y1 + .1), iso(X1 + 1, Y1 + .1), 30);
+}
+// each district has its own ground: cobbles in the old town, a lawn in the park, a checkerboard on the fun street...
+function ground(d, x, y){
+  var odd = (x + y) % 2;
+  if (d.id === "history") tile(x, y, odd ? "#ecd6b2" : "#e0c59c", "#cfb287");
+  else if (d.id === "nature") tile(x, y, odd ? "#9fd87c" : "#a9de86");
+  else if (d.id === "fun") tile(x, y, odd ? "#ffd9c9" : "#fff4e6", "#f5c3b0");
+  else if (d.id === "geo") tile(x, y, odd ? "#f5e9c2" : "#efdfb0");
+  else if (d.id === "computer") tile(x, y, "#cfe6f2", "#a9d3e6");
+  else tile(x, y, d.ground, shade(d.ground, .93));
+}
+function plank(x, y){ for (var k = 1; k < 4; k++){ var a = iso(x + k / 4, y), b = iso(x + k / 4, y + 1);
+  el("path", { d:"M" + a.join(" ") + " L" + b.join(" "), stroke:"#b98d5c", "stroke-width":1.5, fill:"none" }, gGround); } }
+function marks(d){
+  var i, a, b, c;
+  if (d.id === "computer"){            // circuit-board traces
+    for (i = 0; i < 14; i++){
+      var x = d.ox + .5 + Math.floor(rnd(i, 3) * BW), y = d.oy + .5 + Math.floor(rnd(i, 5) * BD), horiz = rnd(i, 7) > .5;
+      var x2 = horiz ? Math.min(d.ox + BW - .5, x + 1 + Math.floor(rnd(i, 9) * 2)) : x, y2 = horiz ? y : Math.min(d.oy + BD - .5, y + 1);
+      a = iso(x, y); b = iso(x2, y2);
+      el("path", { d:"M" + a.join(" ") + " L" + b.join(" "), stroke:"#3fa9d6", "stroke-width":4, "stroke-linecap":"round", opacity:.55, fill:"none" }, gGround);
+      el("ellipse", { cx:a[0], cy:a[1], rx:9, ry:4.5, fill:"#3fa9d6", opacity:.8 }, gGround);
+      el("ellipse", { cx:b[0], cy:b[1], rx:9, ry:4.5, fill:"#fff", stroke:"#3fa9d6", "stroke-width":3 }, gGround);
+    }
+  }
+  if (d.id === "science"){             // a landing pad in the middle
+    c = iso(d.ox + 3, d.oy + 1.5);
+    [[92, "#fff", .55], [62, "#8d7be0", .35], [30, "#fff", .8]].forEach(function(r){ el("ellipse", { cx:c[0], cy:c[1], rx:r[0], ry:r[0] / 2, fill:r[1], opacity:r[2] }, gGround); });
+  }
+  if (d.id === "history"){             // a round plaza
+    c = iso(d.ox + 2.5, d.oy + 1.5);
+    el("ellipse", { cx:c[0], cy:c[1], rx:120, ry:60, fill:"#f6ead2", stroke:"#cfb287", "stroke-width":4, "stroke-dasharray":"10 8" }, gGround);
+  }
+  if (d.id === "nature"){              // a winding footpath
+    a = iso(d.ox, d.oy + 2.5); b = iso(d.ox + 2.5, d.oy + 2.2); c = iso(d.ox + BW, d.oy + .5);
+    el("path", { d:"M" + a.join(" ") + " Q" + b.join(" ") + " " + c.join(" "), stroke:"#ead9a8", "stroke-width":18, "stroke-linecap":"round", fill:"none", opacity:.9 }, gGround);
+  }
+  if (d.id === "fun"){                 // bunting along the back edges
+    var cols = ["#e4572e", "#ffc93c", "#3d7ea6", "#4f9d5d"];
+    for (i = 0; i < 20; i++){ a = iso(d.ox + i * BW / 20, d.oy); el("path", { d:"M" + (a[0] - 7) + " " + (a[1] - 3) + " l14 7 l-10 9 Z", fill:cols[i % 4] }, gGround); }
+  }
 }
 function line(a, b){ el("path", { d:"M" + a.join(" ") + " L" + b.join(" "), stroke:"#fff", "stroke-opacity":.7, "stroke-width":2.5, "stroke-dasharray":"18 18", fill:"none" }, gGround); }
 function deco(x, y, name, size){ sprite(gThings, name, x, y, size || SIZE[name] || 64); }
+function floater(x, y, name){            // hangs in the air and bobs a little
+  var g = el("g", { "pointer-events":"none" }, gThings), c = iso(x + .5, y + .5);
+  el("ellipse", { cx:c[0], cy:c[1] + 10, rx:26, ry:11, fill:"#000", opacity:.12 }, g);
+  var up = el("g", { transform:"translate(0 -120)" }, g); sprite(up, name, x, y, SIZE[name]);
+  if (!CALM) el("animateTransform", { attributeName:"transform", type:"translate", values:"0 -120; 0 -134; 0 -120", dur:"6s", repeatCount:"indefinite" }, up);
+}
 function mover(name, a, b, sec){
   var g = el("g", { "pointer-events":"none" }, gThings); sprite(g, name, -.5, -.5, SIZE[name]);
   if (CALM){ g.setAttribute("transform", "translate(" + (a[0] + b[0]) / 2 + " " + (a[1] + b[1]) / 2 + ")"); return; }
