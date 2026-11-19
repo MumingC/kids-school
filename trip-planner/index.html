@@ -7,6 +7,7 @@
 <meta name="description" content="8 站學會規劃旅行：願望、地圖、時間、交通、預算、行李、備案，最後幫全家排出淡水一日遊。">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%B3%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
@@ -71,7 +72,18 @@ button.b:disabled{opacity:.45;cursor:default}
 input[type=text],input[type=number],select{font:inherit;font-size:17px;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);min-width:0;width:100%}
 /* map */
 .mapbox{border:2px solid var(--line);border-radius:16px;overflow:hidden;background:var(--river-soft)}
-.mapbox svg{display:block;width:100%;height:auto}
+.mapbox #map > svg{display:block;width:100%;height:auto}
+#map.real{height:460px}
+@media (max-width:640px){#map.real{height:420px}.lpin .pin .e{width:30px;height:30px;font-size:16px}.lpin .pin{margin-top:-15px}.lpin .pin .n{display:none;font-size:12px}.lpin .pin.sel .n{display:block}.lpin .sta{font-size:10px;padding:1px 5px;opacity:.9}}
+.mapchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.mapchips button{font:700 14px var(--body);color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
+.mapchips button.sel{background:var(--sun);border-color:var(--ink)}
+.lpin{background:none;border:0}
+.lpin .pin{display:flex;flex-direction:column;align-items:center;width:110px;margin-left:-55px;margin-top:-20px;cursor:pointer}
+.lpin .pin .e{width:40px;height:40px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);display:grid;place-items:center;font-size:22px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.lpin .pin.sel .e{background:var(--sun)}
+.lpin .pin .n{margin-top:2px;font:700 13px var(--body);color:var(--ink);background:rgba(255,255,255,.9);border-radius:8px;padding:1px 6px;white-space:nowrap}
+.lpin .sta{font:700 12px var(--body);color:#fff;background:#d3202f;border-radius:8px;padding:2px 7px;white-space:nowrap;transform:translate(-50%,-50%);display:inline-block}
 .pin{cursor:pointer}
 .pin circle{fill:#fff;stroke:var(--ink);stroke-width:2.5}
 .pin.sel circle{fill:var(--sun)}
@@ -170,10 +182,11 @@ footer{text-align:center;color:var(--ink-soft);font-size:13.5px;padding:0 16px 3
   <div class="num">Stop 2 · Map</div>
   <h2>把地方放到地圖上</h2>
   <p>想去的地方很多，但它們不在同一個位置。<strong>把靠近的地方排在一起</strong>，才不會整天都在趕路。</p>
-  <p>點地圖上的<strong>兩個地方</strong>，看看從一個到另一個要多久。</p>
-  <div class="mapbox"><svg id="map" viewBox="0 0 800 430" role="group" aria-label="淡水示意地圖"></svg></div>
+  <p>點地圖上的<strong>兩個地方</strong>（圖釘擠在一起點不到的話，點地圖下面的按鈕也可以），看看從一個到另一個要多久。</p>
+  <div class="mapbox"><div id="map" role="group" aria-label="淡水地圖"></div></div>
+  <div class="mapchips" id="mapChips" aria-label="用按鈕選地方"></div>
   <p class="mapout" id="mapOut">👆 先點第一個地方</p>
-  <p class="tip">這是示意圖，位置大概對，但不是照真正的比例畫的。出發前可以打開真的地圖 App 再看一次。</p>
+  <p class="tip">這是真的地圖（OpenStreetMap），可以放大、縮小、拖著看。紅線是捷運，藍色虛線是渡輪。圓圈標的是大概的位置，出發前可以用地圖 App 再查一次怎麼走。</p>
   <p class="key">同一區的地方排在一起。隔著河的八里，要坐渡輪才到得了。</p>
   <div id="q2"></div>
   <div class="next"><button class="b soft" data-go="1">← 上一站</button><button class="b" data-go="3">下一站 →</button></div>
@@ -297,9 +310,10 @@ footer{text-align:center;color:var(--ink-soft);font-size:13.5px;padding:0 16px 3
 
 </main>
 </div>
-<footer>價錢與時間是 2026 年整理的大約數字，出發前請再查一次官方資訊。地圖是示意圖。</footer>
+<footer>價錢與時間是 2026 年整理的大約數字，出發前請再查一次官方資訊。地圖資料 © OpenStreetMap 貢獻者。</footer>
 <div id="printout"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -363,6 +377,7 @@ function go(n, scroll){
   document.querySelectorAll(".st").forEach(function(s){ s.classList.toggle("on", +s.dataset.s === n); });
   drawLine();
   if (n === 8) drawPlanner();
+  if (n === 2 && lmap){ lmap.invalidateSize(); if (!lmap._fit){ lmap._fit = 1; lmap.fitBounds(Object.keys(LL).map(function(k){ return LL[k]; }), { padding:innerWidth < 640 ? [22,22] : [45,45] }); } }
   if (scroll) $("line").scrollIntoView({ block:"start" });
 }
 document.addEventListener("click", function(e){
@@ -460,8 +475,43 @@ $("wish").addEventListener("change", function(e){
 /* ---------- stop 2: map ---------- */
 var NS = "http://www.w3.org/2000/svg", picked = [];
 function sv(name, attrs, parent, text){ var e = document.createElementNS(NS, name); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text != null) e.textContent = text; parent.appendChild(e); return e; }
+// Real coordinates (OpenStreetMap). The map is Leaflet + OSM tiles; if Leaflet cannot load, a drawn sketch is used.
+var LL = { street:[25.1707,121.4392], fort:[25.17539,121.43293], white:[25.17412,121.43621], hobe:[25.17938,121.42894],
+  wharf:[25.18310,121.41081], bike:[25.16000,121.43450], crab:[25.15900,121.45560] };
+var PIER = { tamsui:[25.16961,121.43905], bali:[25.15929,121.43589], wharf:[25.18215,121.41330] };
+var SHORT = { street:"老街", bike:"八里左岸", crab:"紅樹林步道" };
+var lmap = null, lmarks = {};
+function drawReal(){
+  var box = $("map");
+  if (!lmap){
+    box.className = "real";
+    lmap = L.map(box, { scrollWheelZoom:false, zoomSnap:.25 });
+    lmap.attributionControl.setPrefix(false);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:18, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢獻者' }).addTo(lmap);
+    L.polyline([PIER.tamsui, PIER.bali], { color:"#1f6c89", weight:4, dashArray:"4 9" }).addTo(lmap);
+    L.polyline([PIER.tamsui, [25.1722,121.4290], [25.1790,121.4150], PIER.wharf], { color:"#1f6c89", weight:4, dashArray:"4 9" }).addTo(lmap);
+    [["🚇 淡水站", [25.1678,121.4456]], ["🚇 紅樹林站", [25.1546,121.4590]], ["🚈 輕軌漁人碼頭站", [25.18200,121.41861]]].forEach(function(s){
+      L.marker(s[1], { interactive:false, keyboard:false, icon:L.divIcon({ className:"lpin", iconSize:[0,0], html:'<span class="sta">' + s[0] + "</span>" }), zIndexOffset:-500 }).addTo(lmap);
+    });
+    var pts = [];
+    PLACES.filter(function(p){ return LL[p.id]; }).forEach(function(p){
+      pts.push(LL[p.id]);
+      lmarks[p.id] = L.marker(LL[p.id], { keyboard:false, icon:L.divIcon({ className:"lpin", iconSize:[0,0],
+        html:'<div class="pin" tabindex="0" role="button" aria-label="' + p.name + '" data-p="' + p.id + '"><span class="e">' + p.emo + '</span><span class="n">' + (SHORT[p.id] || p.name) + "</span></div>" }) }).addTo(lmap);
+    });
+    lmap.fitBounds(pts, { padding:innerWidth < 640 ? [22,22] : [45,45] });
+  }
+  box.querySelectorAll(".pin").forEach(function(e){ var on = picked.indexOf(e.dataset.p) >= 0; e.classList.toggle("sel", on); lmarks[e.dataset.p].setZIndexOffset(on ? 1000 : 0); });
+}
+function drawChips(){
+  $("mapChips").innerHTML = PLACES.filter(function(p){ return LL[p.id]; }).map(function(p){
+    return '<button type="button" data-p="' + p.id + '"' + (picked.indexOf(p.id) >= 0 ? ' class="sel"' : "") + ">" + p.emo + " " + (SHORT[p.id] || p.name) + "</button>"; }).join("");
+}
 function drawMap(){
-  var m = $("map"); m.innerHTML = "";
+  drawChips();
+  if (window.L) return drawReal();
+  var box = $("map"); box.innerHTML = "";
+  var m = sv("svg", { viewBox:"0 0 800 430" }, box);
   sv("rect", { x:0, y:0, width:800, height:430, fill:"#bfe0ec" }, m);
   sv("path", { d:"M0 0 H800 V170 C700 190 640 250 520 255 C420 260 330 250 240 230 C170 215 110 240 60 250 L0 200 Z", fill:"#eadfc4", stroke:"#c9b98f", "stroke-width":2 }, m);
   sv("path", { d:"M800 300 C690 300 620 340 520 330 C430 320 340 310 250 320 C190 328 150 360 120 430 H800 Z", fill:"#dfe6c4", stroke:"#b9c592", "stroke-width":2 }, m);
@@ -495,6 +545,7 @@ function pickPin(id){
     else { var L = leg(a.zone, b.zone); o.textContent = a.emo + " " + a.name + " → " + b.emo + " " + b.name + "：" + L[1] + "，大約 " + L[0] + " 分鐘" + (L[2] ? "，一個大人約 " + L[2] + " 元。" : "，不用錢。"); }
   }
 }
+$("mapChips").addEventListener("click", function(e){ var g = e.target.closest ? e.target.closest("button") : null; if (g) pickPin(g.dataset.p); });
 $("map").addEventListener("click", function(e){ var g = e.target.closest ? e.target.closest(".pin") : null; if (g) pickPin(g.dataset.p); });
 $("map").addEventListener("keydown", function(e){ var g = e.target.closest ? e.target.closest(".pin") : null; if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); pickPin(g.dataset.p); var f = $("map").querySelector('[data-p="' + g.dataset.p + '"]'); if (f) f.focus(); } });
 

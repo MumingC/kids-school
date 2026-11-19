@@ -246,6 +246,7 @@ function buildList() {
   const s = seen(), rnd = seeded(prof.key + today());
   let vs = pool().filter(v => (lang === "all" || v.lang === lang) && (chan === "all" ? !v.s : v.ch === chan));
   if (vs.length && vs[0].s) { list = vs.sort((a, b) => a.n - b.n); return; }
+  if (chan !== "all" && vs.length && vs[0].o) { list = vs; return; }   // news: newest first, as built
   vs = vs.map(v => [v, rnd()]).sort((a, b) => a[1] - b[1]).map(a => a[0]);
   list = vs.filter(v => !s.has(v.id)).concat(vs.filter(v => s.has(v.id)));
 }
@@ -449,6 +450,8 @@ $("parent").addEventListener("click", e => { if (e.target.id === "parent") show(
   const want = new URLSearchParams(location.search).get("p");
   if (PROFILES.some(p => p.key === want)) {
     openProfile(want);
+    const wc = new URLSearchParams(location.search).get("c");   // ?c=<channel name> opens that channel
+    if (wc && pool().some(v => v.ch === wc)) { chan = wc; buildList(); renderChips(); renderGrid(true); }
     if (new URLSearchParams(location.search).has("pick")) { const sv = pool().find(v => v.s); if (sv) openEpPick(sv.s); }
   } else goPick();
   setInterval(() => { if (!$("browse").classList.contains("hidden")) updateClock(); }, 30000);
