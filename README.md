@@ -18,7 +18,11 @@ A small collection of static learning websites I build for my kids.
 
 ## Kids TV 家庭小電視（`tv/`）
 
-首頁也是孩子的上網首頁：最上面是 [`tv/`](tv/) 家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
+首頁也是孩子的上網首頁，畫成一張有六座分類島的海圖（科學、自然、歷史、地理、電腦、娛樂）。每個有字的六角格是一個可以去的地方，點島或格子，下方碼頭會列出那座島的選項。
+
+**新增科目要加到首頁**：在 `index.html` 的 `ISLANDS` 裡，把一筆 `{ id, emo, short, title, age, desc, href }` 加進對應島的 `items`（每座島最多 6 格）。只給大孩加 `only:"b"`（中孩會看到上鎖）；有簡單版加 `mHref:"…"`；還沒做的題目寫在 `ideas`，會顯示成虛線空地。
+
+娛樂島上的 [`tv/`](tv/) 是家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
 
 - 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。
 - 限時、PIN、隱藏影片都存在各裝置的 `localStorage`（key 前綴 `kt.`）。
@@ -26,9 +30,9 @@ A small collection of static learning websites I build for my kids.
 
 ### 每個孩子自己的首頁
 
-- `mid/`（＝`?k=m`，🦊 中孩）：只顯示中孩的小電視＋「帶小小孩看」、The Six Minutes 捷徑；二戰與 River City 連到簡單版；不顯示核分裂與小小村長。
-- `big/`（＝`?k=b`，🚀 大孩）：全部科目（完整版）。
-- 根目錄不帶參數：全部內容。新科目卡片要只給大孩就加 `data-k="b"`，有簡單版就加 `data-m-href="…"`。
+- `mid/`（＝`?k=m`，🦊 中孩）：只顯示中孩的小電視＋「帶小小孩看」、The Six Minutes；二戰與 River City 連到簡單版；核分裂與小小村長顯示為上鎖。
+- `big/`（＝`?k=b`，🚀 大孩）：全部科目（完整版），不顯示 The Six Minutes。
+- 根目錄不帶參數：全部內容。
 
 ## How it works
 
