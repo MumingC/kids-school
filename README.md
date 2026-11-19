@@ -35,6 +35,43 @@ A small collection of static learning websites I build for my kids.
 - `big/`（＝`?k=b`，🚀 大孩）：全部科目（完整版），不顯示 The Six Minutes。
 - 根目錄不帶參數：全部內容。
 
+### 用 Google 登入切換首頁（選用，預設關閉）
+
+首頁可以加一顆「使用 Google 帳戶登入」的按鈕：孩子登入後，首頁自動變成他自己的版本（等同 `?k=m`／`?k=b`），並記在那台裝置的 `localStorage`（`ks.who`，只存 `m`／`b`／`p` 一個字母，不存 email）。標題下方會出現「🦊 中孩的海圖　換人」，按「換人」就登出回到全部內容。
+
+**它不是權限控管。** 這是公開的靜態網站，沒有後端，ID token 只在瀏覽器裡解開讀 email、沒有驗簽章；任何人照樣可以直接開 `?k=b` 或任何一門課。它只是省掉「選自己是誰」這一步，不保護任何內容。
+
+- `index.html` 裡 `window.KS_AUTH` 的 `GOOGLE_CLIENT_ID` 是空字串時，整個功能不存在：不載入 Google 的程式、畫面沒有任何變化。
+- 網址明確帶 `?k=` 時（包含 `mid/`、`big/`）以網址為準，不顯示登入列。`?k=a` 可以強制看全部內容。
+- 沒登記的帳號登入，會看到「這個帳號還沒登記喔」，照樣顯示全部內容。
+- repo 是公開的，所以 `ROLES` **只放 email 的 SHA-256，不放 email 本身**。雜湊只是不讓地址直接出現在原始碼裡；已經知道或猜得到地址的人仍然可以比對出來。
+- 啟用後，還沒登入的訪客開首頁時，瀏覽器會向 `accounts.google.com` 載入登入元件（「給大人的說明」裡「不需要登入、不收集任何資料」那句屆時要跟著改）。
+
+**啟用步驟（家長做一次）**
+
+1. 到 [Google Cloud Console → Google Auth Platform → Clients](https://console.developers.google.com/auth/clients)，選一個專案（沒有就新建），第一次會先要求填 Branding（應用程式名稱、支援 email）。
+2. **Create client** → Application type 選 **Web application**。
+3. **Authorized JavaScript origins** 加入（只有網域，不含路徑、結尾不加 `/`）：
+   - `https://mumingc.github.io`
+   - `https://kids-school-tawny.vercel.app`
+   - `http://localhost` 和 `http://localhost:8000`（本機預覽用；Google 文件要求兩個都加，埠號換成實際使用的）
+   
+   Authorized redirect URIs 不用填。
+4. 把產生的 Client ID（`….apps.googleusercontent.com`）貼到 `index.html` 的 `GOOGLE_CLIENT_ID`。Client ID 不是密碼，可以公開。
+5. 取得每個人 email 的代碼：開 `首頁?hash=1`，在「家長工具」輸入 email（只在本機計算，不會送出），或在終端機執行（`fox@example.com` 換成真的地址，全部小寫）：
+
+   ```
+   python -c "import hashlib,sys;print(hashlib.sha256(sys.argv[1].strip().lower().encode()).hexdigest())" fox@example.com
+   ```
+
+   把結果加進 `ROLES`：`"代碼": "m"`（中孩）、`"b"`（大孩）或 `"p"`（家長，看全部）。
+6. commit、push。Vercel preview 網址每次不同，沒列在 origins 裡的網址按鈕不會動。
+
+**還沒確認的事**
+
+- OAuth 同意畫面如果停在 Testing 狀態，只有列在 Test users 的帳號能登入；要讓名單外的帳號也能登入就要發布成 In production（只要 email／profile 這類基本範圍，一般不需要送審，但這點請以 Console 當下顯示的為準）。
+- **Family Link 監護的兒童帳號能不能用「使用 Google 帳戶登入」登入第三方網站，沒有在 Google 官方說明裡查到明確文字（未驗證）。** 2021 年的媒體報導說可以，但預設要家長逐次核准，Family Link 裡有相關開關；實際情況要拿孩子的帳號試一次才知道。學校發的 Google Workspace for Education 帳號則由學校管理員決定能不能登入第三方網站。
+
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.

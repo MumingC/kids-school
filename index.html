@@ -85,6 +85,13 @@ a.btn.out{background:#9aa9b3;box-shadow:0 4px 0 #73828c}
 .note strong{color:var(--ink)}
 footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacity:.85}
 .plain{background:var(--paper);border-radius:16px;padding:16px 20px;margin-top:14px}
+.who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:10px 0 0;font-size:15px;color:var(--foam)}
+.who[hidden]{display:none}
+.who button{font:inherit;font-weight:700;padding:4px 14px;border:0;border-radius:999px;background:var(--paper);color:var(--ink);cursor:pointer}
+.who button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.who .msg{flex-basis:100%;font-weight:700;color:#fff}
+.plain input{font:inherit;width:100%;max-width:26em;padding:6px 10px;border:2px solid var(--line);border-radius:10px}
+.plain code{display:block;margin-top:8px;overflow-wrap:anywhere;user-select:all}
 @media (max-width:720px){.back{display:inline-block}}
 @media (prefers-reduced-motion:reduce){.isl .bob,.wave{animation:none}.boat,.isl .lift{transition:none}}
 </style>
@@ -96,6 +103,7 @@ footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacit
       <div class="eyebrow">Kids School · Built by Dad</div>
       <h1 id="greet">今天想去哪一座島？</h1>
       <p class="last" id="last" hidden></p>
+      <div class="who" id="who" hidden></div>
     </div>
     <div class="now"><span id="clock">--:--</span><small id="date"></small></div>
   </header>
@@ -117,6 +125,21 @@ footer{margin-top:18px;text-align:center;color:var(--foam);font-size:13px;opacit
 </div>
 
 <script>
+/* Optional "Sign in with Google" (see README「用 Google 登入切換首頁」).
+   It only picks WHICH homepage to show. It is NOT access control: this site is public and
+   anyone can still open ?k=m or ?k=b. While GOOGLE_CLIENT_ID is "" the feature is fully off
+   (no Google script, no extra UI).
+   ROLES maps SHA-256(lowercased email) -> "m" (middle kid) | "b" (big kid) | "p" (parent, sees everything).
+   Never write a real email address here: hashes only. Get a hash by opening this page with ?hash=1.
+   Example (fake): "fox@example.com" -> 359fec6b87bd004eb3d6d1cb2fd2b18a113e9b5f128c97fbae5656d5ec8fc59f */
+window.KS_AUTH = {
+  GOOGLE_CLIENT_ID: "",
+  ROLES: {
+    // "359fec6b87bd004eb3d6d1cb2fd2b18a113e9b5f128c97fbae5656d5ec8fc59f": "m",
+  }
+};
+</script>
+<script>
 (function(){
 "use strict";
 var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
@@ -132,7 +155,8 @@ var ISLANDS = [
     items:[
       { id:"rocket", emo:"🚀", short:"火箭", title:"從地面到軌道", age:"小三起點", desc:"12 關火箭課程，每一關都有一個真的在算物理的互動模擬器。", href:"rocket/" },
       { id:"relativity", emo:"⏱️", short:"相對論", title:"時間變慢實驗室", age:"小二起點", desc:"跟光比賽跑到月球，用「光做的時鐘」看懂時間為什麼會變慢。", href:"relativity/" },
-      { id:"fission", emo:"⚛️", short:"核分裂", title:"核分裂實驗室", age:"大孩", only:"b", desc:"8 站，從原子結構到連鎖反應，最後看反應爐與核彈的分岔。", href:"fission/" }
+      { id:"fission", emo:"⚛️", short:"核分裂", title:"核分裂實驗室", age:"大孩", only:"b", desc:"8 站，從原子結構到連鎖反應，最後看反應爐與核彈的分岔。", href:"fission/" },
+      { id:"junyi", emo:"📐", short:"均一", title:"均一教育平台", age:"數學 · 自然 · 各年級", desc:"學校也在用的免費學習網站：看短片、做練習題，數學和自然都有。會離開 Kids School。", href:"https://www.junyiacademy.org/", ext:true }
     ]},
   { id:"nature", name:"自然島", emblem:"🌿", lead:"這座島剛浮出海面，還沒有蓋東西。想先蓋什麼？", ground:["forest","grass","grass"], scenery:["🌲","🦋","🌳"],
     items:[], ideas:["🦖 恐龍與化石","🐛 昆蟲觀察","🌦️ 天氣與颱風"] },
@@ -153,6 +177,7 @@ var ISLANDS = [
   { id:"fun", name:"娛樂島", emblem:"🎪", lead:"看影片、聽故事、玩遊戲。", ground:["grass","sand","grass"], scenery:["⛱️","🎡"],
     items:[
       { id:"tv", emo:"📺", short:"小電視", title:"家庭小電視", age:"每天限時", desc:"爸爸媽媽挑過的頻道。點自己的名字進去。", tv:true },
+      { id:"news", emo:"📡", short:"小新聞", title:"新聞超小號", age:"小公視 · 每週五更新", desc:"給小朋友看的新聞：這個星期臺灣和世界發生了什麼事，每集大約 15 分鐘。會算進小電視的時間。", news:true },
       { id:"six", emo:"📻", short:"六分鐘", title:"The Six Minutes", age:"English · 每集約 6 分鐘", hide:"b", desc:"一集一集往下聽的英文廣播劇，可以接著聽，也可以自己選集數。", six:true },
       { id:"village", emo:"🏘️", short:"小小村長", title:"Village Chief 小小村長", age:"大孩 · 英文介面", only:"b", desc:"六角格地圖的經濟策略遊戲：探索、建城、做買賣。", href:"village-chief/" }
     ]}
@@ -162,7 +187,12 @@ var TALL = { w:640, h:1080, pos:{ fun:[175,170], science:[465,190], geo:[175,520
 var NARROW = window.matchMedia("(max-width: 720px)");
 
 // whose page: ?k=m (middle kid) or ?k=b (big kid); anything else = everyone ("a")
-var kid = new URLSearchParams(location.search).get("k");
+// With Google sign-in configured (KS_AUTH), a remembered role (ks.who) picks the page when the URL has no ?k=.
+var AUTH = window.KS_AUTH || {}, CID = AUTH.GOOGLE_CLIENT_ID || "";
+var QS = new URLSearchParams(location.search), qk = QS.get("k");
+var who = CID && qk == null ? get("ks.who", null) : null;
+if (who !== "m" && who !== "b" && who !== "p") who = null;
+var kid = qk == null && who && who !== "p" ? who : qk;
 if (kid !== "m" && kid !== "b") kid = "a";
 var NAME = { m:"🦊 中孩", b:"🚀 大孩" };
 var LK = "ks.last" + (kid === "a" ? "" : "." + kid);
@@ -262,12 +292,12 @@ function btn(href, label, sub, cls, title){
 }
 // TV minutes left today (same keys as tv/index.html)
 var DEF = { s:20, m:40, b:60 };
-function tvBtn(k, label, alt){
+function tvBtn(k, label, alt, ch){
   var st = get("kt.settings", {}), lim = st.limits || {}, used = get("kt.used", {});
   var L = lim[k] == null ? DEF[k] : lim[k], today = new Date().toLocaleDateString("sv");
   var u = used.date === today ? (used[k] || 0) : 0, left = Math.max(0, L * 60 - u);
   var sub = L <= 0 ? "不限時" : left <= 0 ? "今天看完了" : "還有 " + Math.ceil(left / 60) + " 分鐘";
-  return btn("tv/?p=" + k, label, sub, L > 0 && left <= 0 ? "out" : alt ? "alt" : "");
+  return btn("tv/?p=" + k + (ch ? "&c=" + encodeURIComponent(ch) : ""), label, sub, L > 0 && left <= 0 ? "out" : alt ? "alt" : "");
 }
 function dock(){
   var is = ISLANDS.filter(function(x){ return x.id === selIsland; })[0], its = items(is);
@@ -279,6 +309,8 @@ function dock(){
       var n = (get("kt.series", {})["The Six Minutes"]) || 1;
       go = btn("tv/?p=m", "▶ 聽故事", n > 1 ? "繼續聽第 " + n + " 集" : "從第 1 集開始") + btn("tv/?p=m&pick=1", "🔢 選集數", "自己挑一集", "alt");
     }
+    else if (it.news) go = (kid !== "b" ? tvBtn("m", "🦊 中孩", false, "新聞超小號") : "") + (kid !== "m" ? tvBtn("b", "🚀 大孩", false, "新聞超小號") : "");
+    else if (it.ext) go = btn(it.href, "⛵ 出發", "到均一的網站", "", "");
     else { var easy = kid === "m" && it.mHref; go = btn(easy ? it.mHref : it.href, "⛵ 出發", easy ? "簡單版" : "上島探險", "", it.title); }
     return '<article class="opt' + (lk ? " locked" : "") + (it.id === selItem ? " pick" : "") + '" data-item="' + it.id + '"><span class="age">' + esc(it.age) + "</span><h3>" + it.emo + " " + esc(it.title) +
       "</h3><p>" + esc(it.desc) + '</p><div class="go">' + go + "</div></article>";
@@ -310,6 +342,71 @@ if (last && last.href && last.title){
 if (kid !== "a"){
   document.getElementById("mine").hidden = true;
   document.title = NAME[kid].slice(3) + "的首頁 · Kids School";
+}
+// ---- optional Google sign-in: personalization only, not access control (config: KS_AUTH above) ----
+function sha256(s){
+  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)).then(function(buf){
+    return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ("0" + b.toString(16)).slice(-2); }).join("");
+  });
+}
+function normMail(s){ return String(s || "").trim().toLowerCase(); }
+function jwtEmail(tok){        // read the (unverified) payload of the ID token; nothing is sent anywhere
+  var seg = String(tok).split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  while (seg.length % 4) seg += "=";
+  var bin = atob(seg), bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return normMail(JSON.parse(new TextDecoder("utf-8").decode(bytes)).email);
+}
+(function(){
+  if (!CID || qk != null) return;          // off, or an explicit ?k= page: no sign-in UI at all
+  var box = document.getElementById("who"), roles = {};
+  Object.keys(AUTH.ROLES || {}).forEach(function(h){ roles[h.toLowerCase()] = AUTH.ROLES[h]; });
+  if (who){
+    var lab = document.createElement("span"), out = document.createElement("button");
+    lab.textContent = who === "p" ? "👨‍👩‍👧‍👦 爸爸媽媽：全部的島" : NAME[who] + "的海圖";
+    out.type = "button"; out.textContent = "換人";
+    out.addEventListener("click", function(){ try { localStorage.removeItem("ks.who"); } catch(e){} location.reload(); });
+    box.appendChild(lab); box.appendChild(out); box.hidden = false;
+    return;
+  }
+  var tip = document.createElement("span"), slot = document.createElement("span"), msg = document.createElement("span");
+  tip.textContent = "登入就會變成你的海圖："; msg.className = "msg"; msg.setAttribute("role", "status");
+  box.appendChild(tip); box.appendChild(slot); box.appendChild(msg);
+  function onCredential(resp){
+    var mail = "";
+    try { mail = jwtEmail(resp.credential); } catch(e){}
+    if (!mail || !window.crypto || !crypto.subtle){ msg.textContent = "登入沒有成功，再試一次看看。"; return; }
+    sha256(mail).then(function(h){
+      var role = roles[h];
+      if (role === "m" || role === "b" || role === "p"){ set("ks.who", role); location.reload(); }
+      else msg.textContent = "這個帳號還沒登記喔，先看全部的島。請爸爸媽媽幫你加上去！";
+    }, function(){ msg.textContent = "登入沒有成功，再試一次看看。"; });
+  }
+  var s = document.createElement("script");
+  s.src = "https://accounts.google.com/gsi/client?hl=zh-TW"; s.async = true;
+  s.onload = function(){
+    try {
+      google.accounts.id.initialize({ client_id: CID, callback: onCredential, auto_select: false });
+      google.accounts.id.renderButton(slot, { type:"standard", theme:"outline", size:"medium", shape:"pill", text:"signin", locale:"zh_TW" });
+      box.hidden = false;
+    } catch(e){}
+  };
+  document.head.appendChild(s);            // if it cannot load (offline, blocked) the page just stays as it is
+})();
+// parent helper: ?hash=1 turns an email into the code for KS_AUTH.ROLES (computed on this device only)
+if (QS.get("hash") === "1"){
+  var hb = document.createElement("div"), hi = document.createElement("input"), ho = document.createElement("code");
+  hb.className = "plain"; hb.id = "hashbox";
+  hb.innerHTML = "<p><strong>家長工具：</strong>輸入 email，下面會出現要貼進 <code style=\"display:inline\">KS_AUTH.ROLES</code> 的代碼。只在這台裝置上計算，不會傳到任何地方。</p>";
+  hi.type = "email"; hi.placeholder = "name@example.com"; hi.autocomplete = "off"; hi.setAttribute("aria-label", "email");
+  hi.addEventListener("input", function(){
+    var m = normMail(hi.value);
+    if (!m){ ho.textContent = ""; return; }
+    if (!window.crypto || !crypto.subtle){ ho.textContent = "這個瀏覽器在這裡不能計算，請改用 https 或 localhost 開啟。"; return; }
+    sha256(m).then(function(h){ if (normMail(hi.value) === m) ho.textContent = h; });
+  });
+  hb.appendChild(hi); hb.appendChild(ho);
+  document.getElementById("mine").parentNode.insertBefore(hb, document.getElementById("mine"));
 }
 function tick(){
   var d = new Date(), h = d.getHours();
