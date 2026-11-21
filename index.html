@@ -172,18 +172,24 @@ var DISTRICTS = [
     items:[
       { id:"tv", img:"tv", emo:"📺", short:"小電視", title:"家庭小電視", age:"每天限時", desc:"爸爸媽媽挑過的頻道。點自己的名字進去。", tv:true },
       { id:"news", img:"news", emo:"📡", short:"小新聞", title:"新聞超小號", age:"小公視 · 每週五更新", desc:"給小朋友看的新聞：這個星期臺灣和世界發生了什麼事，每集大約 15 分鐘。會算進小電視的時間。", news:true },
-      { id:"six", img:"radio", emo:"📻", short:"六分鐘", title:"The Six Minutes", age:"English · 每集約 6 分鐘", hide:"b", desc:"一集一集往下聽的英文廣播劇，可以接著聽，也可以自己選集數。", six:true },
       { id:"village", img:"village", emo:"🏘️", short:"小小村長", title:"Village Chief 小小村長", age:"大孩 · 英文介面", only:"b", desc:"六角格地圖的經濟策略遊戲：探索、建城、做買賣。", href:"village-chief/" }
-    ], ideas:[] }
+    ], ideas:[] },
+  { id:"english", name:"英語小鎮", emo:"🔤", roof:"#c8553d", ground:"#f8e3dc", deco:["phonebox","postbox"],
+    items:[
+      { id:"engtest", img:"exam", emo:"✏️", short:"程度測驗", title:"英文程度小測驗", age:"10–30 分鐘 · 最多四關", desc:"字彙、文法、閱讀、聽力，從簡單到難，過關才往下一關。最後對照全民英檢的等級（初級、中級、中高級），結果給爸爸媽媽看。", href:"english/test/" },
+      { id:"six", img:"talk", emo:"📻", short:"六分鐘", title:"The Six Minutes", age:"English · 每集約 6 分鐘", hide:"b", desc:"一集一集往下聽的英文廣播劇，可以接著聽，也可以自己選集數。", six:true }
+    ], ideas:["📚 每日單字","📖 分級閱讀","✍️ 英文日記"] }
 ];
 // pictures in assets/city/<name>.webp : [width, height] of the file
 var SPR = { rocket:[279,360], clock:[278,360], atom:[345,360], school:[345,360], museum:[360,329], robot:[360,339], detective:[233,360], ferry:[360,295], station:[360,352],
   tv:[293,360], news:[303,360], radio:[324,360], village:[279,360], site:[351,360], carousel:[314,360], tree:[329,360], pine:[259,360], fountain:[360,333],
   telescope:[308,360], vase:[216,360], dish:[279,360], palm:[302,360], lighthouse:[181,360], ferris:[304,360], bus:[360,315], boat:[278,360], bench:[360,271],
-  ship:[360,295], crane:[324,360], fishboat:[360,272], gate:[320,360], pond:[360,263], flowers:[360,295], chip:[288,360], balloon:[246,360], cart:[294,360] };
+  ship:[360,295], crane:[324,360], fishboat:[360,272], gate:[320,360], pond:[360,263], flowers:[360,295], chip:[288,360], balloon:[246,360], cart:[294,360],
+  exam:[342,360], library:[357,360], bookshop:[354,360], talk:[314,360], cafe:[360,331], phonebox:[196,360], postbox:[184,360], blocks:[294,360], lamp:[195,360] };
 // how big scenery is drawn (longest side, in map pixels); buildings use BUILD
 var SIZE = { tree:78, pine:80, fountain:84, telescope:62, vase:58, dish:66, palm:92, lighthouse:120, ferris:128, carousel:112, bench:72, site:104, bus:66, boat:70,
-  ship:170, crane:150, fishboat:100, gate:118, pond:126, flowers:76, chip:96, balloon:96, cart:84 };
+  ship:170, crane:150, fishboat:100, gate:118, pond:126, flowers:76, chip:96, balloon:96, cart:84,
+  phonebox:96, postbox:66, lamp:96, blocks:64, cafe:112, library:120, bookshop:120 };
 // what makes each district its own place: extra scenery on the tiles between the lots [dx, dy, picture]
 // (lots sit on even dx and dy, so use spots where dx + dy is odd or they hide a building's name)
 var EXTRA = {
@@ -191,7 +197,8 @@ var EXTRA = {
   computer:[[2,1,"chip"]],
   nature:[[2,1,"pond"],[1,0,"flowers"],[3,2,"flowers"],[0,1,"tree"],[1,2,"pine"],[4,1,"pine"],[3,0,"tree"]],
   geo:[[2,1,"palm"]],
-  fun:[[4,1,"cart"],[2,1,"balloon"]]
+  fun:[[4,1,"cart"],[2,1,"balloon"]],
+  english:[[1,0,"lamp"],[3,0,"lamp"],[2,1,"blocks"]]
 };
 var BUILD = [134, 176];
 
@@ -209,7 +216,7 @@ var last = get(LK, null);
 var CALM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- layout: blocks of 5 x 3 tiles with one-tile roads between ---------- */
-var TW = 170, TH = 85, M = 2, BW = 5, BD = 3, COLS = 3;
+var TW = 170, TH = 85, M = 2, BW = 5, BD = 3, COLS = 4;
 var ROWS = Math.ceil(DISTRICTS.length / COLS);
 var X1 = M + COLS * (BW + 1) - 1;            // east road x
 var Y1 = M + ROWS * (BD + 1) - 1;            // front road y
@@ -306,6 +313,7 @@ function ground(d, x, y){
   else if (d.id === "fun") tile(x, y, odd ? "#ffd9c9" : "#fff4e6", "#f5c3b0");
   else if (d.id === "geo") tile(x, y, odd ? "#f5e9c2" : "#efdfb0");
   else if (d.id === "computer") tile(x, y, "#cfe6f2", "#a9d3e6");
+  else if (d.id === "english") tile(x, y, odd ? "#f6d9cf" : "#fbece6", "#ecc4b6");
   else tile(x, y, d.ground, shade(d.ground, .93));
 }
 function plank(x, y){ for (var k = 1; k < 4; k++){ var a = iso(x + k / 4, y), b = iso(x + k / 4, y + 1);

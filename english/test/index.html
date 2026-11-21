@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>英文程度小測驗 · Kids School</title>
+<meta name="description" content="10–30 分鐘的英文程度小測驗：字彙、文法、閱讀、聽力，從簡單到難，過關才往下一關，最後對照全民英檢的等級。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Nunito:wght@600;800&display=swap">
+<style>
+/* English level check: four bands (A1, A2, B1, B2), each with vocabulary, grammar, reading and listening.
+   A band is passed at 65%; the test stops at the first band that is not passed. Items are original
+   (not GEPT items); the bands map roughly onto GEPT 初級 / 中級 / 中高級. Results stay on this device. */
+:root{
+  color-scheme:light;
+  --ink:#1d2a3a; --ink-soft:#52627a; --paper:#fffaf0; --card:#ffffff; --line:#e3d9c3;
+  --sun:#ffc93c; --go:#e4572e; --go-dark:#b9411f; --leaf:#3f9a5a; --sky:#3d7ea6; --bad:#c24a3a;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --en:"Nunito","Noto Sans TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:linear-gradient(#bfe6f5,#e9f6ef 340px) no-repeat,#e9f6ef;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;min-height:100vh}
+[hidden]{display:none!important}
+.wrap{max-width:720px;margin:0 auto;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.top a{color:var(--ink);font-weight:700;text-decoration:none;background:rgba(255,255,255,.9);border-radius:999px;padding:4px 12px;font-size:14px}
+.top .time{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink-soft)}
+.card{background:var(--card);border-radius:22px;padding:22px 22px 24px;box-shadow:0 8px 26px rgba(29,42,58,.13);border:2px solid #fff}
+h1{margin:0 0 6px;font-size:clamp(24px,5vw,32px);font-weight:900;line-height:1.3;text-wrap:balance}
+h2{margin:0 0 8px;font-size:22px;font-weight:900;line-height:1.35;text-wrap:balance}
+p{margin:0 0 12px}
+.soft{color:var(--ink-soft)}
+.hero{display:flex;gap:16px;align-items:center}
+.hero img{width:112px;height:112px;object-fit:contain;flex:none}
+@media (max-width:480px){.hero{flex-direction:column;align-items:flex-start}.hero img{width:96px;height:96px}}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0 18px}
+.steps div{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 12px;font-size:14.5px}
+.steps b{display:block;font-size:16px}
+.who{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 16px}
+.who button{font:inherit;font-weight:700;border:2px solid var(--line);background:#fff;border-radius:999px;padding:6px 16px;cursor:pointer;color:var(--ink)}
+.who button.on{border-color:var(--ink);background:var(--sun)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-weight:900;font-size:18px;color:#fff;background:var(--go);border:0;border-radius:16px;padding:12px 26px;box-shadow:0 4px 0 var(--go-dark);cursor:pointer;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.small{font-size:15px;padding:8px 16px}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.bar{height:10px;background:rgba(255,255,255,.75);border-radius:999px;overflow:hidden;margin:0 0 6px}
+.bar i{display:block;height:100%;background:var(--leaf);border-radius:999px;transition:width .3s}
+.where{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink-soft);margin-bottom:10px}
+.kind{display:inline-block;font-size:13px;font-weight:800;border-radius:999px;padding:2px 12px;margin-bottom:10px;color:#fff;background:var(--sky)}
+.kind.vocab{background:#8d7be0}.kind.grammar{background:#3d7ea6}.kind.reading{background:#d99a2b}.kind.listening{background:#4f9d5d}
+.word{font-family:var(--en);font-size:clamp(30px,7vw,40px);font-weight:800;margin:4px 0 2px}
+.ex{font-family:var(--en);font-size:17px;color:var(--ink-soft);margin-bottom:14px}
+.stem{font-family:var(--en);font-size:21px;font-weight:700;line-height:1.5;margin:6px 0 16px}
+.stem .blank{display:inline-block;min-width:4.5em;border-bottom:3px solid var(--ink);margin:0 4px}
+.q{font-size:18px;font-weight:700;margin:4px 0 12px}
+.q.en{font-family:var(--en);font-size:19px}
+.passage{font-family:var(--en);font-size:17px;line-height:1.75;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;max-height:46vh;overflow-y:auto}
+.passage p{margin:0 0 10px}.passage p:last-child{margin:0}
+.opts{display:grid;gap:10px}
+.opts button{font:inherit;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:11px 14px;cursor:pointer;color:var(--ink);font-size:17px;line-height:1.45;display:flex;gap:10px;align-items:baseline}
+.opts button.en{font-family:var(--en);font-size:18px}
+.opts button .k{flex:none;width:26px;height:26px;border-radius:50%;background:var(--paper);border:2px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font:800 13px var(--body)}
+.opts button:hover{border-color:var(--ink-soft)}
+.opts button.on{border-color:var(--ink);background:#fff4cc}
+.opts button.dk{color:var(--ink-soft);font-size:15px;border-style:dashed}
+.next{margin-top:16px;display:flex;justify-content:flex-end}
+.play{display:flex;align-items:center;gap:12px;margin:4px 0 16px;flex-wrap:wrap}
+.play button{width:64px;height:64px;border-radius:50%;border:0;background:var(--leaf);color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 0 #2b7240}
+.play button:disabled{opacity:.45;cursor:default}
+.play span{font-size:14px;color:var(--ink-soft);font-weight:700}
+.warn{background:#fff1e8;border:2px solid #f5c3b0;border-radius:14px;padding:10px 14px;font-size:15px;margin-bottom:14px}
+
+.big{font-size:clamp(34px,8vw,48px);font-weight:900;line-height:1.15;margin:4px 0}
+.lvl{display:inline-block;background:var(--sun);border-radius:14px;padding:4px 14px;font-weight:900;margin-bottom:10px}
+.tbl{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:15px}
+@media (max-width:480px){table{font-size:13.5px}th,td{padding:6px 4px}}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:center}
+th:first-child,td:first-child{text-align:left}
+td.good{color:var(--leaf);font-weight:800}td.mid{color:#b9801a;font-weight:800}td.low{color:var(--bad);font-weight:800}td.na{color:#aab}
+textarea{width:100%;min-height:180px;font:17px/1.6 var(--en);border:2px solid var(--line);border-radius:14px;padding:12px 14px;resize:vertical}
+.count{font-size:14px;color:var(--ink-soft);font-weight:700;text-align:right;margin-top:4px}
+details{margin-top:14px;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px}
+summary{cursor:pointer;font-weight:800}
+.wrong{font-size:14.5px;border-top:1px dashed var(--line);padding:8px 0}
+.wrong:first-of-type{border-top:0}
+.wrong .en{font-family:var(--en)}
+.wrong .x{color:var(--bad);font-weight:700}.wrong .o{color:var(--leaf);font-weight:700}
+.essay{white-space:pre-wrap;font-family:var(--en);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.hist{font-size:14.5px;margin-top:6px}
+.cele{font-size:52px;line-height:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../../">🏙️ 回城市</a><span class="time" id="time" hidden></span></div>
+  <main class="card" id="app" aria-live="polite"></main>
+  <noscript><div class="card"><p>這個測驗需要 JavaScript。</p></div></noscript>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------------- item bank ----------------
+   Every item lists the right answer FIRST; options are shuffled when shown.
+   vocab: word + example sentence, pick the Chinese meaning.
+   grammar: sentence with ___, pick the word(s) that fit.
+   reading: one passage, three questions.
+   listening: read aloud by the browser (say = what is spoken; lines = a dialogue). */
+var BANDS = [
+ { id:"A1", name:"第 1 關 · 暖身", tag:"國小基礎", gept:"全民英檢初級之前", rate:.85,
+   vocab:[
+    ["kitchen","Mom is cooking in the kitchen.",["廚房","臥室","花園","教室"]],
+    ["hungry","I didn't eat breakfast, so I'm hungry.",["餓的","累的","生氣的","快樂的"]],
+    ["Tuesday","We have P.E. class on Tuesday.",["星期二","星期四","星期日","星期六"]],
+    ["borrow","Can I borrow your eraser?",["借（別人的東西來用）","買","丟掉","修理"]],
+    ["umbrella","Take an umbrella. It's raining.",["雨傘","雨衣","帽子","手套"]],
+    ["above","The clock is above the door.",["在……上方","在……旁邊","在……裡面","在……後面"]],
+    ["cousin","My cousin is my uncle's son.",["堂表兄弟姊妹","鄰居","叔叔","同學"]],
+    ["dangerous","Don't play near the river. It's dangerous.",["危險的","安靜的","便宜的","乾淨的"]]
+   ],
+   grammar:[
+    ["My sister ___ a teacher.",["is","are","am","be"]],
+    ["There ___ two cats under the table.",["are","is","be","am"]],
+    ["He ___ to school every day.",["walks","walk","walking","to walk"]],
+    ["I can't find ___ pencil. Can I use yours?",["my","me","mine","I"]],
+    ["___ do you live? — In Taipei.",["Where","What","Who","When"]]
+   ],
+   reading:{ zhq:true, text:["Hi, I'm Amy. I am ten years old. I have a brother and a dog. My brother is six. Our dog's name is Lucky.","Every Saturday morning, we take Lucky to the park. Lucky likes to run after balls. After that, we eat ice cream. I like chocolate ice cream, but my brother likes strawberry."],
+    qs:[
+     ["Amy 的弟弟幾歲？",["六歲","十歲","七歲","四歲"]],
+     ["他們什麼時候去公園？",["星期六早上","星期天下午","每天晚上","放學以後"]],
+     ["Amy 的弟弟喜歡什麼口味的冰淇淋？",["草莓","巧克力","香草","芒果"]]
+    ]},
+   listening:[
+    { say:"I have three apples and two bananas.", q:"他總共有幾個水果？", zh:true, o:["五個","三個","兩個","六個"] },
+    { say:"What's your favorite color?", q:"聽到這句話，最好的回答是？", o:["Blue.","I'm fine, thank you.","It's on Monday.","Yes, I do."] },
+    { say:"The library opens at nine o'clock.", q:"圖書館幾點開門？", zh:true, o:["九點","五點","十點","一點"] },
+    { say:"Can you help me close the window? It's cold.", q:"最好的回答是？", o:["Sure, no problem.","It's a window.","Yes, it's hot today.","I'm ten years old."] }
+   ]},
+ { id:"A2", name:"第 2 關 · 初級", tag:"國中程度", gept:"約等於全民英檢初級", rate:.9,
+   vocab:[
+    ["journey","The journey from Taipei to Tainan took four hours.",["旅程","新聞","工作","家具"]],
+    ["polite","It's polite to say \"thank you.\"",["有禮貌的","驕傲的","緊張的","誠實的"]],
+    ["medicine","Take this medicine after dinner.",["藥","醫院","疾病","護士"]],
+    ["receive","Did you receive my letter?",["收到","交換","拒絕","寄出"]],
+    ["dessert","We had cake for dessert.",["甜點","沙漠","飲料","早餐"]],
+    ["temperature","The temperature today is 30 degrees.",["溫度","天氣","季節","溼度"]],
+    ["invite","I want to invite you to my party.",["邀請","介紹","拜訪","抱怨"]],
+    ["suddenly","Suddenly, the lights went out.",["突然地","慢慢地","通常","幾乎"]]
+   ],
+   grammar:[
+    ["I ___ my homework yesterday evening.",["finished","finish","have finished","will finish"]],
+    ["This box is ___ than that one.",["heavier","heavy","heaviest","more heavy"]],
+    ["Look! The baby ___.",["is sleeping","sleeps","slept","sleep"]],
+    ["We have lived here ___ 2020.",["since","for","from","at"]],
+    ["If it ___ tomorrow, we will stay home.",["rains","will rain","rained","raining"]]
+   ],
+   reading:{ text:["Dear Grandma,","Thank you for the birthday present! The book about space is wonderful. I have already read half of it. My favorite part is about Mars. Did you know a day on Mars is only a little longer than a day on Earth?","Next month, our class is going to visit the science museum. I hope I can see a real piece of rock from space there. Mom says we will visit you during the summer vacation. I can't wait!","Love, Tom"],
+    qs:[
+     ["What did Grandma give Tom?",["A book about space","A model of Mars","A ticket to the museum","A piece of space rock"]],
+     ["What will Tom's class do next month?",["Visit a science museum","Visit Grandma","Read a book together","Have a birthday party"]],
+     ["Which sentence is true?",["Tom has not finished the book yet.","A day on Mars is much shorter than a day on Earth.","Tom has already seen a space rock.","Tom will visit Grandma next month."]]
+    ]},
+   listening:[
+    { say:"How long does it take to get to your school?", q:"最好的回答是？", o:["About fifteen minutes by bus.","It's very big.","I go there every day.","Since last year."] },
+    { lines:[["W","Are you coming to Jenny's party on Saturday?"],["M","I'd love to, but I have a piano lesson in the afternoon. I'll come after five."]], q:"When will the man go to the party?", o:["After five o'clock","In the morning","He won't go","Before his piano lesson"] },
+    { say:"Would you like something to drink?", q:"最好的回答是？", o:["Just some water, please.","No, I don't like to eat.","Yes, I drank it.","It's delicious food."] },
+    { say:"Attention, please. The train to Kaohsiung will leave from platform three, not platform two. It will leave ten minutes late.", q:"Which is true?", o:["The train leaves from platform three.","The train is leaving early.","The train goes to Taichung.","The train leaves from platform two."] }
+   ]},
+ { id:"B1", name:"第 3 關 · 中級", tag:"高中程度", gept:"約等於全民英檢中級", rate:.95,
+   vocab:[
+    ["ancient","We visited an ancient temple that is 800 years old.",["古代的","現代的","遙遠的","巨大的"]],
+    ["avoid","Try to avoid eating too much sugar.",["避免","允許","抵達","鼓勵"]],
+    ["environment","We should protect the environment.",["環境","政府","實驗","設備"]],
+    ["confident","She practiced a lot, so she felt confident before the test.",["有自信的","好奇的","方便的","舒適的"]],
+    ["pollution","Air pollution is a big problem in many cities.",["汙染","人口","傳統","交通"]],
+    ["recommend","Can you recommend a good book?",["推薦","記得","回覆","減少"]],
+    ["opportunity","This trip is a great opportunity to practice English.",["機會","意見","經驗","責任"]],
+    ["gradually","The weather gradually became warmer.",["逐漸地","立刻","偶爾","確實地"]]
+   ],
+   grammar:[
+    ["The book ___ I borrowed from the library is very interesting.",["that","who","what","where"]],
+    ["My bike ___ last night, so I walked to school today.",["was stolen","stole","was stealing","has stolen"]],
+    ["I'm used to ___ up early.",["getting","get","got","be getting"]],
+    ["She asked me where ___.",["I lived","did I live","do I live","lived I"]],
+    ["By the time we arrived, the movie ___.",["had already started","already starts","has already started","was already start"]]
+   ],
+   reading:{ text:["For hundreds of years, people in the Netherlands have fought against water. About a quarter of the country lies below sea level, so without help, much of the land would be under water. Long ago, people built windmills to pump water out of the fields. Today, modern pumps and huge walls called dikes do most of the work.","But in recent years, Dutch engineers have started to think differently. Instead of only keeping water out, they also give rivers more space. In some places, farmers have moved their houses so that the land can flood safely when the river gets too high. Parks and squares in cities are also designed to hold rainwater for a short time. The idea is simple: if you cannot stop the water, make room for it."],
+    qs:[
+     ["What is the main idea of the passage?",["The Dutch are changing the way they deal with water.","Windmills are still the main way to pump water.","Dutch farmers are moving to the cities.","Most Dutch cities are under water."]],
+     ["Why did some farmers move their houses?",["So that the land could flood safely","Because the sea took their farms","To make room for new windmills","Because the cities needed more parks"]],
+     ["In the last sentence, \"make room for it\" — what does \"it\" mean?",["the water","the land","the city","the windmill"]]
+    ]},
+   listening:[
+    { say:"I can't believe I left my wallet at home again.", q:"最好的回答是？", o:["Don't worry, I can lend you some money.","Yes, it's a nice wallet.","I'll go home at six.","You can't believe it."] },
+    { lines:[["M","Did you finish the science report?"],["W","Almost. I still need to add the charts, but my computer crashed last night, so I lost some of my work."],["M","That's terrible. Did you save a copy online?"],["W","Luckily, most of it."]], q:"What problem does the woman have?", o:["Her computer stopped working and she lost part of her work.","She forgot the topic of the report.","She doesn't know how to make charts.","Her report was due yesterday."] },
+    { say:"Good morning, visitors. Because of the heavy rain, the outdoor dolphin show at eleven has been cancelled. Instead, you are welcome to watch a short film about ocean animals in Hall B at the same time. We're sorry for any inconvenience.", q:"What can visitors do at eleven o'clock?", o:["Watch a film in Hall B","See the dolphin show","Get their money back","Visit the outdoor area"] },
+    { lines:[["W","Should we take the MRT or a taxi to the airport?"],["M","A taxi is faster, but the traffic at this hour is terrible. The MRT goes directly there, and it's much cheaper."],["W","OK, let's do that."]], q:"How will they go to the airport?", o:["By MRT","By taxi","By bus","On foot"] }
+   ]},
+ { id:"B2", name:"第 4 關 · 挑戰", tag:"大學程度", gept:"約等於全民英檢中高級", rate:1,
+   vocab:[
+    ["reluctant","He was reluctant to leave the party early.",["不情願的","可靠的","相關的","鬆了一口氣的"]],
+    ["consequence","Being late every day had serious consequences.",["後果","良心","共識","順序"]],
+    ["abandon","They had to abandon the car in the snow.",["拋下、放棄","吸收","適應","欣賞"]],
+    ["inevitable","With so little rain, a water shortage seemed inevitable.",["不可避免的","看不見的","無價的","獨立的"]],
+    ["undergo","The old building will undergo major repairs next year.",["經歷、接受（變化或治療）","低估","承諾","打斷"]],
+    ["thorough","The doctor gave him a thorough check-up.",["徹底的","粗心的","吃力的","透明的"]],
+    ["prosperity","The new port brought prosperity to the town.",["繁榮","財產","優先權","宣傳"]],
+    ["diminish","The pain will diminish after a few days.",["減少、減弱","區分","統治","展示"]]
+   ],
+   grammar:[
+    ["Had I known about the traffic, I ___ earlier.",["would have left","would leave","had left","will have left"]],
+    ["Not only ___ the test, but she also got the highest score.",["did she pass","she passed","she did pass","passed she"]],
+    ["It's high time we ___ something about the problem.",["did","do","will do","have done"]],
+    ["The new bridge, ___ took five years to build, opened last week.",["which","that","what","it"]],
+    ["Hardly ___ home when it started to rain.",["had I got","I had got","I got","did I got"]]
+   ],
+   reading:{ text:["Most people assume that teenagers who stay up late are simply lazy or glued to their phones. Scientists, however, have found that the picture is more complicated. During puberty, the body starts releasing melatonin, the hormone that makes us feel sleepy, as much as two hours later than it did in childhood. As a result, a typical teenager may not feel tired until eleven at night or later, no matter how early they go to bed.","This shift creates a problem, because most schools start early in the morning. Students who have to wake up at six-thirty may lose several hours of sleep every school night, and the effects add up. Lack of sleep has been linked to poorer concentration, worse moods and even more car accidents among young drivers.","Some school districts have experimented with later start times. Where this has happened, researchers have generally reported that students sleep longer and attend class more regularly, although critics point out that later schedules can be difficult for working parents and for sports teams."],
+    qs:[
+     ["According to the passage, why do many teenagers go to bed late?",["Their bodies release a sleep hormone later.","They spend too much time on their phones.","They have too much homework.","They exercise less than children do."]],
+     ["\"The effects add up\" suggests that ...",["the lost sleep builds up over time.","students add more hours to their day.","the problems disappear on weekends.","scientists added up the numbers."]],
+     ["What is the writer's attitude toward later school start times?",["Mostly positive, but aware of some drawbacks","Completely against them","Not interested in them","Sure that they solve every problem"]]
+    ]},
+   listening:[
+    { say:"I was wondering if you could cover my shift on Friday.", q:"最好的回答是？", o:["I'd be happy to, as long as you take mine next week.","Yes, the shift was covered with snow.","Friday is the fifth day of the week.","I'm wondering about it too."] },
+    { lines:[["M","Have you decided whether to accept the job offer?"],["W","Not yet. The salary is much better, but I'd have to move to another city, and my kids just started at a new school."],["M","That's a tough call."]], q:"Why hasn't the woman decided yet?", o:["Moving would affect her family.","The salary is too low.","She doesn't like the new city.","She has already started a new job."] },
+    { say:"Many people believe that goldfish can only remember things for three seconds. However, experiments have shown that goldfish can remember things for months. In one study, fish were trained to push a lever to get food, and weeks later they still remembered how to do it.", q:"What is the speaker's main point?", o:["Goldfish remember things much longer than people think.","Goldfish can only remember things for three seconds.","Goldfish are not able to learn anything.","Experiments on goldfish should be stopped."] },
+    { lines:[["W","The museum's new exhibition was supposed to open this week, wasn't it?"],["M","It was, but some of the paintings were held up at customs, so they've pushed it back to the end of the month."]], q:"What happened to the exhibition?", o:["It was delayed.","It opened early.","It was cancelled.","It moved to another museum."] }
+   ]}
+];
+var KINDS = { vocab:"字彙", grammar:"文法", reading:"閱讀", listening:"聽力" };
+var PASS = .65;
+var WRITE = "Write about a place you like to go. Where is it? What do you do there? Why do you like it?";
+
+/* ---------------- helpers ---------------- */
+var app = document.getElementById("app"), timeEl = document.getElementById("time");
+var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
+var put = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]; }); }
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+var KEY = "ks.eng.test";
+var WHO = { b:"🚀 大孩", m:"🦊 中孩", o:"🙂 其他人" };
+var qk = new URLSearchParams(location.search).get("k");
+var who = WHO[qk] ? qk : (get("ks.who", null) === "m" ? "m" : "b");
+
+/* ---------------- speech ---------------- */
+var synth = window.speechSynthesis, voices = [];
+function loadVoices(){ if (!synth) return; voices = synth.getVoices().filter(function(v){ return /^en[-_]/i.test(v.lang); }); }
+if (synth){ loadVoices(); synth.onvoiceschanged = loadVoices; }
+function pickVoices(){
+  var us = voices.filter(function(v){ return /en[-_]US/i.test(v.lang); }), pool = us.length ? us : voices;
+  var good = function(re){ return pool.filter(function(v){ return re.test(v.name); })[0]; };
+  var f = good(/natural.*(aria|jenny|emma|ava|michelle)|google us english|samantha|zira|female/i) || pool[0];
+  var m = good(/natural.*(guy|andrew|brian|christopher|eric|davis)|(guy|david|mark|alex|daniel|fred)\b|male/i);
+  if (!m || m === f) m = pool.filter(function(v){ return v !== f; })[0] || f;
+  return { W:f, M:m, same:m === f };
+}
+function speak(item, rate, done){
+  if (!synth || !voices.length){ done(); return; }
+  synth.cancel();
+  var V = pickVoices(), parts = item.lines || [["W", item.say]], i = 0;
+  (function next(){
+    if (i >= parts.length){ done(); return; }
+    var p = parts[i++], u = new SpeechSynthesisUtterance(p[1]);
+    u.voice = V[p[0]] || V.W; u.lang = (u.voice && u.voice.lang) || "en-US"; u.rate = rate;
+    if (V.same && p[0] === "M") u.pitch = .7;
+    u.onend = function(){ setTimeout(next, 350); }; u.onerror = function(){ setTimeout(next, 50); };
+    synth.speak(u);
+  })();
+}
+
+/* ---------------- state ---------------- */
+var S = null, clock = 0;
+function tick(){ if (!S) return; var s = Math.round((Date.now() - S.t0) / 1000); timeEl.textContent = "⏱ " + Math.floor(s / 60) + ":" + ("0" + s % 60).slice(-2); }
+function makeBand(b){
+  var list = [];
+  b.vocab.forEach(function(v){ list.push({ kind:"vocab", word:v[0], ex:v[1], right:v[2][0], opts:shuffle(v[2]) }); });
+  b.grammar.forEach(function(g){ list.push({ kind:"grammar", stem:g[0], right:g[1][0], opts:shuffle(g[1]) }); });
+  b.reading.qs.forEach(function(q, i){ list.push({ kind:"reading", text:b.reading.text, q:q[0], zh:b.reading.zhq, right:q[1][0], opts:shuffle(q[1]), n:i }); });
+  b.listening.forEach(function(l){ list.push({ kind:"listening", item:l, q:l.q, zh:l.zh, right:l.o[0], opts:shuffle(l.o), plays:0 }); });
+  return list;
+}
+
+/* ---------------- screens ---------------- */
+function start(){
+  S = null; timeEl.hidden = true; clearInterval(clock);
+  var hist = get(KEY, []);
+  app.innerHTML =
+    '<div class="hero"><img src="../../assets/city/exam.webp" alt="" onerror="this.remove()"><div><h1>英文程度小測驗</h1>' +
+    '<p class="soft">從簡單的開始，答得好就往下一關，最多四關。大約 10 到 30 分鐘，看你走到哪一關。</p></div></div>' +
+    '<div class="steps"><div><b>📚 字彙</b>看英文選中文</div><div><b>🧩 文法</b>選對的字填空</div><div><b>📖 閱讀</b>讀一小段文章</div><div><b>🎧 聽力</b>聽完選答案</div></div>' +
+    '<p><b>小提醒：</b>不會的題目請選「我不知道」，不要用猜的，這樣結果才準。測驗中不會告訴你答案對不對，最後才一起看。聽力要開聲音，最好戴耳機。</p>' +
+    '<p class="soft" style="margin-bottom:4px">誰在做測驗？</p><div class="who" id="who">' +
+    Object.keys(WHO).map(function(k){ return '<button type="button" data-k="' + k + '"' + (k === who ? ' class="on"' : "") + ">" + WHO[k] + "</button>"; }).join("") + "</div>" +
+    '<div class="row"><button class="btn" id="go" type="button">開始 ✏️</button><button class="btn alt small" id="hear" type="button">🔊 先試聽聲音</button></div>' +
+    (hist.length ? '<details><summary>以前的結果（' + hist.length + ' 次）</summary>' + hist.slice().reverse().map(function(h, i){
+      return '<div class="hist">' + esc(h.date) + " · " + (WHO[h.who] || "") + " · <b>" + esc(h.level) + "</b>（" + h.min + ' 分鐘）<button class="btn alt small" type="button" data-h="' + (hist.length - 1 - i) + '">看詳細</button></div>'; }).join("") + "</details>" : "");
+  app.querySelector("#who").onclick = function(e){ var b = e.target.closest("button"); if (!b) return; who = b.dataset.k;
+    app.querySelectorAll("#who button").forEach(function(x){ x.classList.toggle("on", x === b); }); };
+  app.querySelector("#hear").onclick = function(){ loadVoices();
+    if (!synth || !voices.length){ alertBox("這個瀏覽器找不到英文語音。聽力題會跳過，請換一個瀏覽器（例如 Chrome 或 Edge）。"); return; }
+    speak({ lines:[["W","Hello! Can you hear me?"],["M","Yes, I can hear you clearly."]] }, .9, function(){}); };
+  app.querySelector("#go").onclick = begin;
+  app.querySelectorAll("[data-h]").forEach(function(b){ b.onclick = function(){ result(get(KEY, [])[+b.dataset.h], true); }; });
+}
+function alertBox(msg){ var w = app.querySelector(".warn"); if (!w){ w = document.createElement("div"); w.className = "warn"; app.insertBefore(w, app.querySelector(".row")); } w.textContent = msg; }
+function begin(){
+  loadVoices();
+  S = { who:who, t0:Date.now(), band:0, i:0, answers:[], bands:[], noVoice:!synth || !voices.length };
+  timeEl.hidden = false; clock = setInterval(tick, 1000); tick();
+  bandIntro();
+}
+function bandIntro(){
+  var b = BANDS[S.band];
+  S.list = makeBand(b); S.i = 0;
+  app.innerHTML = '<div class="kind" style="background:var(--go)">' + esc(b.tag) + "</div><h2>" + esc(b.name) + "</h2>" +
+    "<p>這一關有 " + S.list.length + " 題：字彙 8、文法 5、閱讀 3、聽力 4。</p>" +
+    (S.band ? '<p class="soft">比上一關難一點。不會的就選「我不知道」，沒關係。</p>' : '<p class="soft">先暖身，應該很快。</p>') +
+    (S.noVoice ? '<div class="warn">這個瀏覽器沒有英文語音，聽力題會跳過，不算分。</div>' : "") +
+    '<div class="next"><button class="btn" type="button" id="go">開始這一關 →</button></div>';
+  app.querySelector("#go").onclick = show;
+  app.querySelector("#go").focus();
+}
+function show(){
+  var b = BANDS[S.band], it = S.list[S.i], total = S.list.length;
+  if (it.kind === "listening" && S.noVoice){ it.skipped = true; S.i++; return S.i < total ? show() : endBand(); }
+  var head = '<div class="bar"><i style="width:' + Math.round(S.i / total * 100) + '%"></i></div><div class="where"><span>' + esc(b.name) + "</span><span>" + (S.i + 1) + " / " + total + "</span></div>" +
+    '<span class="kind ' + it.kind + '">' + KINDS[it.kind] + "</span>";
+  var body = "", en = true;
+  if (it.kind === "vocab"){ body = '<div class="word" lang="en">' + esc(it.word) + '</div><div class="ex" lang="en">' + esc(it.ex) + '</div><div class="q">這個字的意思是？</div>'; en = false; }
+  else if (it.kind === "grammar") body = '<div class="stem" lang="en">' + esc(it.stem).replace("___", '<span class="blank"></span>') + "</div>";
+  else if (it.kind === "reading"){ body = '<div class="passage" lang="en">' + it.text.map(function(p){ return "<p>" + esc(p) + "</p>"; }).join("") + '</div><div class="q' + (it.zh ? "" : " en") + '"' + (it.zh ? "" : ' lang="en"') + ">" + (it.n + 1) + ". " + esc(it.q) + "</div>"; en = !it.zh; }
+  else { body = '<div class="play"><button type="button" id="play" aria-label="播放">▶</button><span id="plays">按播放鍵聽（可以聽兩次）</span></div><div class="q' + (/^[A-Za-z]/.test(it.q) ? " en" : "") + '">' + esc(it.q) + "</div>"; en = !it.zh; }
+  app.innerHTML = head + body + '<div class="opts" id="opts">' + it.opts.map(function(o, k){
+      return '<button type="button" class="' + (en ? "en" : "") + '" data-o="' + esc(o) + '"' + (en ? ' lang="en"' : "") + '><span class="k">' + "ABCD"[k] + "</span><span>" + esc(o) + "</span></button>"; }).join("") +
+    '<button type="button" class="dk" data-o="">🤷 我不知道</button></div><div class="next"><button class="btn" type="button" id="next" disabled>' + (S.i + 1 < total ? "下一題 →" : "完成這一關 ✓") + "</button></div>";
+  var chosen = null, next = app.querySelector("#next");
+  app.querySelector("#opts").onclick = function(e){ var o = e.target.closest("button"); if (!o) return; chosen = o.dataset.o;
+    app.querySelectorAll("#opts button").forEach(function(x){ x.classList.toggle("on", x === o); }); next.disabled = false; };
+  next.onclick = function(){ if (chosen == null) return; if (synth) synth.cancel();
+    it.answer = chosen; it.ok = chosen === it.right; S.i++;
+    if (S.i < total) show(); else endBand(); window.scrollTo(0, 0); };
+  if (it.kind === "listening"){
+    var pb = app.querySelector("#play"), pl = app.querySelector("#plays");
+    var upd = function(){ pl.textContent = it.plays >= 2 ? "已經聽兩次了" : it.plays ? "還可以再聽一次" : "按播放鍵聽（可以聽兩次）"; pb.disabled = it.plays >= 2; };
+    pb.onclick = function(){ if (it.plays >= 2) return; it.plays++; pb.disabled = true; pl.textContent = "播放中……";
+      speak(it.item, b.rate, function(){ upd(); }); };
+    upd(); setTimeout(function(){ if (!it.plays) pb.click(); }, 500);
+  }
+}
+function score(list){
+  var by = {}, ok = 0, n = 0;
+  list.forEach(function(it){ if (it.skipped) return; var k = by[it.kind] || (by[it.kind] = [0, 0]); k[1]++; n++; if (it.ok){ k[0]++; ok++; } });
+  return { ok:ok, n:n, by:by };
+}
+function endBand(){
+  var b = BANDS[S.band], sc = score(S.list), pass = sc.n && sc.ok / sc.n >= PASS;
+  S.bands.push({ id:b.id, ok:sc.ok, n:sc.n, by:sc.by, pass:pass,
+    wrong:S.list.filter(function(it){ return !it.skipped && !it.ok; }).map(function(it){ return { kind:it.kind, q:it.word || it.stem || it.q, a:it.answer, r:it.right }; }) });
+  if (pass && S.band + 1 < BANDS.length){
+    app.innerHTML = '<div class="cele">🎉</div><h2>' + esc(b.name) + ' 過關！</h2><p>答對 ' + sc.ok + " / " + sc.n + " 題。</p>" +
+      '<p class="soft">下一關：' + esc(BANDS[S.band + 1].name) + "。要休息一下也可以，準備好再按。</p>" +
+      '<div class="row"><button class="btn" type="button" id="go">下一關 →</button><button class="btn alt small" type="button" id="stop">先到這裡</button></div>';
+    app.querySelector("#go").onclick = function(){ S.band++; bandIntro(); };
+    app.querySelector("#stop").onclick = function(){ S.stopped = true; writing(); };
+  } else writing();
+}
+function levelOf(bands){
+  var top = -1; for (var i = 0; i < bands.length; i++){ if (bands[i].pass) top = i; else break; }
+  return top;
+}
+function writing(){
+  var top = levelOf(S.bands);
+  if (top < 1){ finish(""); return; }          // writing is only asked once the A2 band is passed
+  app.innerHTML = '<span class="kind" style="background:var(--go)">最後一題 · 寫作（可以跳過）</span><h2>寫一小段英文</h2>' +
+    '<p class="q en" lang="en">' + esc(WRITE) + '</p><p class="soft">寫 5 句以上，大約 5 分鐘。不用查字典，不會拼的字就用自己的方法寫。這一題不自動打分，給爸爸媽媽看。</p>' +
+    '<textarea id="txt" lang="en" spellcheck="false" autocomplete="off" placeholder="My favorite place is ..."></textarea><div class="count" id="cnt">0 words</div>' +
+    '<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn alt small" type="button" id="skip">跳過</button><button class="btn" type="button" id="done">交出去 ✓</button></div>';
+  var t = app.querySelector("#txt"), c = app.querySelector("#cnt");
+  t.oninput = function(){ var n = (t.value.match(/[A-Za-z']+/g) || []).length; c.textContent = n + " words"; };
+  app.querySelector("#skip").onclick = function(){ finish(""); };
+  app.querySelector("#done").onclick = function(){ finish(t.value.trim()); };
+  t.focus();
+}
+function finish(essay){
+  clearInterval(clock);
+  var top = levelOf(S.bands), d = new Date();
+  var rec = { date:d.toLocaleDateString("zh-TW") + " " + d.toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit", hour12:false }),
+    who:S.who, min:Math.max(1, Math.round((Date.now() - S.t0) / 60000)), top:top, bands:S.bands, essay:essay, noVoice:S.noVoice, stopped:!!S.stopped,
+    level:top < 0 ? "A1 還在打基礎" : BANDS[top].id + " · " + BANDS[top].gept };
+  var hist = get(KEY, []); hist.push(rec); put(KEY, hist.slice(-20));
+  S = null; timeEl.hidden = true;
+  result(rec, false);
+}
+function pctCell(by, k){ if (!by[k]) return '<td class="na">—</td>'; var p = by[k][0] / by[k][1];
+  return '<td class="' + (p >= .75 ? "good" : p >= .5 ? "mid" : "low") + '">' + by[k][0] + "/" + by[k][1] + "</td>"; }
+function result(rec, old){
+  var top = rec.top, b = top >= 0 ? BANDS[top] : null, nb = BANDS[top + 1];
+  var words = rec.essay ? (rec.essay.match(/[A-Za-z']+/g) || []).length : 0;
+  // weakest skill in the highest band attempted
+  var lastB = rec.bands[rec.bands.length - 1], weak = null;
+  Object.keys(KINDS).forEach(function(k){ var v = lastB.by[k]; if (v && (!weak || v[0] / v[1] < weak[1])) weak = [k, v[0] / v[1]]; });
+  app.innerHTML = (old ? "" : '<div class="cele">🏁</div>') + '<p class="soft" style="margin:0">' + esc(rec.date) + " · " + (WHO[rec.who] || "") + " · " + rec.min + " 分鐘</p>" +
+    '<div class="big">' + (b ? b.id : "A1 之前") + '</div><div class="lvl">' + (b ? esc(b.tag + " · " + b.gept) : "還在打基礎") + "</div>" +
+    "<p>" + (b ? "第 " + (top + 1) + " 關（" + esc(b.name.split(" · ")[1]) + "）以下都過了。" : "第 1 關還沒過，先把基本的單字和句子練熟。") +
+      (nb ? "下一個目標是「" + esc(nb.name.split(" · ")[1]) + "」（" + esc(nb.gept) + "）。" : "四關全過，已經超過這份測驗能測量的範圍了！") + "</p>" +
+    (weak && weak[1] < .75 ? '<p class="soft">在最後一關裡，<b>' + KINDS[weak[0]] + "</b>答得最少，可以先從這裡加強。</p>" : "") +
+    (rec.noVoice ? '<div class="warn">這次沒有英文語音，聽力沒有測到，結果可能偏高或偏低。</div>' : "") +
+    '<div class="tbl"><table><thead><tr><th>關卡</th><th>字彙</th><th>文法</th><th>閱讀</th><th>聽力</th><th>合計</th></tr></thead><tbody>' +
+    rec.bands.map(function(x){ return "<tr><td>" + x.id + " " + (x.pass ? "✅" : "❌") + "</td>" + pctCell(x.by, "vocab") + pctCell(x.by, "grammar") + pctCell(x.by, "reading") + pctCell(x.by, "listening") +
+      "<td><b>" + Math.round(x.ok / Math.max(1, x.n) * 100) + "%</b></td></tr>"; }).join("") +
+    "</tbody></table></div>" +
+    '<p class="soft" style="font-size:14px">每一關答對 65% 以上算過關。這是 Kids School 自己出的題目，只用來估計大概落在哪一級，不是正式的全民英檢成績。</p>' +
+    "<details><summary>給爸爸媽媽：答錯和選「不知道」的題目</summary>" +
+    rec.bands.map(function(x){ return x.wrong.length ? "<p style=\"margin:10px 0 2px\"><b>" + x.id + "</b></p>" + x.wrong.map(function(w){
+      return '<div class="wrong"><span class="kind ' + w.kind + '" style="margin:0 6px 0 0;font-size:11px;padding:0 8px">' + KINDS[w.kind] + '</span><span class="en">' + esc(w.q) + '</span><br>選了：<span class="x">' + (w.a ? esc(w.a) : "不知道") + '</span>　答案：<span class="o">' + esc(w.r) + "</span></div>"; }).join("") : ""; }).join("") +
+    "</details>" +
+    (rec.essay ? "<details open><summary>寫作（" + words + " 個字）</summary><p class=\"soft\" style=\"margin:6px 0 0;font-size:14px\">題目：" + esc(WRITE) + '</p><div class="essay" lang="en">' + esc(rec.essay) + "</div></details>" : "") +
+    '<div class="row" style="margin-top:18px"><a class="btn" href="../../">🏙️ 回城市</a><button class="btn alt small" type="button" id="again">' + (old ? "回測驗首頁" : "再做一次") + "</button></div>";
+  app.querySelector("#again").onclick = start;
+  window.scrollTo(0, 0);
+}
+start();
+})();
+</script>
+</body>
+</html>
