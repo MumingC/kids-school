@@ -499,13 +499,14 @@ function sha256(s){
   });
 }
 function normMail(s){ return String(s || "").trim().toLowerCase(); }
-function jwtEmail(tok){        // read the (unverified) payload of the ID token; nothing is sent anywhere
+function jwtPayload(tok){      // read the (unverified) payload of the ID token; nothing is sent anywhere
   var seg = String(tok).split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
   while (seg.length % 4) seg += "=";
   var bin = atob(seg), bytes = new Uint8Array(bin.length);
   for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return normMail(JSON.parse(new TextDecoder("utf-8").decode(bytes)).email);
+  return JSON.parse(new TextDecoder("utf-8").decode(bytes));
 }
+function jwtEmail(tok){ return normMail(jwtPayload(tok).email); }
 (function(){
   if (!CID || qk != null) return;          // off, or an explicit ?k= page: no sign-in UI at all
   var box = document.getElementById("who"), roles = {};
@@ -514,7 +515,7 @@ function jwtEmail(tok){        // read the (unverified) payload of the ID token;
     var lab = document.createElement("span"), out = document.createElement("button");
     lab.textContent = who === "p" ? "👨‍👩‍👧‍👦 爸爸媽媽：整座城市" : NAME[who] + "的城市";
     out.type = "button"; out.textContent = "換人";
-    out.addEventListener("click", function(){ try { localStorage.removeItem("ks.who"); } catch(e){} location.reload(); });
+    out.addEventListener("click", function(){ try { ["ks.who", "ks.idtok", "ks.cloud.role"].forEach(function(k){ localStorage.removeItem(k); }); } catch(e){} location.reload(); });
     box.appendChild(lab); box.appendChild(out); box.hidden = false;
     return;
   }
@@ -527,7 +528,11 @@ function jwtEmail(tok){        // read the (unverified) payload of the ID token;
     if (!mail || !window.crypto || !crypto.subtle){ msg.textContent = "登入沒有成功，再試一次看看。"; return; }
     sha256(mail).then(function(h){
       var role = roles[h];
-      if (role === "m" || role === "b" || role === "p"){ set("ks.who", role); location.reload(); }
+      if (role === "m" || role === "b" || role === "p"){
+        set("ks.who", role);
+        try { set("ks.idtok", { tok:resp.credential, exp:jwtPayload(resp.credential).exp }); } catch(e){}   // lets pages save to the cloud for the next hour (assets/ks-cloud.js)
+        location.reload();
+      }
       else msg.textContent = "這個帳號還沒登記喔，先看整座城市。請爸爸媽媽幫你加上去！";
     }, function(){ msg.textContent = "登入沒有成功，再試一次看看。"; });
   }

@@ -73,11 +73,20 @@ A small collection of static learning websites I build for my kids.
 - OAuth 同意畫面如果停在 Testing 狀態，只有列在 Test users 的帳號能登入；要讓名單外的帳號也能登入就要發布成 In production（只要 email／profile 這類基本範圍，一般不需要送審，但這點請以 Console 當下顯示的為準）。
 - **Family Link 監護的兒童帳號能不能用「使用 Google 帳戶登入」登入第三方網站，沒有在 Google 官方說明裡查到明確文字（未驗證）。** 2021 年的媒體報導說可以，但預設要家長逐次核准，Family Link 裡有相關開關；實際情況要拿孩子的帳號試一次才知道。學校發的 Google Workspace for Education 帳號則由學校管理員決定能不能登入第三方網站。
 
+## 雲端紀錄（Google 試算表）
+
+登入後，英文測驗的結果會存進家長 Google 帳號裡的一份試算表，換裝置也讀得回來。沒登入或沒設定時，一切照舊只存在裝置上。
+
+- 網站端：`assets/ks-cloud.js`（`KSCloud.save / list / signInButton`）。`ENDPOINT` 空白＝功能關閉。新頁面要存進度，就載入它、用自己的 `app` 名稱呼叫 `save`。
+- 試算表端：`cloud/apps-script.gs`。每次請求都帶 Google 登入的 ID token，程式向 Google 驗證後，用 email 的 SHA-256 對照 `ROLES` 決定是誰；孩子只讀得到自己的紀錄，家長讀得到全部。
+- 首頁登入時會把 token 存在 `ks.idtok`（一小時有效），其他頁面在這段時間不用再登入。沒存上的紀錄留在 `ks.cloud.queue`，下次再送。
+- 設定：用家長帳號開一份 Google 試算表 → 擴充功能 → Apps Script → 貼上 `cloud/apps-script.gs` → 部署為網頁應用程式（執行身分：我；存取權：所有人）→ 把 `/exec` 網址貼到 `ks-cloud.js` 的 `ENDPOINT`。改 `ROLES` 時，首頁的 `KS_AUTH.ROLES` 和 Apps Script 兩邊都要改，Apps Script 改完要「管理部署作業 → 編輯 → 新版本」。
+
 ## How it works
 
 - Plain static HTML. No build step, no dependencies, no tracking.
 - Each subject is one self-contained `index.html` inside its own folder (`ww2/` also ships a `kids.html` easy version and its own `images/`; `village-chief/` loads optional artwork from its `images/`; `detective/` ships `photos/`, `culture/` and `flags/`).
-- Progress is stored in the browser's `localStorage`, so it never leaves the device.
+- Progress is stored in the browser's `localStorage`. The English test can also save to the parents' Google Sheet after Google sign-in (see 雲端紀錄 above); nothing else leaves the device.
 
 ## Local preview
 

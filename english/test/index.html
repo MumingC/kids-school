@@ -13,7 +13,7 @@
 <style>
 /* English level check: four bands (A1, A2, B1, B2), each with vocabulary, grammar, reading and listening.
    A band is passed at 65%; the test stops at the first band that is not passed. Items are original
-   (not GEPT items); the bands map roughly onto GEPT 初級 / 中級 / 中高級. Results stay on this device. */
+   (not GEPT items); the bands map roughly onto GEPT 初級 / 中級 / 中高級. Results stay on this device unless the cloud (assets/ks-cloud.js) is on and the kid is signed in. */
 :root{
   color-scheme:light;
   --ink:#1d2a3a; --ink-soft:#52627a; --paper:#fffaf0; --card:#ffffff; --line:#e3d9c3;
@@ -96,6 +96,10 @@ summary{cursor:pointer;font-weight:800}
 .essay{white-space:pre-wrap;font-family:var(--en);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
 .hist{font-size:14.5px;margin-top:6px}
 .cele{font-size:52px;line-height:1}
+.cloud{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:#eef6fb;border:2px solid #cfe3ef;border-radius:14px;padding:8px 12px;font-size:14.5px;margin:0 0 14px}
+.cloud.ok{background:#edf7ef;border-color:#cbe6d1}
+.cloud .gbtn{min-height:32px}
+.hist .tag{font-size:12px;color:var(--ink-soft)}
 </style>
 </head>
 <body>
@@ -105,6 +109,7 @@ summary{cursor:pointer;font-weight:800}
   <noscript><div class="card"><p>這個測驗需要 JavaScript。</p></div></noscript>
 </div>
 
+<script src="../../assets/ks-cloud.js"></script>
 <script>
 (function(){
 "use strict";
@@ -251,6 +256,30 @@ var WHO = { b:"🚀 大孩", m:"🦊 中孩", o:"🙂 其他人" };
 var qk = new URLSearchParams(location.search).get("k");
 var who = WHO[qk] ? qk : (get("ks.who", null) === "m" ? "m" : "b");
 
+/* ---------------- cloud (optional; see assets/ks-cloud.js) ---------------- */
+var CL = window.KSCloud || { on:false }, APP = "eng-test";
+function newId(){ return "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function summary(rec){
+  return rec.level + "｜" + rec.bands.map(function(x){ return x.id + " " + x.ok + "/" + x.n; }).join("、") + (rec.essay ? "｜有寫作" : "");
+}
+function localHist(){            // older records get an id so they can be uploaded once
+  var h = get(KEY, []), changed = false;
+  h.forEach(function(r){ if (!r.id){ r.id = newId(); changed = true; } if (!r.summary){ r.summary = summary(r); changed = true; }
+    if (!r.ts){ var t = Date.parse(r.date); if (t){ r.ts = t; changed = true; } } });
+  if (changed) put(KEY, h);
+  return h;
+}
+function markSynced(ids){
+  if (!ids || !ids.length) return;
+  var set = {}; ids.forEach(function(i){ set[i] = 1; });
+  var h = get(KEY, []); h.forEach(function(r){ if (set[r.id]) r.cloud = true; }); put(KEY, h);
+}
+function syncLocal(){           // push this device's records that are not in the cloud yet
+  var todo = localHist().filter(function(r){ return !r.cloud; });
+  return CL.save(APP, todo).then(function(ids){ markSynced(ids); return ids; });
+}
+var ROLE_NAME = { m:"🦊 中孩", b:"🚀 大孩", p:"👨‍👩‍👧‍👦 爸爸媽媽" };
+
 /* ---------------- speech ---------------- */
 var synth = window.speechSynthesis, voices = [];
 function loadVoices(){ if (!synth) return; voices = synth.getVoices().filter(function(v){ return /^en[-_]/i.test(v.lang); }); }
@@ -292,7 +321,7 @@ function makeBand(b){
 /* ---------------- screens ---------------- */
 function start(){
   S = null; timeEl.hidden = true; clearInterval(clock);
-  var hist = get(KEY, []);
+  var hist = localHist();
   app.innerHTML =
     '<div class="hero"><img src="../../assets/city/exam.webp" alt="" onerror="this.remove()"><div><h1>英文程度小測驗</h1>' +
     '<p class="soft">從簡單的開始，答得好就往下一關，最多四關。大約 10 到 30 分鐘，看你走到哪一關。</p></div></div>' +
@@ -300,16 +329,72 @@ function start(){
     '<p><b>小提醒：</b>不會的題目請選「我不知道」，不要用猜的，這樣結果才準。測驗中不會告訴你答案對不對，最後才一起看。聽力要開聲音，最好戴耳機。</p>' +
     '<p class="soft" style="margin-bottom:4px">誰在做測驗？</p><div class="who" id="who">' +
     Object.keys(WHO).map(function(k){ return '<button type="button" data-k="' + k + '"' + (k === who ? ' class="on"' : "") + ">" + WHO[k] + "</button>"; }).join("") + "</div>" +
+    '<div class="cloud" id="cloud" hidden></div>' +
     '<div class="row"><button class="btn" id="go" type="button">開始 ✏️</button><button class="btn alt small" id="hear" type="button">🔊 先試聽聲音</button></div>' +
-    (hist.length ? '<details><summary>以前的結果（' + hist.length + ' 次）</summary>' + hist.slice().reverse().map(function(h, i){
-      return '<div class="hist">' + esc(h.date) + " · " + (WHO[h.who] || "") + " · <b>" + esc(h.level) + "</b>（" + h.min + ' 分鐘）<button class="btn alt small" type="button" data-h="' + (hist.length - 1 - i) + '">看詳細</button></div>'; }).join("") + "</details>" : "");
+    '<div id="hist"></div>';
   app.querySelector("#who").onclick = function(e){ var b = e.target.closest("button"); if (!b) return; who = b.dataset.k;
     app.querySelectorAll("#who button").forEach(function(x){ x.classList.toggle("on", x === b); }); };
   app.querySelector("#hear").onclick = function(){ loadVoices();
     if (!synth || !voices.length){ alertBox("這個瀏覽器找不到英文語音。聽力題會跳過，請換一個瀏覽器（例如 Chrome 或 Edge）。"); return; }
     speak({ lines:[["W","Hello! Can you hear me?"],["M","Yes, I can hear you clearly."]] }, .9, function(){}); };
   app.querySelector("#go").onclick = begin;
-  app.querySelectorAll("[data-h]").forEach(function(b){ b.onclick = function(){ result(get(KEY, [])[+b.dataset.h], true); }; });
+  showHist(hist, null);
+  cloudBox();
+}
+var SHOWN = [];
+function showHist(local, remote){
+  var all = local.slice(), seen = {};
+  all.forEach(function(r){ seen[r.id] = 1; });
+  (remote || []).forEach(function(x){ var r = x.data; if (r && r.id && r.bands && !seen[r.id]){ r.cloud = true; r.elsewhere = true; all.push(r); seen[r.id] = 1; } });
+  all = all.map(function(r, i){ return [r, i]; }).sort(function(a, b){ return (a[0].ts || 0) - (b[0].ts || 0) || a[1] - b[1]; }).map(function(x){ return x[0]; });
+  SHOWN = all;
+  var el = app.querySelector("#hist");
+  if (!el) return;
+  el.innerHTML = all.length ? '<details><summary>以前的結果（' + all.length + ' 次）</summary>' + all.slice().reverse().map(function(h, i){
+    var tag = h.elsewhere ? ' <span class="tag">☁️ 其他裝置</span>' : h.cloud ? ' <span class="tag">☁️</span>' : "";
+    return '<div class="hist">' + esc(h.date) + " · " + (WHO[h.who] || "") + " · <b>" + esc(h.level) + "</b>（" + h.min + " 分鐘）" + tag +
+      ' <button class="btn alt small" type="button" data-h="' + (all.length - 1 - i) + '">看詳細</button></div>'; }).join("") + "</details>" : "";
+  el.querySelectorAll("[data-h]").forEach(function(b){ b.onclick = function(){ result(SHOWN[+b.dataset.h], true); }; });
+}
+function cloudFail(box, e, again){
+  var m = String(e && e.message || "");
+  if (/^token/.test(m)){ again(); return; }          // sign-in expired: the button comes back
+  box.className = "cloud";
+  box.textContent = /^account/.test(m) ? "☁️ 這個 Google 帳號還沒登記，結果先存在這台裝置。請爸爸媽媽幫你加上去。"
+    : "☁️ 現在連不到雲端，結果先存在這台裝置，下次打開測驗會再試。";
+}
+function askSignIn(box, text, again){
+  box.className = "cloud";
+  box.innerHTML = "<span>" + text + '</span><span class="gbtn"></span>';
+  CL.signInButton(box.querySelector(".gbtn"), function(){ if (app.contains(box)) again(); }).catch(function(){ box.hidden = true; });
+}
+function cloudBox(){
+  var box = app.querySelector("#cloud");
+  if (!CL.on || !box) return;
+  box.hidden = false;
+  if (!CL.signedIn()){ askSignIn(box, "☁️ 想把結果存到雲端、換裝置也看得到？先登入（不登入也可以做）：", cloudBox); return; }
+  box.className = "cloud"; box.textContent = "☁️ 正在連到雲端…";
+  syncLocal().then(function(){ return CL.list(APP); }).then(function(items){
+    if (!app.contains(box)) return;
+    var r = CL.role();
+    box.className = "cloud ok";
+    box.textContent = "☁️ 已登入" + (ROLE_NAME[r] ? "（" + ROLE_NAME[r] + "）" : "") + "，做完的結果會自動存到雲端" +
+      (r === "p" ? "；下面也看得到孩子們在其他裝置做的。" : "，換裝置也看得到。");
+    showHist(localHist(), items);
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, cloudBox); });
+}
+function resultCloud(rec){
+  var box = app.querySelector("#cstat"), again = function(){ resultCloud(rec); };
+  if (!CL.on || !box) return;
+  box.hidden = false;
+  if (!CL.signedIn()){ askSignIn(box, "這次的結果先存在這台裝置。登入就會存到雲端：", again); return; }
+  box.className = "cloud"; box.textContent = "☁️ 存到雲端中…";
+  syncLocal().then(function(){
+    if (!app.contains(box)) return;
+    var done = get(KEY, []).some(function(r){ return r.id === rec.id && r.cloud; });
+    box.className = done ? "cloud ok" : "cloud";
+    box.textContent = done ? "☁️ 已存到雲端，爸爸媽媽在試算表裡看得到。" : "☁️ 還沒存到雲端，下次打開測驗會再試。";
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, again); });
 }
 function alertBox(msg){ var w = app.querySelector(".warn"); if (!w){ w = document.createElement("div"); w.className = "warn"; app.insertBefore(w, app.querySelector(".row")); } w.textContent = msg; }
 function begin(){
@@ -393,9 +478,10 @@ function writing(){
 function finish(essay){
   clearInterval(clock);
   var top = levelOf(S.bands), d = new Date();
-  var rec = { date:d.toLocaleDateString("zh-TW") + " " + d.toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit", hour12:false }),
+  var rec = { id:newId(), ts:d.getTime(), date:d.toLocaleDateString("zh-TW") + " " + d.toLocaleTimeString("zh-TW", { hour:"2-digit", minute:"2-digit", hour12:false }),
     who:S.who, min:Math.max(1, Math.round((Date.now() - S.t0) / 60000)), top:top, bands:S.bands, essay:essay, noVoice:S.noVoice, stopped:!!S.stopped,
     level:top < 0 ? "A1 還在打基礎" : BANDS[top].id + " · " + BANDS[top].gept };
+  rec.summary = summary(rec);
   var hist = get(KEY, []); hist.push(rec); put(KEY, hist.slice(-20));
   S = null; timeEl.hidden = true;
   result(rec, false);
@@ -413,6 +499,7 @@ function result(rec, old){
     "<p>" + (b ? "第 " + (top + 1) + " 關（" + esc(b.name.split(" · ")[1]) + "）以下都過了。" : "第 1 關還沒過，先把基本的單字和句子練熟。") +
       (nb ? "下一個目標是「" + esc(nb.name.split(" · ")[1]) + "」（" + esc(nb.gept) + "）。" : "四關全過，已經超過這份測驗能測量的範圍了！") + "</p>" +
     (weak && weak[1] < .75 ? '<p class="soft">在最後一關裡，<b>' + KINDS[weak[0]] + "</b>答得最少，可以先從這裡加強。</p>" : "") +
+    (old ? "" : '<div class="cloud" id="cstat" hidden></div>') +
     (rec.noVoice ? '<div class="warn">這次沒有英文語音，聽力沒有測到，結果可能偏高或偏低。</div>' : "") +
     '<div class="tbl"><table><thead><tr><th>關卡</th><th>字彙</th><th>文法</th><th>閱讀</th><th>聽力</th><th>合計</th></tr></thead><tbody>' +
     rec.bands.map(function(x){ return "<tr><td>" + x.id + " " + (x.pass ? "✅" : "❌") + "</td>" + pctCell(x.by, "vocab") + pctCell(x.by, "grammar") + pctCell(x.by, "reading") + pctCell(x.by, "listening") +
@@ -426,6 +513,7 @@ function result(rec, old){
     (rec.essay ? "<details open><summary>寫作（" + words + " 個字）</summary><p class=\"soft\" style=\"margin:6px 0 0;font-size:14px\">題目：" + esc(WRITE) + '</p><div class="essay" lang="en">' + esc(rec.essay) + "</div></details>" : "") +
     '<div class="row" style="margin-top:18px"><a class="btn" href="../../">🏙️ 回城市</a><button class="btn alt small" type="button" id="again">' + (old ? "回測驗首頁" : "再做一次") + "</button></div>";
   app.querySelector("#again").onclick = start;
+  if (!old) resultCloud(rec);
   window.scrollTo(0, 0);
 }
 start();
