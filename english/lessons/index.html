@@ -433,13 +433,15 @@ function runQuiz(qs, label, done){
   })();
 }
 
-/* review: see the word, pick its meaning; the answer moves the word along the deck */
+/* review: see the word, pick its English definition; the answer moves the word along the deck */
+function meaning(x){ return x.def || x.zh; }
 function reviewQs(words){
   var all = Object.keys(WORDS);
   return words.map(function(w){
-    var x = WORDS[w], wrong = shuffle(all.filter(function(k){ return k !== w && WORDS[k].zh !== x.zh; })).slice(0, 3);
+    var x = WORDS[w], wrong = shuffle(all.filter(function(k){ return k !== w && meaning(WORDS[k]) !== meaning(x); })).slice(0, 3);
     return { q:x.w + ' <button class="say" type="button" data-say="' + esc(x.w) + '">🔊</button><div class="soft" style="font-size:16px;font-weight:600;margin-top:4px">' + esc(x.ex) + '</div>',
-      o:[x.zh].concat(wrong.map(function(k){ return WORDS[k].zh; })), a:0, zhOpts:true,
+      o:[meaning(x)].concat(wrong.map(function(k){ return meaning(WORDS[k]); })), a:0, zhOpts:!x.def,
+      why:x.def ? x.w + " (" + x.zh + ")" : "",
       onAnswer:function(ok){ grade(w, ok); } };
   });
 }

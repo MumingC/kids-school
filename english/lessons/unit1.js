@@ -26,14 +26,14 @@ window.UNITS.push({
       vid: "nsnyl8llfH4", ch: "Mark Rober", len: "9:49",
       intro: "Mark Rober 用五種方法保護從高處掉下來的雞蛋，順便解釋為什麼汽車要有安全氣囊。",
       words: [
-        { w: "contraption", zh: "奇妙的裝置", ex: "Every student built a strange contraption to protect an egg." },
-        { w: "cushion", zh: "緩衝物；墊子", ex: "Popcorn can work as a cushion around the egg." },
-        { w: "potential energy", zh: "位能（因為高度而有的能量）", ex: "The higher you hold the egg, the more potential energy it has." },
-        { w: "kinetic energy", zh: "動能（因為速度而有的能量）", ex: "As the egg falls faster, it gains more kinetic energy." },
-        { w: "impact", zh: "撞擊", ex: "The impact with the ground cracked the shell." },
-        { w: "parachute", zh: "降落傘", ex: "A parachute made from a trash bag slowed the egg down." },
-        { w: "spread out", zh: "分散開", ex: "Airbags spread out the force over a longer time." },
-        { w: "intact", zh: "完好無損的", ex: "After the drop, the egg was still intact." }
+        { w: "contraption", def: "a machine or device that looks strange or home-made", zh: "奇妙的裝置", ex: "Every student built a strange contraption to protect an egg." },
+        { w: "cushion", def: "something soft that protects a thing when it hits something", zh: "緩衝物；墊子", ex: "Popcorn can work as a cushion around the egg." },
+        { w: "potential energy", def: "energy an object has because of its height or position", zh: "位能（因為高度而有的能量）", ex: "The higher you hold the egg, the more potential energy it has." },
+        { w: "kinetic energy", def: "energy an object has because it is moving", zh: "動能（因為速度而有的能量）", ex: "As the egg falls faster, it gains more kinetic energy." },
+        { w: "impact", def: "the moment when one thing hits another", zh: "撞擊", ex: "The impact with the ground cracked the shell." },
+        { w: "parachute", def: "a large piece of cloth that slows down something falling through the air", zh: "降落傘", ex: "A parachute made from a trash bag slowed the egg down." },
+        { w: "spread out", def: "to make something cover a bigger area or a longer time", zh: "分散開", ex: "Airbags spread out the force over a longer time." },
+        { w: "intact", def: "not broken or damaged", zh: "完好無損的", ex: "After the drop, the egg was still intact." }
       ],
       watch: [
         "What are the <b>two ways</b> to keep the egg safe?（保護雞蛋的兩個方法）",
@@ -58,12 +58,12 @@ window.UNITS.push({
       title: "Airbags: A Cushion in the Blink of an Eye", zh: "眨眼之間的安全氣囊",
       intro: "把雞蛋實驗學到的「拉長撞擊時間」用在真正的汽車上。",
       words: [
-        { w: "sensor", zh: "感應器", ex: "A sensor in the car can tell when it stops too quickly." },
-        { w: "signal", zh: "訊號", ex: "The sensor sends a signal to the airbag." },
-        { w: "fraction", zh: "一小部分", ex: "It all happens in a fraction of a second." },
-        { w: "vent", zh: "排氣孔", ex: "Gas escapes through a small vent in the bag." },
-        { w: "injury", zh: "受傷", ex: "Wearing a seat belt lowers the risk of injury." },
-        { w: "design", zh: "設計", ex: "Engineers design airbags to open very quickly." }
+        { w: "sensor", def: "a device that notices a change, such as movement, heat or light", zh: "感應器", ex: "A sensor in the car can tell when it stops too quickly." },
+        { w: "signal", def: "a message sent from one thing to another, often as electricity", zh: "訊號", ex: "The sensor sends a signal to the airbag." },
+        { w: "fraction", def: "a very small part of something", zh: "一小部分", ex: "It all happens in a fraction of a second." },
+        { w: "vent", def: "a small hole that lets air or gas in or out", zh: "排氣孔", ex: "Gas escapes through a small vent in the bag." },
+        { w: "injury", def: "harm done to a person's body", zh: "受傷", ex: "Wearing a seat belt lowers the risk of injury." },
+        { w: "design", def: "to plan how something will look and work before it is made", zh: "設計", ex: "Engineers design airbags to open very quickly." }
       ],
       text: [
         "Imagine a car is driving at 50 kilometres an hour when it suddenly hits a wall. The car stops almost at once, but the people inside keep moving forward. Without protection, the driver's head could hit the steering wheel in a tiny fraction of a second. This is where the airbag comes in.",
@@ -86,14 +86,14 @@ window.UNITS.push({
       vid: "a1D-fZP8qJk", ch: "Mark Rober", len: "12:04",
       intro: "Mark Rober 用 1,232 顆檸檬做電池，想幫一台電動賽車充電。結果呢？",
       words: [
-        { w: "generate", zh: "產生（電、能量）", ex: "Can lemons generate enough electricity for a car?" },
-        { w: "electron", zh: "電子", ex: "An electron is a tiny particle that can carry electricity." },
-        { w: "electrolyte", zh: "電解質", ex: "Lemon juice is the electrolyte that connects the two metals." },
-        { w: "current", zh: "電流", ex: "The lemon battery made only a very small current." },
-        { w: "measure", zh: "測量", ex: "They used a meter to measure the voltage." },
-        { w: "equivalent", zh: "相當於…的量", ex: "All the lemons together made the equivalent of one AA battery." },
-        { w: "harness", zh: "利用（自然的力量）", ex: "Solar panels harness the power of the sun." },
-        { w: "efficient", zh: "有效率的", ex: "Using sunlight directly is more efficient than using lemons." }
+        { w: "generate", def: "to produce something, such as electricity or energy", zh: "產生（電、能量）", ex: "Can lemons generate enough electricity for a car?" },
+        { w: "electron", def: "a tiny particle with a negative charge that carries electricity", zh: "電子", ex: "An electron is a tiny particle that can carry electricity." },
+        { w: "electrolyte", def: "a liquid that lets electricity pass through it", zh: "電解質", ex: "Lemon juice is the electrolyte that connects the two metals." },
+        { w: "current", def: "a flow of electricity", zh: "電流", ex: "The lemon battery made only a very small current." },
+        { w: "measure", def: "to find out the size, amount or strength of something", zh: "測量", ex: "They used a meter to measure the voltage." },
+        { w: "equivalent", def: "an amount that is equal to another amount", zh: "相當於…的量", ex: "All the lemons together made the equivalent of one AA battery." },
+        { w: "harness", def: "to control and use a natural force, like wind or sunlight", zh: "利用（自然的力量）", ex: "Solar panels harness the power of the sun." },
+        { w: "efficient", def: "working well without wasting energy, time or money", zh: "有效率的", ex: "Using sunlight directly is more efficient than using lemons." }
       ],
       watch: [
         "Why do you need <b>zinc</b> and <b>copper</b>?（為什麼要用鋅和銅）",
