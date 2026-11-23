@@ -97,7 +97,7 @@ function signInButton(el, done){
       setToken(resp.credential);
       flush().catch(function(){}).then(function(){ onSigned(); });
     } });
-    google.accounts.id.renderButton(el, { type:"standard", theme:"outline", size:"medium", shape:"pill", text:"signin", locale:"zh_TW" });
+    google.accounts.id.renderButton(el, { type:"standard", theme:"outline", size:"medium", shape:"pill", text:"signin", locale:(document.documentElement.lang === "en" ? "en" : "zh_TW") });
   });
 }
 

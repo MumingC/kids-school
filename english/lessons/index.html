@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>英文課 · Kids School</title>
+<title>English Lessons · Kids School</title>
 <meta name="description" content="大孩的英文課：用科學影片學英文，一天約 35 分鐘，看影片、讀文章、文法、寫作，單字會照記憶曲線回來複習。">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E">
@@ -80,6 +80,8 @@ details.adult ul{margin:8px 0 0;padding-left:20px}
 .wd .h b{font-family:var(--en);font-size:21px}
 .wd .h span{font-weight:700}
 .wd .x{font-family:var(--en);color:var(--ink-soft);font-size:16px;margin-top:2px}
+.wd .d{font-family:var(--en);font-weight:700;font-size:16.5px}
+.wd .z{font-size:13.5px;color:var(--ink-soft);font-weight:500}
 .say{border:0;background:#e9f3f9;color:var(--sky);border-radius:999px;width:32px;height:32px;font-size:15px;cursor:pointer;flex:none}
 .vid{position:relative;width:100%;aspect-ratio:16/9;max-width:100%;background:#111;border-radius:16px;overflow:hidden;margin:6px 0 12px}
 .vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -142,7 +144,7 @@ function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var 
 function ymd(d){ d = d || new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
 function plusDays(n){ var d = new Date(); d.setDate(d.getDate() + n); return ymd(d); }
 
-var WHO = { b:"🚀 大孩", m:"🦊 中孩", o:"🙂 其他人" };
+var WHO = { b:"🚀 Big kid", m:"🦊 Middle kid", o:"🙂 Guest" };
 var qk = new URLSearchParams(location.search).get("k");
 var who = WHO[qk] ? qk : (get("ks.who", null) === "m" ? "m" : "b");
 var KEY = "ks.eng.les." + who;
@@ -150,7 +152,7 @@ var S = get(KEY, null) || {};
 S.done = S.done || {}; S.deck = S.deck || {}; S.recs = S.recs || []; S.drafts = S.drafts || {};
 function save(){ put(KEY, S); }
 
-var KIND = { video:{ ic:"🎬", zh:"影片" }, reading:{ ic:"📖", zh:"閱讀" }, grammar:{ ic:"🧩", zh:"文法" }, writing:{ ic:"✍️", zh:"寫作" } };
+var KIND = { video:{ ic:"🎬", en:"Video" }, reading:{ ic:"📖", en:"Reading" }, grammar:{ ic:"🧩", en:"Grammar" }, writing:{ ic:"✍️", en:"Writing" } };
 function dayKey(u, d){ return u.n + "-" + d.n; }
 
 /* every word in every unit, by its text */
@@ -173,7 +175,7 @@ function speak(text, rate){
   var u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = rate || .92; if (voice) u.voice = voice;
   synth.speak(u);
 }
-function sayBtn(text){ return '<button class="say" type="button" title="聽發音" data-say="' + esc(text) + '">🔊</button>'; }
+function sayBtn(text){ return '<button class="say" type="button" title="Listen" data-say="' + esc(text) + '">🔊</button>'; }
 app.addEventListener("click", function(e){ var b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say); });
 
 /* ---------------- word deck (spaced review) ---------------- */
@@ -189,7 +191,7 @@ function grade(w, ok){
 
 /* ---------------- cloud (optional; see assets/ks-cloud.js) ---------------- */
 var CL = window.KSCloud || { on:false }, APP = "eng-lesson";
-var ROLE_NAME = { m:"🦊 中孩", b:"🚀 大孩", p:"👨‍👩‍👧‍👦 爸爸媽媽" };
+var ROLE_NAME = { m:"🦊 Middle kid", b:"🚀 Big kid", p:"👨‍👩‍👧‍👦 Mum & Dad" };
 function newId(){ return "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 function markSynced(ids){
   if (!ids || !ids.length) return;
@@ -216,8 +218,8 @@ function cloudFail(box, e, again){
   var m = String(e && e.message || "");
   if (/^token/.test(m)){ again(); return; }
   box.className = "cloud";
-  box.textContent = /^account/.test(m) ? "☁️ 這個 Google 帳號還沒登記，進度先存在這台裝置。請爸爸媽媽幫你加上去。"
-    : "☁️ 現在連不到雲端，進度先存在這台裝置，下次打開會再試。";
+  box.textContent = /^account/.test(m) ? "☁️ This Google account isn't registered yet, so progress is saved on this device only. Ask Mum or Dad to add it."
+    : "☁️ Can't reach the cloud right now. Progress is saved on this device and will be uploaded next time.";
 }
 function askSignIn(box, text, again){
   box.className = "cloud";
@@ -228,13 +230,13 @@ function cloudBox(){
   var box = app.querySelector("#cloud");
   if (!CL.on || !box) return;
   box.hidden = false;
-  if (!CL.signedIn()){ askSignIn(box, "☁️ 登入後，完成的課和寫的作文會存到雲端，爸爸媽媽看得到（不登入也可以上課）：", cloudBox); return; }
-  box.className = "cloud"; box.textContent = "☁️ 正在連到雲端…";
+  if (!CL.signedIn()){ askSignIn(box, "☁️ Sign in to save your lessons and writing to the cloud, so Mum and Dad can see them (you can also study without signing in):", cloudBox); return; }
+  box.className = "cloud"; box.textContent = "☁️ Connecting to the cloud…";
   syncLocal().then(function(){ return CL.list(APP); }).then(function(items){
     if (!app.contains(box)) return;
     var r = CL.role();
     box.className = "cloud ok";
-    box.textContent = "☁️ 已登入" + (ROLE_NAME[r] ? "（" + ROLE_NAME[r] + "）" : "") + "，上完的課會自動存到雲端。";
+    box.textContent = "☁️ Signed in" + (ROLE_NAME[r] ? " as " + ROLE_NAME[r] : "") + ". Finished lessons are saved to the cloud automatically.";
     if (mergeRemote(items)) home();
   }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, cloudBox); });
 }
@@ -242,13 +244,13 @@ function resultCloud(rec){
   var box = app.querySelector("#cstat"), again = function(){ resultCloud(rec); };
   if (!CL.on || !box) return;
   box.hidden = false;
-  if (!CL.signedIn()){ askSignIn(box, "這一課先存在這台裝置。登入就會存到雲端：", again); return; }
-  box.className = "cloud"; box.textContent = "☁️ 存到雲端中…";
+  if (!CL.signedIn()){ askSignIn(box, "This lesson is saved on this device. Sign in to save it to the cloud too:", again); return; }
+  box.className = "cloud"; box.textContent = "☁️ Saving to the cloud…";
   syncLocal().then(function(){
     if (!app.contains(box)) return;
     var ok = S.recs.some(function(r){ return r.id === rec.id && r.cloud; });
     box.className = ok ? "cloud ok" : "cloud";
-    box.textContent = ok ? "☁️ 已存到雲端，爸爸媽媽在試算表裡看得到。" : "☁️ 還沒存到雲端，下次打開會再試。";
+    box.textContent = ok ? "☁️ Saved to the cloud. Mum and Dad can see it in the spreadsheet." : "☁️ Not saved to the cloud yet. It will try again next time.";
   }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, again); });
 }
 
@@ -259,21 +261,21 @@ function home(){
   window.scrollTo(0, 0);
   var u = UNITS[0], nx = nextDay(u), n = due().length;
   var doneN = u.days.filter(function(d){ return S.done[dayKey(u, d)]; }).length;
-  var h = '<div class="top"><a href="../../">← Kids School</a><a href="../test/">✏️ 程度測驗</a><span class="who">' + WHO[who] + '</span></div>';
-  h += '<div class="card"><div class="eyebrow">英文課 · UNIT ' + u.n + '</div><h1 class="en">' + esc(u.title) + '</h1>' +
-    '<p style="font-weight:800;margin-bottom:6px">' + esc(u.zh) + '</p><p class="soft">' + esc(u.blurb) + '</p>' +
+  var h = '<div class="top"><a href="../../">← Kids School</a><a href="../test/">✏️ Level test</a><span class="who">' + WHO[who] + '</span></div>';
+  h += '<div class="card"><div class="eyebrow">ENGLISH LESSONS · UNIT ' + u.n + '</div><h1 class="en">' + esc(u.title) + '</h1>' +
+    '<p class="soft en">' + esc(u.blurb) + '</p>' +
     '<div class="bar"><i style="width:' + (100 * doneN / u.days.length) + '%"></i></div>' +
-    '<p class="soft" style="font-size:14px">完成 ' + doneN + ' / ' + u.days.length + ' 課 · 一天一課，約 30–40 分鐘</p>' +
-    '<div class="row">' + (nx ? '<button class="btn" id="go">▶ 第 ' + nx.n + ' 課：' + esc(nx.zh) + '</button>' : '<b>🎉 單元一全部完成！</b>') +
-    (n ? '<button class="btn alt" id="rev">🔁 單字複習（' + n + ' 個）</button>' : "") + '</div></div>';
+    '<p class="soft" style="font-size:14px">' + doneN + ' of ' + u.days.length + ' lessons done · one lesson a day, about 30–40 minutes</p>' +
+    '<div class="row">' + (nx ? '<button class="btn en" id="go">▶ Lesson ' + nx.n + ': ' + esc(nx.title) + '</button>' : '<b>🎉 Unit ' + u.n + ' complete!</b>') +
+    (n ? '<button class="btn alt" id="rev">🔁 Word review (' + n + ')</button>' : "") + '</div></div>';
   h += '<div id="cloud" class="cloud" hidden></div>';
   u.weeks.forEach(function(wk){
-    h += '<div class="card week"><h2>第 ' + wk.n + ' 週 · ' + esc(wk.zh) + '<small>' + esc(wk.title) + '</small></h2><div class="days">';
+    h += '<div class="card week"><h2 class="en">Week ' + wk.n + ' · ' + esc(wk.title) + (wk.n > 1 ? '<small>harder</small>' : '') + '</h2><div class="days">';
     u.days.filter(function(d){ return d.week === wk.n; }).forEach(function(d){
       var k = dayKey(u, d), dn = S.done[k], K = KIND[d.kind];
-      var st = dn ? (dn.total ? "✓ " + dn.score + "/" + dn.total : "✓ 完成") : (nx && nx.n === d.n ? "今天" : "約 " + d.min + " 分");
+      var st = dn ? (dn.total ? "✓ " + dn.score + "/" + dn.total : "✓ Done") : (nx && nx.n === d.n ? "Today" : "~" + d.min + " min");
       h += '<button class="day' + (nx && nx.n === d.n ? " now" : "") + '" data-day="' + d.n + '"><span class="ic k-' + d.kind + '">' + K.ic + '</span>' +
-        '<span class="tx"><b>' + esc(d.title) + '</b><span>第 ' + d.n + ' 課 · ' + K.zh + ' · ' + esc(d.zh) + (d.challenge ? '<span class="tag">挑戰</span>' : "") + '</span></span>' +
+        '<span class="tx"><b>' + esc(d.title) + '</b><span class="en">Lesson ' + d.n + ' · ' + K.en + (d.challenge ? '<span class="tag">Challenge</span>' : "") + '</span></span>' +
         '<span class="st' + (dn ? " ok" : "") + '">' + st + '</span></button>';
     });
     h += '</div></div>';
@@ -283,7 +285,9 @@ function home(){
     '<li>影片在這個頁面裡播（YouTube 官方播放器，可暫停、倒轉、開關英文字幕），<b>不算家庭小電視的時間</b>。題目是照影片字幕內容出的。</li>' +
     '<li>每課學到的單字會照記憶曲線回來複習（隔 1、2、4、7、14、30 天），每課開頭先複習到期的字。</li>' +
     '<li>週五的作文：登入後會存進家裡的 Google 試算表（「紀錄」分頁，項目 eng-lesson），請看完給孩子一點回饋。沒登入就只存在這台裝置。</li>' +
-    '<li>程度：以全民英檢中級（B1）為底，往中高級（B2）拉；標「挑戰」的那課是 B2。</li></ul></details></div>';
+    '<li>程度：以全民英檢中級（B1）為底，往中高級（B2）拉；標「Challenge」的那課是 B2。</li>' +
+    '<li>第二週較難（2026-11-23 調整）：題目多考推論和細節，解說、單字定義都改成英文（中文只留小字提示），閱讀較長，文法加了完成式、進行式和助動詞的被動，作文 180–240 字。</li>' +
+    '<li>介面是英文的；這段說明留中文給爸爸媽媽看。</li></ul></details></div>';
   app.innerHTML = h;
   if (nx) app.querySelector("#go").onclick = function(){ openDay(u, nx); };
   var rv = app.querySelector("#rev"); if (rv) rv.onclick = reviewOnly;
@@ -295,7 +299,7 @@ function home(){
 var L = null;   // the lesson in progress
 function frame(title, body){
   var steps = L.steps.map(function(s, i){ return '<span class="' + (i < L.at ? "done" : i === L.at ? "on" : "") + '">' + s.name + '</span>'; }).join("");
-  app.innerHTML = '<div class="top"><button type="button" id="back">← 課表</button><span class="who">第 ' + L.d.n + ' 課 · ' + esc(L.d.zh) + '</span></div>' +
+  app.innerHTML = '<div class="top"><button type="button" id="back">← All lessons</button><span class="who en">' + (typeof L.d.n === "number" ? "Lesson " + L.d.n + " · " : "") + esc(L.d.title) + '</span></div>' +
     '<div class="steps">' + steps + '</div><div class="card">' + (title ? '<h2>' + title + '</h2>' : "") + body + '</div>';
   app.querySelector("#back").onclick = function(){ L = null; home(); };
   window.scrollTo(0, 0);
@@ -306,33 +310,34 @@ function nextStep(){ if (!L) return; L.at++; step(); }
 function openDay(u, d){
   L = { u:u, d:d, at:0, score:0, total:0, t0:Date.now(), steps:[] };
   var rev = due().filter(function(w){ return !(d.words || []).some(function(x){ return x.w === w; }); });
-  if ((d.kind === "video" || d.kind === "reading") && rev.length) L.steps.push({ name:"複習", run:function(){ runQuiz(reviewQs(shuffle(rev).slice(0, 10)), "複習以前的單字", nextStep); } });
+  if ((d.kind === "video" || d.kind === "reading") && rev.length) L.steps.push({ name:"Review", run:function(){ runQuiz(reviewQs(shuffle(rev).slice(0, 10)), "Review earlier words", nextStep); } });
   if (d.kind === "video"){
-    L.steps.push({ name:"新單字", run:stepWords });
-    L.steps.push({ name:"看影片", run:stepWatch });
-    L.steps.push({ name:"問題", run:function(){ runQuiz(d.qs, "影片問題", nextStep); } });
-    L.steps.push({ name:"說說看", run:stepSay });
+    L.steps.push({ name:"New words", run:stepWords });
+    L.steps.push({ name:"Watch", run:stepWatch });
+    L.steps.push({ name:"Questions", run:function(){ runQuiz(d.qs, "Video questions", nextStep); } });
+    L.steps.push({ name:"Speak", run:stepSay });
   } else if (d.kind === "reading"){
-    L.steps.push({ name:"新單字", run:stepWords });
-    L.steps.push({ name:"閱讀", run:stepRead });
-    L.steps.push({ name:"問題", run:function(){ runQuiz(d.qs, "閱讀問題", nextStep); } });
+    L.steps.push({ name:"New words", run:stepWords });
+    L.steps.push({ name:"Read", run:stepRead });
+    L.steps.push({ name:"Questions", run:function(){ runQuiz(d.qs, "Reading questions", nextStep); } });
   } else if (d.kind === "grammar"){
-    L.steps.push({ name:"文法", run:stepExplain });
-    L.steps.push({ name:"練習", run:function(){ runQuiz(d.qs, "文法練習", nextStep); } });
-    L.steps.push({ name:"本週單字", run:function(){ runQuiz(clozeQs(weekWords(u, d.review)), "這週的單字", nextStep); } });
+    L.steps.push({ name:"Grammar", run:stepExplain });
+    L.steps.push({ name:"Practice", run:function(){ runQuiz(d.qs, "Grammar practice", nextStep); } });
+    L.steps.push({ name:"Week's words", run:function(){ runQuiz(clozeQs(weekWords(u, d.review)), "This week's words", nextStep); } });
   } else if (d.kind === "writing"){
-    L.steps.push({ name:"想一想", run:stepPlan });
-    L.steps.push({ name:"寫", run:stepWrite });
+    L.steps.push({ name:"Plan", run:stepPlan });
+    L.steps.push({ name:"Write", run:stepWrite });
   }
-  L.steps.push({ name:"完成", run:finish });
+  L.steps.push({ name:"Done", run:finish });
   step();
 }
 
 function stepWords(){
   var d = L.d;
-  frame("今天的新單字", '<p class="soft">' + esc(d.intro) + '</p><p class="tip">先看一遍，按 🔊 聽發音，念念看。等一下' + (d.kind === "video" ? "影片" : "文章") + '裡都會出現。</p><div class="words">' +
-    d.words.map(function(w){ return '<div class="wd"><div class="h">' + sayBtn(w.w) + '<b>' + esc(w.w) + '</b><span>' + esc(w.zh) + '</span></div><div class="x">' + esc(w.ex) + '</div></div>'; }).join("") +
-    '</div><div class="next"><button class="btn" id="nx">我看完了 →</button></div>');
+  frame("Today's new words", '<p class="soft">' + esc(d.intro) + '</p><p class="tip">Read each word, press 🔊 to hear it, and say it out loud. You will meet all of them in the ' + (d.kind === "video" ? "video" : "text") + '.</p><div class="words">' +
+    d.words.map(function(w){ return '<div class="wd"><div class="h">' + sayBtn(w.w) + '<b>' + esc(w.w) + '</b>' + (w.def ? '<span class="z">' + esc(w.zh) + '</span>' : '<span>' + esc(w.zh) + '</span>') + '</div>' +
+      (w.def ? '<div class="d">' + esc(w.def) + '</div>' : "") + '<div class="x">' + esc(w.ex) + '</div></div>'; }).join("") +
+    '</div><div class="next"><button class="btn" id="nx">Got it →</button></div>');
   app.querySelector("#nx").onclick = nextStep;
 }
 
@@ -343,15 +348,15 @@ function embed(d, cc){
 function stepWatch(){
   var d = L.d, cc = true;
   frame('<span class="en">' + esc(d.title) + '</span>',
-    '<p class="soft">' + esc(d.ch) + ' · ' + d.len + (d.challenge ? ' · <b>挑戰（B2）</b>' : "") + '</p>' +
-    '<div class="listen"><b>看的時候注意聽：</b><ol>' + d.watch.map(function(x){ return "<li>" + x + "</li>"; }).join("") + '</ol></div>' +
+    '<p class="soft">' + esc(d.ch) + ' · ' + d.len + (d.challenge ? ' · <b>Challenge (B2)</b>' : "") + '</p>' +
+    '<div class="listen"><b>Listen for:</b><ol>' + d.watch.map(function(x){ return "<li>" + x + "</li>"; }).join("") + '</ol></div>' +
     '<div class="vid"><iframe id="yt" src="' + embed(d, true) + '" title="' + esc(d.title) + '" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>' +
-    '<div class="row"><button class="btn alt small" id="cc">字幕：開（按這裡關掉）</button><span class="tip">第一次開英文字幕看；有時間的話，關掉字幕再看一次。聽不懂可以暫停、倒回去。</span></div>' +
-    '<div class="next"><button class="btn" id="nx">看完了，回答問題 →</button></div>');
+    '<div class="row"><button class="btn alt small" id="cc">Subtitles: ON (tap to turn off)</button><span class="tip">Watch with English subtitles first. If you have time, watch again without them. Pause and rewind whenever you need to.</span></div>' +
+    '<div class="next"><button class="btn" id="nx">Done, on to the questions →</button></div>');
   app.querySelector("#cc").onclick = function(){
     cc = !cc;
     app.querySelector("#yt").src = embed(d, cc);
-    this.textContent = cc ? "字幕：開（按這裡關掉）" : "字幕：關（按這裡打開）";
+    this.textContent = cc ? "Subtitles: ON (tap to turn off)" : "Subtitles: OFF (tap to turn on)";
   };
   app.querySelector("#nx").onclick = nextStep;
 }
@@ -368,17 +373,17 @@ function glossify(text, words){
 function stepRead(){
   var d = L.d;
   frame('<span class="en">' + esc(d.title) + '</span>',
-    '<p class="tip">黃色底線的字可以點，看中文意思。看不懂的句子先跳過，讀完再回來。</p>' +
-    '<div class="row" style="margin-bottom:10px"><button class="btn alt small" id="lis">🔊 聽整篇</button><button class="btn alt small" id="stop" hidden>⏹ 停</button></div>' +
+    '<p class="tip">Tap a highlighted word to see what it means. If a sentence is hard, skip it and come back after you finish.</p>' +
+    '<div class="row" style="margin-bottom:10px"><button class="btn alt small" id="lis">🔊 Listen to it all</button><button class="btn alt small" id="stop" hidden>⏹ Stop</button></div>' +
     '<div class="passage">' + d.text.map(function(p){ return "<p>" + glossify(p, d.words) + "</p>"; }).join("") + '</div>' +
-    '<div class="next"><button class="btn" id="nx">讀完了，回答問題 →</button></div>');
+    '<div class="next"><button class="btn" id="nx">Done, on to the questions →</button></div>');
   var pop = null;
   app.querySelectorAll(".gl").forEach(function(b){ b.onclick = function(){
     var w = WORDS[b.dataset.w]; if (!w) return;
     if (pop) pop.remove();
-    pop = document.createElement("div"); pop.className = "pop"; pop.innerHTML = "<b>" + esc(w.w) + "</b>" + esc(w.zh);
+    pop = document.createElement("div"); pop.className = "pop"; pop.innerHTML = "<b>" + esc(w.w) + "</b>" + esc(w.def ? w.def + " (" + w.zh + ")" : w.zh);
     document.body.appendChild(pop); speak(w.w);
-    var me = pop; setTimeout(function(){ me.remove(); }, 2600);
+    var me = pop; setTimeout(function(){ me.remove(); }, w.def ? 4500 : 2600);
   }; });
   var lis = app.querySelector("#lis"), stop = app.querySelector("#stop");
   if (!synth){ lis.hidden = true; }
@@ -389,17 +394,17 @@ function stepRead(){
 
 function stepExplain(){
   var d = L.d;
-  frame(esc(d.zh), '<div class="explain">' + d.explain.map(function(x){ return "<div>" + x + "</div>"; }).join("") + '</div>' +
-    '<div class="next"><button class="btn" id="nx">開始練習 →</button></div>');
+  frame('<span class="en">' + esc(d.title) + '</span>', '<div class="explain">' + d.explain.map(function(x){ return "<div>" + x + "</div>"; }).join("") + '</div>' +
+    '<div class="next"><button class="btn" id="nx">Start practising →</button></div>');
   app.querySelector("#nx").onclick = nextStep;
 }
 
 function stepSay(){
   var d = L.d;
-  frame("說說看（不用寫）", '<div class="sayit"><div class="q">' + esc(d.say.q) + '</div><b>可以這樣開頭：</b><ul>' +
+  frame("Say it out loud (no writing)", '<div class="sayit"><div class="q">' + esc(d.say.q) + '</div><b>You could start like this:</b><ul>' +
     d.say.starters.map(function(s){ return "<li>" + esc(s) + "</li>"; }).join("") + '</ul></div>' +
-    '<p class="tip" style="margin-top:12px">用英文說 30 秒到 1 分鐘。說給爸爸媽媽聽最好；沒人在的話，對著自己說也可以。說錯沒關係，說出來最重要。</p>' +
-    '<div class="next"><button class="btn" id="nx">我說完了 →</button></div>');
+    '<p class="tip" style="margin-top:12px">Speak in English for 30 seconds to a minute. Telling Mum or Dad is best; talking to yourself works too. Mistakes are fine. Saying it is what counts.</p>' +
+    '<div class="next"><button class="btn" id="nx">I said it →</button></div>');
   app.querySelector("#nx").onclick = function(){ L.said = true; nextStep(); };
 }
 
@@ -412,15 +417,15 @@ function runQuiz(qs, label, done){
   var i = 0, got = 0;
   (function show(){
     var it = list[i];
-    frame("", '<div class="qn">' + label + ' · 第 ' + (i + 1) + ' / ' + list.length + ' 題</div><div class="q">' + it.q.replace(/___/g, '<span class="blank"></span>') + '</div>' +
+    frame("", '<div class="qn">' + label + ' · ' + (i + 1) + ' of ' + list.length + '</div><div class="q">' + it.q.replace(/___/g, '<span class="blank"></span>') + '</div>' +
       '<div class="opts">' + it.opts.map(function(o, j){ return '<button type="button" class="' + (it.zhOpts ? "" : "en") + '" data-j="' + j + '">' + esc(o.t) + '</button>'; }).join("") + '</div>' +
-      '<div id="fb"></div><div class="next" id="nxw" hidden><button class="btn" id="nx">' + (i + 1 < list.length ? "下一題 →" : "完成 →") + '</button></div>');
+      '<div id="fb"></div><div class="next" id="nxw" hidden><button class="btn" id="nx">' + (i + 1 < list.length ? "Next →" : "Finish →") + '</button></div>');
     app.querySelectorAll(".opts button").forEach(function(b){ b.onclick = function(){
       var o = it.opts[+b.dataset.j];
       app.querySelectorAll(".opts button").forEach(function(x){ x.disabled = true; if (it.opts[+x.dataset.j].ok) x.classList.add("right"); });
       if (!o.ok) b.classList.add("wrong"); else got++;
       if (qs[i].onAnswer) qs[i].onAnswer(o.ok);
-      app.querySelector("#fb").innerHTML = '<div class="why ' + (o.ok ? "ok" : "no") + '"><b>' + (o.ok ? "答對了！" : "再想想：") + '</b>' + (it.why ? esc(it.why) : "") + '</div>';
+      app.querySelector("#fb").innerHTML = '<div class="why ' + (o.ok ? "ok" : "no") + '"><b>' + (o.ok ? "Correct!" : "Not quite.") + '</b>' + (it.why ? esc(it.why) : "") + '</div>';
       app.querySelector("#nxw").hidden = false;
       app.querySelector("#nx").focus();
     }; });
@@ -443,18 +448,18 @@ function clozeQs(words){
   return shuffle(words).slice(0, 10).map(function(x){
     var re = new RegExp(x.w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     var wrong = shuffle(words.filter(function(y){ return y.w !== x.w; })).slice(0, 3);
-    return { q:esc(x.ex.replace(re, "___")), o:[x.w].concat(wrong.map(function(y){ return y.w; })), a:0, why:x.w + "：" + x.zh,
+    return { q:esc(x.ex.replace(re, "___")), o:[x.w].concat(wrong.map(function(y){ return y.w; })), a:0, why:x.w + ": " + (x.def ? x.def + " (" + x.zh + ")" : x.zh),
       onAnswer:function(ok){ if (S.deck[x.w]) grade(x.w, ok); } };
   });
 }
 function reviewOnly(){
   var list = shuffle(due()).slice(0, 15);
   if (!list.length){ home(); return; }
-  L = { d:{ n:"·", zh:"單字複習", kind:"review" }, at:0, score:0, total:0, t0:Date.now(), steps:[] };
-  L.steps.push({ name:"複習", run:function(){ runQuiz(reviewQs(list), "單字複習", nextStep); } });
-  L.steps.push({ name:"完成", run:function(){
-    frame("複習完了！", '<p class="big">' + L.score + ' / ' + L.total + '</p><p class="soft">答對的字會隔久一點再出現；答錯的明天再來一次。' +
-      (due().length ? "還有 " + due().length + " 個到期的字。" : "今天的複習都做完了。") + '</p><div class="next"><button class="btn" id="hm">回課表</button></div>');
+  L = { d:{ n:"·", title:"Word review", kind:"review" }, at:0, score:0, total:0, t0:Date.now(), steps:[] };
+  L.steps.push({ name:"Review", run:function(){ runQuiz(reviewQs(list), "Word review", nextStep); } });
+  L.steps.push({ name:"Done", run:function(){
+    frame("Review done!", '<p class="big">' + L.score + ' / ' + L.total + '</p><p class="soft">Words you got right will come back later; words you missed come back tomorrow. ' +
+      (due().length ? due().length + " more words are due." : "That's all for today.") + '</p><div class="next"><button class="btn" id="hm">Back to lessons</button></div>');
     app.querySelector("#hm").onclick = function(){ L = null; home(); };
   } });
   step();
@@ -463,24 +468,24 @@ function reviewOnly(){
 /* ---------------- writing ---------------- */
 function stepPlan(){
   var d = L.d;
-  frame("寫作題目", '<div class="q" style="font-size:18.5px">' + esc(d.prompt) + '</div>' +
-    '<h3>要寫到的：</h3><ul>' + d.tips.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
-    '<h3>可以這樣開頭：</h3><ul class="en">' + d.starters.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
-    '<p class="tip">長度：' + d.wmin + '–' + d.wmax + ' 個英文字。至少用 3 個這單元學過的單字，和 ' + d.check.need + ' 個' + esc(d.check.label) + '。可以先在紙上列重點再打字。</p>' +
-    '<div class="next"><button class="btn" id="nx">開始寫 →</button></div>');
+  frame("Writing task", '<div class="q" style="font-size:18.5px">' + esc(d.prompt) + '</div>' +
+    '<h3>Make sure you:</h3><ul>' + d.tips.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
+    '<h3>You could start like this:</h3><ul class="en">' + d.starters.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul>' +
+    '<p class="tip">Length: ' + d.wmin + '–' + d.wmax + ' words. Use at least 3 words from this unit and at least ' + d.check.need + ' ' + esc(d.check.label) + '. Jot down your main points on paper first if that helps.</p>' +
+    '<div class="next"><button class="btn" id="nx">Start writing →</button></div>');
   app.querySelector("#nx").onclick = nextStep;
 }
 function countWords(t){ var m = t.match(/[A-Za-z][A-Za-z'’-]*/g); return m ? m.length : 0; }
 function stepWrite(){
   var d = L.d, k = dayKey(L.u, d);
   var pool = []; L.u.days.forEach(function(x){ if (x.n < d.n) pool = pool.concat(x.words || []); });
-  frame("寫吧！", '<p class="tip">' + esc(d.prompt) + '</p>' +
+  frame("Write!", '<p class="tip">' + esc(d.prompt) + '</p>' +
     '<textarea id="tx" spellcheck="true" lang="en" placeholder="' + esc(d.starters[0]) + '"></textarea>' +
     '<div class="meter"><span id="wc"></span><span id="ck"></span><span id="uw"></span></div>' +
-    '<details><summary class="tip" style="cursor:pointer">這單元的單字（用到的會變綠）</summary><div class="chips" id="chips">' +
+    '<details><summary class="tip" style="cursor:pointer">Words from this unit (they turn green when you use them)</summary><div class="chips" id="chips">' +
     pool.map(function(w){ return '<span data-w="' + esc(w.w) + '">' + esc(w.w) + '</span>'; }).join("") + '</div></details>' +
-    '<p class="tip">會自動存草稿，下次打開還在。被動式和 if 句是電腦自動數的，不一定完全準。</p>' +
-    '<div class="next"><button class="btn" id="nx" disabled>交出去 →</button></div>');
+    '<p class="tip">Your draft saves itself, so it will still be here next time. The computer counts passive and if-sentences automatically, so the count may not be perfect.</p>' +
+    '<div class="next"><button class="btn" id="nx" disabled>Hand it in →</button></div>');
   var tx = app.querySelector("#tx"), re = new RegExp(d.check.re, "gi");
   tx.value = S.drafts[k] || "";
   function check(){
@@ -492,9 +497,9 @@ function stepWrite(){
       s.classList.toggle("on", on); if (on) used++;
     });
     var wcEl = app.querySelector("#wc"), ckEl = app.querySelector("#ck"), uwEl = app.querySelector("#uw");
-    wcEl.textContent = "字數 " + wc + " / " + d.wmin + "–" + d.wmax; wcEl.className = wc >= d.wmin && wc <= d.wmax + 30 ? "ok" : "";
+    wcEl.textContent = "Words " + wc + " / " + d.wmin + "–" + d.wmax; wcEl.className = wc >= d.wmin && wc <= d.wmax + 30 ? "ok" : "";
     ckEl.textContent = d.check.label + " " + c + " / " + d.check.need; ckEl.className = c >= d.check.need ? "ok" : "";
-    uwEl.textContent = "單元單字 " + used + " / 3"; uwEl.className = used >= 3 ? "ok" : "";
+    uwEl.textContent = "Unit words " + used + " / 3"; uwEl.className = used >= 3 ? "ok" : "";
     app.querySelector("#nx").disabled = wc < Math.round(d.wmin * .7);
     L.wc = wc; L.feat = c; L.used = used;
   }
@@ -510,10 +515,10 @@ function finish(){
   var rec = { id:newId(), ts:Date.now(), who:who, unit:u.n, day:d.n, kind:d.kind, title:d.title, min:min };
   if (d.kind === "writing"){
     rec.text = L.text; rec.words = L.wc; rec.feat = L.feat; rec.used = L.used;
-    rec.summary = "U" + u.n + "-" + d.n + " 寫作 " + L.wc + " 字：" + L.text.replace(/\s+/g, " ").slice(0, 140);
+    rec.summary = "U" + u.n + "-" + d.n + " Writing, " + L.wc + " words: " + L.text.replace(/\s+/g, " ").slice(0, 140);
   } else {
     rec.score = L.score; rec.total = L.total; if (L.said) rec.said = true;
-    rec.summary = "U" + u.n + "-" + d.n + " " + KIND[d.kind].zh + "「" + d.zh + "」" + L.score + "/" + L.total;
+    rec.summary = "U" + u.n + "-" + d.n + " " + KIND[d.kind].en + " \u201c" + d.title + "\u201d " + L.score + "/" + L.total;
   }
   S.done[k] = { score:rec.score, total:rec.total, ts:rec.ts, id:rec.id };
   if (d.words) addWords(d.words);
@@ -521,14 +526,14 @@ function finish(){
   S.recs.push(rec); S.recs = S.recs.slice(-200);
   save();
   var body = d.kind === "writing"
-    ? '<p class="soft">' + rec.words + ' 個字，交出去了。看看你寫的，再對照範例：哪些句子你也想用？</p><h3>你寫的</h3><div class="mine">' + esc(rec.text) + '</div>' +
-      '<details open><summary class="tip" style="cursor:pointer;font-weight:800">範例（不是標準答案）</summary><div class="model">' + esc(d.model) + '</div></details>' +
-      '<p class="tip" style="margin-top:12px">請爸爸媽媽讀一下你的作文。</p>'
-    : '<p class="big">' + L.score + ' / ' + L.total + '</p><p class="soft">' + (L.score >= L.total * .8 ? "很棒！" : "錯的題目明天複習的時候會再出現相關單字。") +
-      (d.words ? "今天的 " + d.words.length + " 個單字加進複習了，明天會再看到。" : "") + '</p>';
+    ? '<p class="soft">' + rec.words + ' words, handed in. Read yours, then compare it with the model: which sentences would you like to borrow?</p><h3>Your writing</h3><div class="mine">' + esc(rec.text) + '</div>' +
+      '<details open><summary class="tip" style="cursor:pointer;font-weight:800">Model (one good answer, not the only one)</summary><div class="model">' + esc(d.model) + '</div></details>' +
+      '<p class="tip" style="margin-top:12px">Ask Mum or Dad to read your writing.</p>'
+    : '<p class="big">' + L.score + ' / ' + L.total + '</p><p class="soft">' + (L.score >= L.total * .8 ? "Great work! " : "Don't worry: the words behind your mistakes will come back in review. ") +
+      (d.words ? "Today's " + d.words.length + " words have been added to your review deck. See you tomorrow!" : "") + '</p>';
   var nx = nextDay(u);
-  frame("第 " + d.n + " 課完成 🎉", body + '<div id="cstat" class="cloud" hidden></div>' +
-    '<div class="next">' + '<button class="btn alt" id="hm">回課表</button></div>');
+  frame("Lesson " + d.n + " complete 🎉", body + '<div id="cstat" class="cloud" hidden></div>' +
+    '<div class="next">' + '<button class="btn alt" id="hm">Back to lessons</button></div>');
   app.querySelector("#hm").onclick = function(){ L = null; home(); };
   resultCloud(rec);
 }

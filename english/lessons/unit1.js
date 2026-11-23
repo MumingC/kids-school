@@ -13,7 +13,7 @@ window.UNITS.push({
   n: 1,
   title: "How Things Work",
   zh: "東西怎麼運作",
-  blurb: "跟著 Mark Rober 和 Steve Mould 拆解日常生活裡的科學：雞蛋怎麼摔不破、檸檬怎麼發電、加油槍怎麼知道油滿了。",
+  blurb: "Take everyday science apart with Mark Rober and Steve Mould: how to keep a falling egg in one piece, how lemons make electricity, and how a petrol pump knows when to stop. Week 2 is harder: B2-level questions, with explanations in English.",
   weeks: [
     { n: 1, title: "Energy and Impact", zh: "能量與撞擊" },
     { n: 2, title: "Think Like an Engineer", zh: "像工程師一樣思考" }
@@ -141,70 +141,77 @@ window.UNITS.push({
       tips: ["Give it a name.（幫它取名字）", "Say what it is made of.（用什麼材料）", "Explain why the egg will stay intact.（為什麼蛋不會破）", "What could go wrong?（可能出什麼問題）"],
       starters: ["My contraption is called …", "It is made of …", "If the egg …, the … will …", "I think it will work because …"],
       wmin: 100, wmax: 150,
-      check: { label: "if / unless 句子", re: "\\b(if|unless)\\b", need: 2 },
+      check: { label: "if / unless sentences", re: "\\b(if|unless)\\b", need: 2 },
       model: "My contraption is called the Sky Pillow. It is made of a plastic cup, cotton balls and a parachute cut from a trash bag. The egg sits in the cup, surrounded by soft cotton. If the egg falls straight down, the parachute will slow it down, so it will have less kinetic energy at the bottom. When the cup hits the ground, the cotton works as a cushion and makes the impact last longer. That spreads out the force. If it lands on its side, the cup will still protect the egg because the cotton is all around it. I think the egg will stay intact unless the parachute gets tangled."
     },
 
-    /* ---------------- Week 2 ---------------- */
+    /* ---------------- Week 2 (harder: B2 questions, English definitions and explanations) ----------------
+       def = an English definition, shown first; zh stays as a small hint. */
     {
-      n: 6, week: 2, kind: "video", min: 35,
+      n: 6, week: 2, kind: "video", min: 40,
       title: "The Rock-Skipping Robot", zh: "打水漂機器人",
       vid: "M0_U1FHwACk", ch: "Mark Rober", len: "9:22",
-      intro: "Mark Rober 做了一台打水漂機器人，找出讓石頭跳最多下的祕訣，也教你工程師的四個步驟。",
+      intro: "Mark Rober builds a rock-skipping robot to find the perfect skip, and uses it to reveal the four steps he follows on every big engineering project. This week's questions ask why, not just what.",
       words: [
-        { w: "research", zh: "研究；查資料", ex: "Mark always starts a big project with research." },
-        { w: "prototype", zh: "原型；試作品", ex: "A good prototype is cheap and easy to change." },
-        { w: "variable", zh: "變因（實驗裡可以改變的東西）", ex: "Change only one variable at a time." },
-        { w: "angle", zh: "角度", ex: "Hold the rock at an angle of about 20 degrees." },
-        { w: "optimal", zh: "最佳的", ex: "They searched for the optimal way to throw a rock." },
-        { w: "stable", zh: "穩定的", ex: "A spinning rock stays stable in the air." },
-        { w: "momentum", zh: "動量；往前衝的力", ex: "The rock uses its momentum to ride up out of the water." },
-        { w: "confidence", zh: "信心", ex: "Testing gives you confidence that your design will work." }
+        { w: "reconfigure", def: "to change how the parts of something are arranged or set up", zh: "重新調整配置", ex: "A good prototype is cheap and easy to reconfigure." },
+        { w: "variable", def: "one thing in an experiment that you can change", zh: "變因", ex: "They changed only one variable on each throw." },
+        { w: "parameter", def: "a setting or limit that controls how something works", zh: "參數", ex: "Slowly they narrowed in on the key parameters." },
+        { w: "optimal", def: "the best possible", zh: "最佳的", ex: "About 20 degrees is the optimal angle." },
+        { w: "relative to", def: "compared with; measured from", zh: "相對於", ex: "Measure the angle of the rock relative to the water." },
+        { w: "momentum", def: "the force a moving object has that keeps it moving", zh: "動量", ex: "The rock uses its forward momentum to ride up the ramp." },
+        { w: "dissolve", def: "to break up in a liquid until it disappears", zh: "溶解", ex: "The clay rocks dissolve in about 30 minutes." },
+        { w: "intentional", def: "done on purpose", zh: "故意的", ex: "The robot's weak first throw was intentional." }
       ],
       watch: [
-        "What are Mark's <b>four steps</b> for any big project?（四個步驟）",
-        "Why is a <b>robot</b> better than a person for testing?",
-        "What are the four secrets of the perfect rock skip?"
+        "List Mark's <b>four steps</b> for any big project, in order.",
+        "On each throw, what exactly did the team change, and what did they keep the same?",
+        "Before making the video, what did Mark believe about the best throw? Was he right?"
       ],
       qs: [
-        { q: "Why did Mark build a robot instead of just throwing rocks himself?", o: ["A robot can change one thing at a time; every human throw is a little different", "Robots can throw farther than people", "He hurt his arm", "Robots are more fun to watch"], a: 0, why: "人每次丟的動作都不一樣，機器人可以一次只改一個變因。" },
-        { q: "What is the correct order of Mark's four steps?", o: ["Research → prototype → test what matters → final version", "Final version → research → prototype → test", "Prototype → final version → research → test", "Test → final version → prototype → research"], a: 0, why: "他說很多人想直接跳到第四步，通常行不通。" },
-        { q: "Why did they make their own “rocks” out of clay?", o: ["They could make many with the exact size they wanted", "Clay rocks are lighter than air", "Real rocks were not allowed at the lake", "Clay skips 100 times every time"], a: 0, why: "可以控制直徑和厚度，密度跟石頭差不多，而且泡水 30 分鐘就會溶掉。" },
-        { q: "What is the best angle between the rock and the water?", o: ["About 20 degrees", "About 90 degrees", "Perfectly flat (0 degrees)", "About 60 degrees"], a: 0, why: "大約 20 度，石頭撞水後會做出一個「斜坡」讓自己衝上去。" },
-        { q: "Why should you spin the rock with your wrist?", o: ["Spinning things are more stable, so the rock keeps its angle", "Spinning makes the rock lighter", "Spinning makes a nice sound", "It doesn't matter"], a: 0, why: "旋轉的東西比較穩（角動量），可以維持 20 度的角度。" },
-        { q: "What kind of rock is best for kids?", o: ["A small, light rock with a flat bottom", "The biggest rock they can find", "A round rock like a ball", "A wet rock"], a: 0, why: "底部平的最重要；小孩用小而輕的石頭比較好甩出速度。" }
+        { q: "Mark says jumping straight to step four is “almost worse if it does” work. What does he mean?", o: ["Even if it works, you can't be sure your design is close to the best one", "If it works, you will have spent too much money", "If it works, nobody will believe you", "If it works, you will have nothing left to build"], a: 0, why: "He says you would have “no confidence that you're close to the optimal design”. A lucky success doesn't tell you why it worked." },
+        { q: "In step three, a “sensitivity analysis” means…", o: ["trying many combinations of settings to find out which ones actually matter", "checking that the robot is safe to use near children", "asking experts which rocks are the most sensitive", "building the final version very carefully"], a: 0, why: "Mark: “we try lots of different combinations of settings to see what actually matters and what doesn't.”" },
+        { q: "Changing the robot's wrist angle changed ___, while changing its arm angle changed ___.", o: ["the tilt of the rock relative to the water / the angle of the rock's path towards the water", "the path of the rock / the tilt of the rock", "the spin of the rock / the weight of the rock", "the speed of the rock / the size of the rock"], a: 0, why: "Wrist angle = how the rock itself is tilted. Arm angle = the direction it travels in. One option swaps them; read carefully!" },
+        { q: "Which statement about the clay “rocks” is NOT true?", o: ["They were baked in an oven to make them as hard as real rocks", "They had a density similar to real rocks", "They let the team control the diameter and thickness", "They dissolved after about 30 minutes in the lake"], a: 0, why: "The clay was unfired: it was dried in the sun, not baked. That is also why it dissolved in the water afterwards." },
+        { q: "Why was it important to change only one thing on each throw?", o: ["So that any big improvement could be linked to the thing they had just changed", "So that the robot would not break", "So that the children could take turns", "So that the clay would last longer"], a: 0, why: "“If we suddenly saw a huge improvement, we know it would be from the thing that we just changed.” A human can't do this, because every throw is slightly different." },
+        { q: "Mark used to think the best throw was low and parallel to the water. What did he learn instead?", o: ["Starting a bit higher works better, because the rock gets extra potential energy", "The lower the throw, the more skips you get", "The height of the throw doesn't matter at all", "You should throw straight down at the water"], a: 0, why: "The path should be about 20 degrees. Like a ball dropped from higher up, a rock thrown from higher has more energy to spend on skips." },
+        { q: "What happens if the rock isn't spinning enough?", o: ["It loses its 20-degree angle, tips over and sinks", "It skips too many times and goes out of sight", "It becomes heavier", "It makes a louder splash but skips just as well"], a: 0, why: "Spinning objects resist changes to their rotation (angular momentum), so the rock keeps its ramp angle. Without spin “it will rotate over and then sink.”" },
+        { q: "Mark says “the heavier the better”, yet he tells kids to use small, light rocks. Why?", o: ["A rock that is too heavy can't be thrown at the full speed of your arm", "Heavy rocks are never flat on the bottom", "Light rocks spin in the opposite direction", "Heavy rocks dissolve in water"], a: 0, why: "A heavier rock carries more energy, but only if you can still reach your arm's top speed before you let go. Most children can't with a heavy rock." }
       ],
       say: {
-        q: "Mark says jumping straight to step four is a bad idea. Why? Think of something you built or made that didn't work the first time.",
-        starters: ["Jumping to step four is a bad idea because …", "Once I tried to make …", "Next time I will …"]
+        q: "Mark says nobody can tell you the best egg-drop design without testing. Do you agree? Give a reason and an example from your own life.",
+        starters: ["I agree / I don't completely agree, because …", "For example, when I …", "If I had tested it first, …"]
       }
     },
     {
-      n: 7, week: 2, kind: "reading", min: 30,
+      n: 7, week: 2, kind: "reading", min: 35,
       title: "Two Brothers and a Box of Wind", zh: "萊特兄弟的風洞",
-      intro: "一百多年前，兩兄弟也用「一次只改一個變因」的方法，做出了第一架飛機。",
+      intro: "More than a century before Mark's robot, two bicycle makers used the same idea (change one thing at a time and measure) to solve the problem of flight. This text is longer than last week's, and some questions ask you to read between the lines.",
       words: [
-        { w: "glider", zh: "滑翔機", ex: "A glider flies without an engine." },
-        { w: "lift", zh: "升力（把東西往上推的力）", ex: "A good wing creates lift." },
-        { w: "publish", zh: "發表；出版", ex: "Scientists publish their results so others can use them." },
-        { w: "disappointed", zh: "失望的", ex: "Wilbur was disappointed when the glider did not fly well." },
-        { w: "accurate", zh: "準確的", ex: "Accurate numbers helped them build a better wing." },
-        { w: "succeed", zh: "成功", ex: "You can succeed if you keep testing your ideas." }
+        { w: "pioneer", def: "one of the first people to do something new", zh: "先驅", ex: "Otto Lilienthal was a famous glider pioneer." },
+        { w: "flawed", def: "containing a mistake that makes something wrong or less useful", zh: "有缺陷的", ex: "The brothers suspected that the published data was flawed." },
+        { w: "discouraged", def: "having lost confidence or hope", zh: "灰心的", ex: "Wilbur was so discouraged that he almost gave up." },
+        { w: "abandon", def: "to give something up completely", zh: "放棄", ex: "Rather than abandon the project, they tested the numbers themselves." },
+        { w: "systematically", def: "in a careful, step-by-step way, following a plan", zh: "有系統地", ex: "They worked systematically, changing one feature at a time." },
+        { w: "breakthrough", def: "an important discovery that solves a problem", zh: "突破", ex: "The wind tunnel results were a breakthrough." },
+        { w: "reliable", def: "that you can trust to be correct", zh: "可靠的", ex: "Using their own reliable data, they built a new glider." },
+        { w: "conclude", def: "to decide that something is true after thinking about it", zh: "下結論", ex: "It is easy to conclude that they were simply lucky." }
       ],
       text: [
-        "In 1900, two brothers who ran a bicycle shop in Dayton, Ohio, travelled to the windy beaches of Kitty Hawk, North Carolina. Wilbur and Orville Wright wanted to build a flying machine. First they tested a glider, a plane with no engine, but it did not produce as much lift as they had hoped. The next year they came back with a bigger glider. It was even worse.",
-        "To design their wings, the brothers had used numbers that other scientists had published. Slowly they realised something surprising: the published numbers were wrong. On the train home, Wilbur was so disappointed that he said people might not fly for a thousand years.",
-        "But instead of giving up, they decided to collect their own data. In late 1901 they built a wooden box about two metres long with a fan at one end: a simple wind tunnel. Inside it they placed tiny model wings made of metal and measured how much lift each one produced. They changed only one thing at a time, such as the curve, the length or the width of the wing. In a few weeks they tested around 200 different wing shapes and wrote down every result.",
-        "With accurate numbers, they built a much better glider in 1902. Then they added an engine and propellers. On 17 December 1903, Orville flew their plane for 12 seconds and travelled 37 metres. Later that day, Wilbur flew for 59 seconds. It was the first time a powered plane carrying a person had flown under control.",
-        "The Wright brothers did not succeed because they were lucky. They succeeded because they tested their ideas, changed one thing at a time and trusted careful measurements, just like Mark Rober's rock-skipping robot more than a hundred years later."
+        "In September 1900, two brothers who ran a bicycle shop in Dayton, Ohio, shipped a homemade glider to the windy sand dunes of Kitty Hawk, North Carolina. Wilbur and Orville Wright had no university degrees and no money from the government, yet they had set themselves one of the hardest problems of their time: building a machine that could carry a person through the air and be steered by its pilot. Their first glider flew, but it produced far less lift than their calculations had predicted. A year later they returned with a larger glider, confident that size would solve the problem. Instead, it performed even worse.",
+        "Their calculations were based on tables of figures published by Otto Lilienthal, a famous German glider pioneer, together with an old number for air pressure that engineers had relied on for more than a century. Gradually the brothers began to suspect that the published data was flawed. It was an uncomfortable idea: two bicycle makers were questioning the work of respected experts. On the train home in 1901, Wilbur was so discouraged that, according to Orville, he said people would not fly for a thousand years.",
+        "Rather than abandon the project, the brothers decided to test the numbers themselves. That autumn they built a wind tunnel in their workshop: a wooden box about 1.8 metres long with a fan at one end, driven by the engine that powered the shop's machines. Inside it they mounted small metal model wings on delicate balances made partly from bicycle spokes and old hacksaw blades. Working systematically, they changed a single feature at a time (the curve of the wing, its length, its width, the shape of its tips) and recorded how much lift each version produced. In roughly two months they tested around 200 wing designs.",
+        "The results were a breakthrough. They showed that the old air-pressure figure was too high, which explained why the earlier gliders had disappointed them, and that long, narrow wings produced more lift than short, wide ones. Using their own reliable data, the brothers built a new glider in 1902 and made hundreds of successful flights with it. They then designed their own propellers, which they treated as wings that spin, and, with the help of their mechanic Charlie Taylor, built a lightweight engine.",
+        "On 17 December 1903, Orville piloted the powered Wright Flyer for 12 seconds, covering about 37 metres. Later that morning, Wilbur kept it in the air for 59 seconds. It is easy to conclude that the brothers were simply brilliant, or simply lucky. The truth is less dramatic but more useful: when the experts' numbers let them down, they did not guess. They measured."
       ],
       qs: [
-        { q: "What was wrong with the gliders of 1900 and 1901?", o: ["They did not produce enough lift", "They were too fast", "They had no wings", "They were too small to carry anyone"], a: 0, why: "第一段：did not produce as much lift as they had hoped。" },
-        { q: "What did the brothers discover about the other scientists' numbers?", o: ["They were wrong", "They were perfect", "They were secret", "They were about bicycles"], a: 0, why: "第二段：the published numbers were wrong。" },
-        { q: "What was their wind tunnel?", o: ["A wooden box with a fan at one end", "A tunnel under a mountain", "A large balloon", "A train"], a: 0, why: "第三段：a wooden box about two metres long with a fan。" },
-        { q: "How did they test the model wings?", o: ["They changed one thing at a time and measured the lift", "They changed everything at once", "They asked other people to guess", "They flew each wing at the beach"], a: 0, why: "一次只改一個變因：弧度、長度或寬度。" },
-        { q: "How long was Orville's first powered flight?", o: ["12 seconds", "59 seconds", "200 seconds", "1,000 seconds"], a: 0, why: "Orville 飛了 12 秒、37 公尺；同一天稍晚 Wilbur 飛了 59 秒。" },
-        { q: "What is the writer's main message in the last paragraph?", o: ["Careful testing, not luck, leads to success", "The Wright brothers were very lucky", "Robots are better than people", "Bicycles are better than planes"], a: 0, why: "did not succeed because they were lucky … because they tested their ideas。" }
+        { q: "What is the main purpose of the last paragraph?", o: ["To argue that careful measurement, not luck, explains the brothers' success", "To describe the 1903 flights in technical detail", "To prove that the brothers were cleverer than every other scientist", "To explain how propellers work"], a: 0, why: "The writer rejects “brilliant or lucky” and ends with “they did not guess. They measured.”" },
+        { q: "Why did the 1901 glider perform worse than the brothers expected?", o: ["It was designed with published figures that turned out to be wrong", "It was built from cheaper materials", "The wind at Kitty Hawk was too weak that year", "Wilbur was not an experienced pilot"], a: 0, why: "Paragraphs 2 and 4: Lilienthal's tables and the old air-pressure number were too high, so the wings made less lift than calculated. Making the glider bigger couldn't fix that." },
+        { q: "Why does the writer call the brothers' suspicion “an uncomfortable idea”?", o: ["Because two ordinary bicycle makers were doubting respected experts", "Because the train journey home was uncomfortable", "Because the idea made them feel ill", "Because they had promised the government results"], a: 0, why: "Paragraph 2: “two bicycle makers were questioning the work of respected experts.”" },
+        { q: "In paragraph 3, “Working systematically” is closest in meaning to…", o: ["following a careful plan, step by step", "working as fast as possible", "working with a large team", "using expensive machines"], a: 0, why: "The rest of the sentence shows the plan: one feature changed at a time, and every result recorded." },
+        { q: "Which of these did the wind tunnel tests NOT show?", o: ["That a more powerful engine was the key to flight", "That the old air-pressure figure was too high", "That long, narrow wings gave more lift than short, wide ones", "Why their earlier gliders had been disappointing"], a: 0, why: "The tunnel tested wings, not engines. The engine came later, built with Charlie Taylor." },
+        { q: "How did the brothers think about propellers?", o: ["As wings that spin", "As fans that push air downwards", "As bicycle wheels", "As something they could copy from ships without testing"], a: 0, why: "Paragraph 4: “which they treated as wings that spin”, so their wing data helped them design propellers too." },
+        { q: "Put these events in order: (A) the wind tunnel tests (B) Wilbur's 59-second flight (C) the discouraging train ride home (D) hundreds of glider flights.", o: ["C → A → D → B", "A → C → D → B", "C → D → A → B", "D → C → A → B"], a: 0, why: "Train home in 1901 → tunnel that autumn → new glider in 1902 → powered flight in December 1903." },
+        { q: "What can we infer about Wilbur's “thousand years” comment?", o: ["He said it out of frustration, and the brothers proved it wrong two years later", "He believed it for the rest of his life", "It was based on careful measurements", "It was printed in newspapers as a scientific prediction"], a: 0, why: "He was “so discouraged” in 1901, but by December 1903 they had flown. Feelings in a bad moment are not data!" }
       ]
     },
     {
@@ -212,65 +219,70 @@ window.UNITS.push({
       title: "How Does a Petrol Pump Know When to Stop?", zh: "加油槍怎麼知道油滿了？",
       vid: "fT2KhJ8W-Kg", ch: "Steve Mould", len: "11:30", end: 691,
       challenge: true,
-      intro: "Steve Mould 把加油槍鋸成兩半，找出它「喀」一聲自動停下來的祕密。這支比較難（B2），可以開字幕看兩次。影片在 11 分 30 秒後是廣告，會自動停。",
+      intro: "Steve Mould cuts a petrol nozzle in half to find out how it switches itself off with a click. This one is a real challenge: watch it twice if you need to, once with subtitles and once without. The video stops by itself at 11:30, before the advert.",
       words: [
-        { w: "nozzle", zh: "噴嘴；加油槍頭", ex: "He cut a petrol nozzle in half to look inside." },
-        { w: "mechanism", zh: "機械裝置；機構", ex: "There are two clever mechanisms inside the nozzle." },
-        { w: "pressure", zh: "壓力", ex: "The pressure drops where the pipe gets narrow." },
-        { w: "narrow", zh: "窄的", ex: "Air moves faster through the narrow part of the tube." },
-        { w: "valve", zh: "閥門", ex: "When the valve closes, the petrol stops." },
-        { w: "membrane", zh: "薄膜", ex: "A thin membrane gets pulled up by the suction." },
-        { w: "lever", zh: "槓桿", ex: "Pulling the handle moves a lever inside." },
-        { w: "overflow", zh: "溢出來", ex: "The nozzle turns off so the tank doesn't overflow." }
+        { w: "nozzle", def: "the narrow end of a pipe or hose that liquid comes out of", zh: "噴嘴；加油槍頭", ex: "He cut a petrol nozzle in half to look inside." },
+        { w: "mechanism", def: "a set of moving parts that work together to do a job", zh: "機械裝置", ex: "There are two clever mechanisms inside the nozzle." },
+        { w: "pressure", def: "the force of a gas or liquid pushing on something", zh: "壓力", ex: "The pressure drops where the pipe gets narrow." },
+        { w: "constriction", def: "a place where a pipe or tube becomes narrower", zh: "管子變窄的地方", ex: "The air speeds up at the constriction." },
+        { w: "valve", def: "a part that opens and closes to control a flow of liquid or gas", zh: "閥門", ex: "When the valve closes, the petrol stops." },
+        { w: "membrane", def: "a thin, flexible sheet that separates two spaces", zh: "薄膜", ex: "A thin membrane gets pulled up by the suction." },
+        { w: "lever", def: "a bar that turns on a fixed point to move something", zh: "槓桿", ex: "Pulling the handle moves a lever inside." },
+        { w: "overflow", def: "to spill over the edge because something is too full", zh: "溢出來", ex: "The nozzle turns off so the tank doesn't overflow." }
       ],
       watch: [
         "Is there an electronic sensor inside? (Listen to the beginning.)",
-        "What happens to the <b>pressure</b> when air goes through the narrow part?",
-        "What do the little <b>ball bearings</b>（小鋼珠）do?"
+        "What happens to the <b>pressure</b> when air goes through the narrow part, and why?",
+        "What do the little <b>ball bearings</b> (small metal balls) do?"
       ],
       qs: [
-        { q: "How does the nozzle “know” that the tank is full?", o: ["Petrol covers a small hole at the tip, and that changes the air pressure inside", "An electronic sensor measures the petrol", "A computer at the station tells it", "The driver presses a button"], a: 0, why: "他一開始也以為有電子感應器，其實完全是靠流體和機械：油淹過槍頭的小洞。" },
-        { q: "When air goes through the narrow part of a tube, it moves faster and the pressure…", o: ["goes down", "goes up", "stays the same", "disappears completely"], a: 0, why: "Venturi effect：窄的地方流得快、壓力變低，所以 U 形管裡的水被吸上來。" },
-        { q: "Why must the fluid move faster in the narrow part?", o: ["The same amount has to get through a smaller space", "Narrow pipes are warmer", "Petrol is lighter than water", "The pump pushes harder there"], a: 0, why: "同樣多的東西要通過比較小的地方，就一定要跑得比較快。" },
-        { q: "What happens when petrol reaches the hole at the end of the nozzle?", o: ["The suction gets stronger and pulls a membrane up", "The petrol gets hotter", "The nozzle makes more petrol", "Nothing changes"], a: 0, why: "吸油比吸空氣難，另一邊的吸力變強，把薄膜往上拉。" },
-        { q: "What do the ball bearings do?", o: ["They hold the lever's pivot in place; when they fall, the valve shuts", "They make the clicking music", "They clean the petrol", "They keep the handle cold"], a: 0, why: "鋼珠卡住時是槓桿的支點；薄膜一拉，鋼珠掉進去，整組機構垮下來，閥門關上。" },
-        { q: "Why is this clever mechanism important?", o: ["It stops petrol from spilling, which could start a fire", "It makes petrol cheaper", "It makes cars faster", "It saves electricity at the station"], a: 0, why: "油溢出來在加油站是很大的火災危險（fire hazard）。" }
+        { q: "How does the nozzle “know” that the tank is full?", o: ["Petrol covers a small hole at the tip, and that changes the air pressure inside", "An electronic sensor measures the petrol", "A computer at the petrol station tells it", "It counts how many litres have gone through"], a: 0, why: "Steve expected an electronic sensor too, but it is “entirely fluid mechanical”: petrol covers the hole at the end of the nozzle." },
+        { q: "When air goes through the narrow part of a tube, it moves faster and the pressure…", o: ["goes down", "goes up", "stays the same", "disappears completely"], a: 0, why: "This is the Venturi effect: the water in the U-bend is sucked UP, so the pressure in the constriction must be lower." },
+        { q: "Why must the fluid move faster in the narrow part?", o: ["The same amount has to get through a smaller space", "Narrow pipes are warmer", "Petrol is lighter than water", "The pump pushes harder there"], a: 0, why: "“To get the same amount of mass through a narrower pipe, the mass must have to travel more quickly.”" },
+        { q: "Steve also explains the low pressure with conservation of energy. Which statement matches his explanation?", o: ["When the fluid speeds up, its kinetic energy rises, so the energy stored as pressure must fall", "When the fluid speeds up, it gains pressure and kinetic energy together", "The narrow pipe creates new energy", "The fluid loses all its energy as heat"], a: 0, why: "Kinetic energy + energy stored as pressure stays the same in total. Faster flow → more kinetic energy → lower pressure." },
+        { q: "In his model, Steve covers one tube with his finger. What does his finger stand for in the real nozzle?", o: ["Petrol covering the small hole at the tip of the nozzle", "The driver's hand on the handle", "The spring that closes the valve", "The ball bearings falling"], a: 0, why: "Covering the tube stops it from letting air in to relieve the suction, exactly what petrol does when it reaches the hole." },
+        { q: "What happens when petrol reaches the hole at the end of the nozzle?", o: ["The suction in the sealed chamber gets stronger and pulls the membrane up", "The petrol gets hotter and expands", "The pressure in the chamber rises and pushes the membrane down", "Nothing changes until the driver lets go"], a: 0, why: "Petrol is heavier than air, so the tube can't suck as much. The other branch then feels a stronger suction, which lifts the membrane." },
+        { q: "What do the ball bearings do?", o: ["They hold the lever's pivot in place; when they fall, the valve shuts", "They make the clicking sound by hitting the metal", "They filter dirt out of the petrol", "They keep the handle cool"], a: 0, why: "Jammed in place, they make a fulcrum for the lever. When the membrane pulls the wedge up, they fall into the middle, everything collapses and the valve closes." },
+        { q: "Why is this mechanism so important at a petrol station?", o: ["Spilled petrol would be a serious fire hazard", "It makes petrol cheaper", "It makes cars go faster", "It saves electricity"], a: 0, why: "Steve ends with it: petrol spilling out of a full tank “would be a pretty big fire hazard.”" }
       ],
       say: {
-        q: "Explain to someone in your family how the nozzle turns itself off. Use at least three of today's words.",
-        starters: ["Inside the nozzle there is …", "When the tank is full, …", "Then the … closes, so …"]
+        q: "Explain to someone in your family how the nozzle turns itself off, step by step. Use at least four of today's words.",
+        starters: ["Inside the nozzle there is a constriction, so …", "When the tank is full, petrol covers …", "That pulls the membrane up, which …", "Finally the valve …"]
       }
     },
     {
-      n: 9, week: 2, kind: "grammar", min: 25,
-      title: "The Passive: Was it made or did it make?", zh: "文法：被動式",
+      n: 9, week: 2, kind: "grammar", min: 30,
+      title: "The Passive: Every Tense, Every Shape", zh: "文法：被動式（進階）",
       explain: [
-        "<b>被動式 = be 動詞 + 過去分詞</b>。重點放在「東西被怎麼了」，而不是「誰做的」。<br><span class=\"en\">Mark's team <u>made</u> the robot.（主動）→ The robot <u>was made</u> by Mark's team.（被動）</span>",
-        "<b>時態看 be 動詞</b>：現在 is/are + p.p.，過去 was/were + p.p.，未來 will be + p.p.<br><span class=\"en\">Airbags <u>are used</u> in almost every car. · The tunnel <u>was built</u> in 1901. · The results <u>will be recorded</u>.</span>",
-        "<b>什麼時候用？</b>不知道、不重要，或大家都知道是誰做的時候。科學報告裡很常見。<br><span class=\"en\">Over 200 wing shapes <u>were tested</u>.</span>",
-        "常見不規則過去分詞：<span class=\"en\">make → made · build → built · throw → thrown · fly → flown · cut → cut · write → written</span>"
+        "<b>Passive = a form of “be” + past participle.</b> Use it when the action matters more than who did it.<br><span class=\"en\">The robot <u>was built</u> by Mark and his family. · Over 200 wings <u>were tested</u>.</span>",
+        "<b>The tense lives in “be”.</b> The past participle never changes.<br><span class=\"en\">present: Airbags <u>are fitted</u> in most cars. · past: The tunnel <u>was built</u> in 1901.<br>present perfect: The data <u>has been checked</u> twice. · past perfect: The tables <u>had been used</u> for years.<br>continuous: The tank <u>is being filled</u>. · future: The results <u>will be published</u>.</span>",
+        "<b>Modal + be + past participle</b> (can / must / should / might).<br><span class=\"en\">Petrol <u>must not be spilled</u>. · Each test <u>should be repeated</u> five times.</span>",
+        "<b>Questions and negatives</b> use the “be” part, never “do”.<br><span class=\"en\">✗ <s>Did the tunnel built</s> in 1901? → ✓ <u>Was</u> the tunnel <u>built</u> in 1901?<br>The engine <u>wasn't designed</u> by Lilienthal.</span>",
+        "<b>Leave out “by …”</b> when the doer is obvious, unknown or unimportant. Science writers do this all the time.<br><span class=\"en\">The clay <u>was dried</u> in the sun. (not “by us”)</span>"
       ],
       qs: [
-        { q: "The “rocks” in the video ___ from clay.", o: ["were made", "made", "were make", "was making"], a: 0, why: "石頭是「被」做出來的，過去式 → were + made。" },
-        { q: "The wind tunnel ___ by the Wright brothers in 1901.", o: ["was built", "built", "is building", "was build"], a: 0, why: "被建造、過去 → was built（build 的 p.p. 是 built）。" },
-        { q: "Choose the correct sentence.", o: ["Over 200 wing shapes were tested.", "Over 200 wing shapes were test.", "Over 200 wing shapes tested were.", "Over 200 wing shapes was tested."], a: 0, why: "複數 shapes → were；後面要過去分詞 tested。" },
-        { q: "Mark's team made a robot. → A robot ___ by Mark's team.", o: ["was made", "is made", "made", "has make"], a: 0, why: "原句是過去式 made，所以被動也用過去 was made。" },
-        { q: "The valve ___ by a spring.", o: ["is pushed", "pushes", "is push", "pushing"], a: 0, why: "閥門被彈簧推 → is + pushed。" },
-        { q: "Airbags ___ in almost every new car today.", o: ["are used", "use", "are using", "used"], a: 0, why: "today → 現在式；複數 → are used。" },
-        { q: "Each plane will ___ five times.", o: ["be thrown", "throw", "be throw", "thrown"], a: 0, why: "未來被動：will be + p.p.（throw → thrown）。" },
-        { q: "Why do science reports often use the passive?", o: ["Because what happened matters more than who did it", "Because it is shorter", "Because the past tense is not allowed", "Because scientists don't like people"], a: 0, why: "重點是「做了什麼實驗、結果如何」，不是誰動的手。" }
+        { q: "Since 1903, the Wright Flyer ___ by millions of visitors.", o: ["has been seen", "has seen", "was seeing", "have been seen"], a: 0, why: "“Since 1903” → present perfect. The Flyer is singular → has been + seen." },
+        { q: "Please wait: the tank ___ right now.", o: ["is being filled", "is filled by", "has filled", "being filled"], a: 0, why: "Happening right now → continuous passive: is being + filled." },
+        { q: "To keep the test fair, each throw ___ in exactly the same way.", o: ["must be measured", "must measured", "must be measure", "must to be measured"], a: 0, why: "Modal + be + past participle." },
+        { q: "Choose the correct question.", o: ["When was the first wind tunnel built?", "When did the first wind tunnel built?", "When was built the first wind tunnel?", "When the first wind tunnel was built?"], a: 0, why: "Question word + was + subject + past participle. No “did” in a passive question." },
+        { q: "Lilienthal's tables ___ by engineers for years before anyone found the mistake.", o: ["had been used", "had used", "have been using", "were use"], a: 0, why: "Before another past event → past perfect passive: had been + used." },
+        { q: "Find the sentence with a MISTAKE.", o: ["The membrane is pull up by the suction.", "The valve is closed by a spring.", "Three ball bearings are held in place.", "The petrol is pushed through a narrow ring."], a: 0, why: "pull → pulled. The passive always needs the past participle." },
+        { q: "Active: “Steve cut the nozzle in half.” → Passive:", o: ["The nozzle was cut in half by Steve.", "The nozzle was cutted in half by Steve.", "The nozzle cut in half by Steve.", "The nozzle is cut in half by Steve."], a: 0, why: "Past tense → was; cut → cut (irregular, no -ed)." },
+        { q: "Which sentence sounds best in a science report?", o: ["The rocks were dried in the sun for two days.", "Me and my cousins, we dried the rocks in the sun.", "Someone dried the rocks in the sun, I think.", "The sun was dried by the rocks for two days."], a: 0, why: "Reports focus on what was done, so the doer is left out. The last option is passive, but it says the opposite of what happened!" },
+        { q: "If the results ___ carefully, nobody will trust them.", o: ["aren't recorded", "won't be recorded", "don't record", "aren't record"], a: 0, why: "Last week's rule still applies: no “will” after if. Passive + negative → aren't recorded." },
+        { q: "Their engine ___ by a big company; they built it with their own mechanic.", o: ["wasn't made", "didn't make", "wasn't make", "hasn't making"], a: 0, why: "Past negative passive: wasn't + made." }
       ],
       review: 2
     },
     {
-      n: 10, week: 2, kind: "writing", min: 35,
+      n: 10, week: 2, kind: "writing", min: 40,
       title: "Plan a Fair Test", zh: "寫作：設計一個公平的實驗",
-      prompt: "Choose a question you could test at home, for example “Which paper airplane flies the farthest?” or “Which ball bounces the highest?” Explain how you would test it using Mark's four steps. What is the one variable you will change? What will you keep the same?",
-      tips: ["Write your question first.（先寫你的問題）", "Use the four steps: research, prototype, test, final version.", "Name the one variable you change, and what stays the same.", "Use the passive at least twice (e.g. “will be measured”)."],
-      starters: ["My question is: …", "First, I will …", "The only variable I will change is …", "Each … will be … and the results will be …"],
-      wmin: 120, wmax: 160,
-      check: { label: "被動式句子", re: "\\b(am|is|are|was|were|be|been|being)\\s+(\\w+ly\\s+)?(\\w+ed|made|built|thrown|done|taken|given|seen|found|known|held|kept|put|set|cut|shown|written|chosen|sent|told|brought|taught|read|said|paid|flown|drawn|grown|blown|broken|hit|dropped|stopped)\\b", need: 2 },
-      model: "My question is: which paper airplane design flies the farthest? First, I will do some research. I will watch videos and read about paper airplanes. Next, I will build three prototypes with different wing shapes. All of them will be made from the same kind of paper, and they will be thrown from the same place. The only variable I will change is the shape of the wings. Each plane will be thrown five times, and every distance will be measured and recorded. After that, I will look at the results and choose the optimal design. Finally, I will build my final version carefully. I am confident it will fly far because the design was tested, not guessed."
+      prompt: "Write a plan for a fair test you could really do at home, for example “Does the shape of a paper airplane's wings change how far it flies?” Describe your method the way a scientist would: what will be changed, what will be kept the same, how the results will be measured, and what you will do if the results surprise you.",
+      tips: ["Start with a clear question.", "Name the ONE variable you will change and at least two things you will keep the same.", "Describe your method in the passive at least 3 times (e.g. “Each plane will be thrown five times”).", "Use at least one if-sentence about an unexpected result.", "Finish by saying what a good result would show."],
+      starters: ["The question I want to answer is …", "To keep the test fair, … will be kept the same.", "Each … will be … and the distance will be measured …", "If the results are surprising, I will …"],
+      wmin: 180, wmax: 240,
+      check: { label: "passive sentences", re: "\\b(am|is|are|was|were|be|been|being)\\s+(\\w+ly\\s+)?(\\w+ed|made|built|thrown|done|taken|given|seen|found|known|held|kept|put|set|cut|shown|written|chosen|sent|told|brought|taught|read|said|paid|flown|drawn|grown|blown|broken|hit|dropped|stopped)\\b", need: 3 },
+      model: "The question I want to answer is whether the shape of a paper airplane's wings changes how far it flies. First, I will do some research by watching videos and reading about paper airplanes. Next, three prototypes will be made: one with wide wings, one with narrow wings and one with wings that are folded up at the tips. The only variable I will change is the shape of the wings. To keep the test fair, every plane will be made from the same kind of A4 paper, and all of them will be thrown from the same spot in the hallway by the same person. Each plane will be thrown five times, and every distance will be measured with a tape measure and recorded in a table. I will use the average, not the best throw, because one lucky throw could give the wrong answer. If the results are surprising, I will repeat the test instead of guessing why. Finally, the winning design will be improved and tested again. If the narrow wings fly the farthest, it will show that the Wright brothers' discovery also works for paper planes."
     }
   ]
 });
