@@ -25,6 +25,12 @@ A small collection of static learning websites I build for my kids.
 
 **新增科目要加到首頁**：在 `index.html` 的 `DISTRICTS` 裡，把一筆 `{ id, img, emo, short, title, age, desc, href }` 加進對應區的 `items`（每區 6 塊地）。`img` 是 `assets/city/` 裡的圖檔名（尺寸登記在 `SPR`）；圖是用 Canva 產生的黏土風建築，新的房子可以先借用現有的圖。只給大孩加 `only:"b"`（中孩會看到上鎖的灰房子）；有簡單版加 `mHref:"…"`；還沒做的題目寫在 `ideas`，會顯示成工地。新增一個區就在 `DISTRICTS` 加一筆，會佔下一個街廓；六個街廓滿了就把 `COLS` 加一，城市會往右長。
 
+**🎨 自訂城市（家人在頁面上自己調整，不用改程式）**：首頁左下角「ℹ️ 給大人」上面的 🎨 按鈕。可以改區塊的名稱、圖示、順序、顯示／隱藏、招牌和地面顏色、要不要顯示工地；房子可以搬到別區、調整順序、隱藏，或從 `assets/city/` 現有的圖裡換樣子；也有幾組預設配色、「搬家」（複製／貼上 JSON 到別台裝置）和「恢復預設」（要再按一次確認）。
+
+- 這些調整是蓋在 `DISTRICTS` 上面的一層覆寫，存在裝置的 `localStorage`：`ks.city`（整座城市頁）、`ks.city.m`、`ks.city.b`（各孩子的頁面），每個頁面各有一座城市。`DISTRICTS` 本身不會被改；之後在程式裡新增的房子或區塊會照常出現在預設位置，已經不存在的 id 會被忽略。沒有覆寫（或按了恢復預設）時，畫面和原本完全一樣。
+- 雲端同步：登入後（首頁的 Google 登入就夠，token 一樣存在 `ks.idtok`），編輯器裡按「☁️ 存到雲端」，或改完直接關掉編輯器，會用 `assets/ks-cloud.js` 存一筆 `city-layout` 紀錄（`who` 是目前頁面的人：`m`／`b`，家長在整座城市頁是 `p`；家長開 `?k=m` 改的就是中孩的城市）。只在這兩個時機存，不會每改一下就多一列。開首頁時若雲端有比這台裝置新（比 `ts`）的版本就套用，比較舊的不會蓋掉本機。`ks.city*.cloud` 記著最後同步的時間。
+- 編輯器在 `assets/city-edit.js`；覆寫格式的檢查（`cleanCity`）與套用（`customCity`）在 `index.html`，配色在 `PALETTES`。
+
 遊樂街上的 [`tv/`](tv/) 是家長篩選的 YouTube 小電視（三個年齡檔案、每日限時、家長 PIN、電視模式），首頁會顯示每個孩子今天還剩幾分鐘；`tv/?p=s|m|b` 直接進入該孩子的檔案。
 
 - 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。

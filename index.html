@@ -65,6 +65,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset
 .zoom{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px}
 .zoom button,.info{width:44px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.95);font:900 22px var(--body);color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .info{position:fixed;left:max(12px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));width:auto;padding:0 14px;font-size:14px;font-weight:700}
+.info.cust{bottom:max(68px,calc(env(safe-area-inset-bottom) + 52px));width:44px;padding:0;font-size:20px;opacity:.85}
 .hint{position:fixed;left:50%;bottom:max(74px,calc(env(safe-area-inset-bottom) + 58px));transform:translateX(-50%);background:rgba(29,42,58,.88);color:#fff;border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;white-space:nowrap;transition:opacity .4s;pointer-events:none}
 .hint.off{opacity:0}
 
@@ -101,6 +102,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset
   <div class="chips" id="chips" aria-label="直接飛到某一區"></div>
 </div>
 <button class="info" id="info" type="button">ℹ️ 給大人</button>
+<button class="info cust" id="cust" type="button" aria-label="自訂城市" title="自訂城市">🎨</button>
 <div class="zoom"><button id="zin" type="button" aria-label="放大">＋</button><button id="zout" type="button" aria-label="縮小">－</button><button id="zhome" type="button" aria-label="看整座城市">🏠</button></div>
 <div class="hint" id="hint">👆 拖著地圖走走看，點房子進去</div>
 <div class="sheet" id="sheet" aria-live="polite"></div>
@@ -203,6 +205,81 @@ var EXTRA = {
 };
 var BUILD = [134, 176];
 
+/* ---------- the family's own layout ("🎨 自訂城市", editor in assets/city-edit.js) ----------
+   DISTRICTS above stays the default. A device can keep an overrides layer in localStorage (CITY_KEY)
+   that is applied on top of it: district order / name / emoji / colours / hidden / construction sites,
+   and per building: which district, which picture, hidden, order. Ids that no longer exist are ignored;
+   buildings and districts added to the code later show up in their default place. No overrides = exactly the default. */
+var CITY_KEY, PROFILE, BASE = DISTRICTS;          // CITY_KEY / PROFILE are set below, once we know whose page this is
+// preset palettes: [sign colour, ground colour], used in district order
+var PALETTES = {
+  pastel:{ name:"粉彩", c:[["#9575cd","#ece6f7"],["#e46f9b","#fbe3ec"],["#3fa39a","#dcf1ee"],["#e29a45","#fdf0dc"],["#5a93cf","#e1edf9"],["#5fa964","#e3f2e1"],["#ad65bf","#f2e4f5"]] },
+  candy: { name:"糖果", c:[["#ff5d8f","#ffd6e4"],["#ff9f1c","#ffe8c2"],["#2ec4b6","#cdf5f0"],["#7b61ff","#e2dcff"],["#3a86ff","#d4e5ff"],["#e5383b","#ffd7d4"],["#38b000","#d5f5c4"]] },
+  forest:{ name:"森林", c:[["#4f7942","#cfe3b8"],["#8b5a2b","#ead7bd"],["#2e6f57","#c6e2d2"],["#a0522d","#f0d9c4"],["#6b8e23","#e0ebbf"],["#556b2f","#d5e0bf"],["#7a5c3e","#e7dac8"]] },
+  ocean: { name:"海洋", c:[["#1d6fa5","#cfe6f5"],["#138a8a","#c9ecea"],["#3b5ba9","#d7def3"],["#0f7c9e","#c7e8f2"],["#4a6fa5","#dbe4f1"],["#2a9d8f","#d0efe9"],["#264e86","#d2dcec"]] }
+};
+var own = function(o, k){ return o != null && Object.prototype.hasOwnProperty.call(o, k); };
+function cleanCity(ov){            // keep only well-formed, known entries; null = nothing to apply
+  if (!ov || typeof ov !== "object" || Array.isArray(ov)) return null;
+  var dIds = BASE.map(function(d){ return d.id; }), iIds = [], out = {}, n = 0;
+  BASE.forEach(function(d){ d.items.forEach(function(it){ iIds.push(it.id); }); });
+  var txt = function(v, max){ if (typeof v !== "string") return ""; var a = Array.from(v.trim()); return a.length && a.length <= max ? a.join("") : ""; };
+  var hex = function(v){ return typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v) ? v.toLowerCase() : ""; };
+  var uniq = function(a, ok){ return Array.isArray(a) ? a.filter(function(x, i){ return typeof x === "string" && ok.indexOf(x) >= 0 && a.indexOf(x) === i; }) : []; };
+  if (typeof ov.pal === "string" && own(PALETTES, ov.pal)){ out.pal = ov.pal; n++; }
+  var order = uniq(ov.order, dIds); if (order.length){ out.order = order; n++; }
+  if (ov.d && typeof ov.d === "object") dIds.forEach(function(id){
+    var s = own(ov.d, id) && ov.d[id], e = {}, v; if (!s || typeof s !== "object") return;
+    if ((v = txt(s.name, 12))) e.name = v;
+    if ((v = txt(s.emo, 8))) e.emo = v;
+    if ((v = hex(s.roof))) e.roof = v;
+    if ((v = hex(s.ground))) e.ground = v;
+    if (s.hidden === true) e.hidden = true;
+    if (s.sites === false) e.sites = false;
+    if (Object.keys(e).length){ (out.d = out.d || {})[id] = e; n++; }
+  });
+  if (ov.b && typeof ov.b === "object") iIds.forEach(function(id){
+    var s = own(ov.b, id) && ov.b[id], e = {}; if (!s || typeof s !== "object") return;
+    if (typeof s.d === "string" && dIds.indexOf(s.d) >= 0) e.d = s.d;
+    if (typeof s.img === "string" && own(SPR, s.img)) e.img = s.img;
+    if (s.hidden === true) e.hidden = true;
+    if (Object.keys(e).length){ (out.b = out.b || {})[id] = e; n++; }
+  });
+  if (ov.io && typeof ov.io === "object") dIds.forEach(function(id){
+    var a = own(ov.io, id) ? uniq(ov.io[id], iIds) : []; if (a.length){ (out.io = out.io || {})[id] = a; n++; }
+  });
+  if (typeof ov.ts === "number" && isFinite(ov.ts) && ov.ts > 0) out.ts = Math.round(ov.ts);   // when it was last changed (cloud sync compares these)
+  if (!n && !out.ts) return null;
+  out.v = 1; return out;
+}
+function hasCustom(ov){ return !!(ov && (ov.pal || ov.order || ov.d || ov.b || ov.io)); }
+function lightColour(hex){ var n = parseInt(hex.slice(1), 16); return ((n >> 16) * .299 + (n >> 8 & 255) * .587 + (n & 255) * .114) / 255 > .72; }
+// all districts (hidden ones too, flagged .hidden) with the overrides applied; items carry ._off when hidden
+function customCity(ov){
+  ov = cleanCity(ov) || {};
+  var od = ov.d || {}, ob = ov.b || {}, io = ov.io || {}, pal = ov.pal ? PALETTES[ov.pal].c : null, byId = {};
+  BASE.forEach(function(d){ byId[d.id] = d; });
+  var order = (ov.order || []).slice(); BASE.forEach(function(d){ if (order.indexOf(d.id) < 0) order.push(d.id); });
+  var out = order.map(function(id, i){
+    var d = byId[id], o = own(od, id) ? od[id] : {}, p = pal ? pal[i % pal.length] : null;
+    var roof = o.roof || (p ? p[0] : d.roof), gr = o.ground || (p ? p[1] : "");
+    return Object.assign({}, d, { name:o.name || d.name, emo:o.emo || d.emo, roof:roof, ground:gr || d.ground,
+      _g:!!gr, _r:roof !== d.roof, hidden:!!o.hidden, ideas:o.sites === false ? [] : d.ideas, items:[], _base:d });
+  });
+  if (!out.some(function(d){ return !d.hidden; })) out.forEach(function(d){ d.hidden = false; });
+  var at = {}; out.forEach(function(d){ at[d.id] = d; });
+  BASE.forEach(function(d){ d.items.forEach(function(it){
+    var o = own(ob, it.id) ? ob[it.id] : {}, t = at[o.d] || at[d.id];
+    t.items.push(Object.assign({}, it, { img:o.img || it.img, _off:!!o.hidden, _home:d.id }));
+  }); });
+  out.forEach(function(d){
+    var want = own(io, d.id) ? io[d.id] : [];
+    var rank = function(it){ var k = want.indexOf(it.id); return k < 0 ? 1e3 : k; };
+    d.items = d.items.map(function(it, k){ return [it, k]; }).sort(function(a, b){ return rank(a[0]) - rank(b[0]) || a[1] - b[1]; }).map(function(x){ return x[0]; });
+  });
+  return out;
+}
+
 // whose page: ?k=m (middle kid) or ?k=b (big kid); anything else = everyone ("a")
 // With Google sign-in configured (KS_AUTH), a remembered role (ks.who) picks the page when the URL has no ?k=.
 var AUTH = window.KS_AUTH || {}, CID = AUTH.GOOGLE_CLIENT_ID || "";
@@ -213,17 +290,27 @@ var kid = qk == null && who && who !== "p" ? who : qk;
 if (kid !== "m" && kid !== "b") kid = "a";
 var NAME = { m:"🦊 中孩", b:"🚀 大孩" };
 var LK = "ks.last" + (kid === "a" ? "" : "." + kid);
+// each profile has its own city: m / b, or the whole-city page ("p" when a parent is signed in, else "a")
+PROFILE = kid !== "a" ? kid : (who || "a");
+CITY_KEY = "ks.city" + (kid === "a" ? "" : "." + kid);
 var last = get(LK, null);
 var CALM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- layout: blocks of 5 x 3 tiles with one-tile roads between ---------- */
 var TW = 170, TH = 85, M = 2, BW = 5, BD = 3, COLS = 4;
-var ROWS = Math.ceil(DISTRICTS.length / COLS);
-var X1 = M + COLS * (BW + 1) - 1;            // east road x
-var Y1 = M + ROWS * (BD + 1) - 1;            // front road y
-var RIVER = Y1 + 2, GX = X1 + 8, GY = RIVER + 3;
+var ROWS, X1, Y1, RIVER, GX, GY, PORT, B0, B1, BY0, BY1;
 var LOTS = [[0,0],[2,0],[4,0],[0,2],[2,2],[4,2]];
-DISTRICTS.forEach(function(d, i){ d.ox = M + (i % COLS) * (BW + 1); d.oy = M + Math.floor(i / COLS) * (BD + 1); });
+function layout(){                   // (re)computes the map from DISTRICTS + this device's overrides
+  var ov = cleanCity(get(CITY_KEY, null));
+  DISTRICTS = hasCustom(ov) ? customCity(ov).filter(function(d){ return !d.hidden; }) : BASE;
+  ROWS = Math.ceil(DISTRICTS.length / COLS);
+  X1 = M + COLS * (BW + 1) - 1;            // east road x
+  Y1 = M + ROWS * (BD + 1) - 1;            // front road y
+  RIVER = Y1 + 2; GX = X1 + 8; GY = RIVER + 3;
+  DISTRICTS.forEach(function(d, i){ d.ox = M + (i % COLS) * (BW + 1); d.oy = M + Math.floor(i / COLS) * (BD + 1); });
+  PORT = DISTRICTS.filter(function(d){ return d.id === "geo" && d.oy + BD === Y1; })[0];   // the port needs the waterfront row
+  B0 = iso(-1, GY); B1 = iso(GX, -1); BY0 = iso(-1, -1)[1]; BY1 = iso(GX, GY)[1];
+}
 
 function iso(x, y){ return [(x - y) * TW / 2, (x + y) * TH / 2]; }
 function pts(a){ return a.map(function(p){ return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" "); }
@@ -233,7 +320,6 @@ function rnd(x, y){ var s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return
 function shade(hex, f){ var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
   function c(v){ return Math.max(0, Math.min(255, Math.round(v * f))); } return "rgb(" + c(r) + "," + c(g) + "," + c(b) + ")"; }
 
-var PORT = DISTRICTS.filter(function(d){ return d.id === "geo" && d.oy + BD === Y1; })[0];   // the port needs the waterfront row
 function tileType(x, y){
   if (PORT && x >= PORT.ox && x < PORT.ox + BW){
     if (y === Y1 + 1) return "quay";
@@ -249,13 +335,15 @@ function tileType(x, y){
 }
 
 var world = document.getElementById("world");
-var gGround = el("g", {}, world), gThings = el("g", {}, world), gLabels = el("g", { "pointer-events":"none" }, world), things = [];
+var gGround, gThings, gLabels, things;
+function fresh(){ world.textContent = ""; things = [];
+  gGround = el("g", {}, world); gThings = el("g", {}, world); gLabels = el("g", { "pointer-events":"none" }, world); }
 function tile(x, y, fill, stroke, extra){
   var a = Object.assign({ points:pts([iso(x,y), iso(x+1,y), iso(x+1,y+1), iso(x,y+1)]), fill:fill, stroke:stroke || fill, "stroke-width":1 }, extra || {});
   return el("polygon", a, gGround);
 }
 function locked(it){ return it.only && kid !== "a" && it.only !== kid; }
-function items(d){ return d.items.filter(function(it){ return !(it.hide && it.hide === kid); }); }
+function items(d){ return d.items.filter(function(it){ return !(it.hide && it.hide === kid) && !it._off; }); }
 
 // a picture standing on tile (x, y); fit = [maxWidth, maxHeight] or the longest side
 function sprite(parent, name, x, y, fit, emo){
@@ -309,7 +397,8 @@ function build(){
 // each district has its own ground: cobbles in the old town, a lawn in the park, a checkerboard on the fun street...
 function ground(d, x, y){
   var odd = (x + y) % 2;
-  if (d.id === "history") tile(x, y, odd ? "#ecd6b2" : "#e0c59c", "#cfb287");
+  if (d._g) tile(x, y, odd ? d.ground : shade(d.ground, .96), shade(d.ground, .9));   // a colour picked in 🎨
+  else if (d.id === "history") tile(x, y, odd ? "#ecd6b2" : "#e0c59c", "#cfb287");
   else if (d.id === "nature") tile(x, y, odd ? "#9fd87c" : "#a9de86");
   else if (d.id === "fun") tile(x, y, odd ? "#ffd9c9" : "#fff4e6", "#f5c3b0");
   else if (d.id === "geo") tile(x, y, odd ? "#f5e9c2" : "#efdfb0");
@@ -364,7 +453,8 @@ function mover(name, a, b, sec){
 function sign(d){
   var p = iso(d.ox + 2, d.oy + BD), w = d.name.length * 24 + 64;
   el("rect", { x:p[0] - w / 2, y:p[1] - 20, width:w, height:36, rx:18, fill:d.roof, stroke:"#fff", "stroke-width":3 }, gLabels);
-  el("text", { x:p[0], y:p[1] + 6, "text-anchor":"middle", "class":"dname" }, gLabels, d.emo + " " + d.name);
+  var t = el("text", { x:p[0], y:p[1] + 6, "text-anchor":"middle", "class":"dname" }, gLabels, d.emo + " " + d.name);
+  if (d._r && lightColour(d.roof)) t.style.fill = "#1d2a3a";        // dark text on a light custom sign
 }
 function building(d, it, x, y){
   var lk = locked(it), c = iso(x + .5, y + .5);
@@ -381,7 +471,6 @@ function site(d, idea, x, y){
 
 /* ---------- camera: drag to pan, wheel / pinch / buttons to zoom ---------- */
 var stage = document.getElementById("stage"), cam = { x:0, y:0, s:1 }, ptrs = {}, moved = 0, pinch = 0, anim = 0;
-var B0 = iso(-1, GY), B1 = iso(GX, -1), BY0 = iso(-1, -1)[1], BY1 = iso(GX, GY)[1];
 function apply(){
   cam.s = Math.max(.3, Math.min(1.8, cam.s));
   cam.x = Math.max(B0[0], Math.min(B1[0], cam.x)); cam.y = Math.max(BY0, Math.min(BY1, cam.y));
@@ -475,10 +564,12 @@ addEventListener("pageshow", function(){ if (picked) fill(); });   // refresh TV
 
 /* ---------- HUD ---------- */
 var chips = document.getElementById("chips");
-chips.innerHTML = DISTRICTS.map(function(d){ return '<button type="button" data-d="' + d.id + '">' + d.emo + " " + d.name + "</button>"; }).join("");
-if (last && last.href && last.title){
-  var la = document.createElement("a"); la.href = last.href; la.id = "last"; la.textContent = "⏪ 上次：" + last.title + " →";
-  chips.insertBefore(la, chips.firstChild);
+function renderChips(){
+  chips.innerHTML = DISTRICTS.map(function(d){ return '<button type="button" data-d="' + d.id + '">' + esc(d.emo + " " + d.name) + "</button>"; }).join("");
+  if (last && last.href && last.title){
+    var la = document.createElement("a"); la.href = last.href; la.id = "last"; la.textContent = "⏪ 上次：" + last.title + " →";
+    chips.insertBefore(la, chips.firstChild);
+  }
 }
 chips.addEventListener("click", function(e){ var b = e.target.closest("button"); if (!b) return;
   var d = DISTRICTS.filter(function(x){ return x.id === b.dataset.d; })[0], c = iso(d.ox + BW / 2, d.oy + BD / 2);
@@ -573,9 +664,31 @@ function infoSheet(){
 }
 document.getElementById("info").onclick = infoSheet;
 
-build(); home(true); tick(); setInterval(tick, 15000);
+// ---- 🎨 customise the city (the editor itself is assets/city-edit.js) ----
+function rebuild(){ picked = null; fresh(); layout(); build(); renderChips(); apply(); }
+window.KS_CITY = {
+  KEY:CITY_KEY, profile:PROFILE, base:BASE, spr:SPR, palettes:PALETTES, kid:kid, hasCustom:hasCustom,
+  clean:cleanCity, model:customCity,
+  load:function(){ return cleanCity(get(CITY_KEY, null)); },
+  // save(ov) = a change made here (stamped now); save(ov, true) = a layout from the cloud (keeps its own ts)
+  save:function(ov, keepTs){ ov = Object.assign({}, ov || {}); if (!keepTs) ov.ts = Date.now();
+    ov = cleanCity(ov); if (ov) set(CITY_KEY, ov); else try { localStorage.removeItem(CITY_KEY); } catch(e){}
+    rebuild(); return ov; },
+  sheet:sheet, esc:esc, home:function(){ home(); },
+  show:function(){ world.querySelectorAll(".bld.sel").forEach(function(b){ b.classList.remove("sel"); }); picked = null; sheet.classList.add("open"); hideHint(); },
+  close:closeSheet
+};
+document.getElementById("cust").onclick = function(){
+  if (window.KS_CITY_EDIT) KS_CITY_EDIT.open(window.KS_CITY);
+  else { closeSheet(); sheet.innerHTML = '<button class="x" type="button" aria-label="關閉">✕</button><h2>🎨 自訂城市</h2><p>編輯器還沒載入，請重新整理一次再試。</p>';
+    sheet.querySelector(".x").onclick = closeSheet; sheet.classList.add("open"); }
+};
+
+fresh(); layout(); build(); renderChips(); home(true); tick(); setInterval(tick, 15000);
 if (QS.get("hash") === "1") infoSheet();
 })();
 </script>
+<script src="assets/ks-cloud.js"></script>
+<script src="assets/city-edit.js"></script>
 </body>
 </html>
