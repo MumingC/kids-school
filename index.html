@@ -152,7 +152,7 @@ var DISTRICTS = [
       { id:"rocket", img:"rocket", emo:"🚀", short:"火箭", title:"從地面到軌道", age:"小三起點", desc:"12 關火箭課程，每一關都有一個真的在算物理的互動模擬器。", href:"rocket/" },
       { id:"relativity", img:"clock", emo:"⏱️", short:"相對論", title:"時間變慢實驗室", age:"小二起點", desc:"跟光比賽跑到月球，用「光做的時鐘」看懂時間為什麼會變慢。", href:"relativity/" },
       { id:"fission", img:"atom", emo:"⚛️", short:"核分裂", title:"核分裂實驗室", age:"大孩", only:"b", desc:"8 站，從原子結構到連鎖反應，最後看反應爐與核彈的分岔。", href:"fission/" },
-      { id:"junyi", img:"school", emo:"📐", short:"均一", title:"均一教育平台", age:"數學 · 自然 · 各年級", desc:"學校也在用的免費學習網站：看短片、做練習題，數學和自然都有。會離開 Kids School。", href:"https://www.junyiacademy.org/", ext:true }
+      { id:"junyi", img:"school", emo:"📐", short:"均一", title:"均一教育平台", age:"數學 · 自然 · 各年級", desc:"學校也在用的免費學習網站：看短片、做練習題，數學和自然都有。會離開 Kids School。", href:"https://www.junyiacademy.org/", ext:true, extName:"均一" }
     ], ideas:[] },
   { id:"history", name:"歷史老城", emo:"🏛️", roof:"#b5653a", ground:"#f1dfc4", deco:["vase","fountain"],
     items:[
@@ -179,6 +179,7 @@ var DISTRICTS = [
   { id:"english", name:"英語小鎮", emo:"🔤", roof:"#c8553d", ground:"#f8e3dc", deco:["phonebox","postbox"],
     items:[
       { id:"engtest", img:"exam", emo:"✏️", short:"程度測驗", title:"英文程度小測驗", age:"10–30 分鐘 · 最多四關", desc:"字彙、文法、閱讀、聽力，從簡單到難，過關才往下一關。最後對照全民英檢的等級（初級、中級、中高級），結果給爸爸媽媽看。", href:"english/test/" },
+      { id:"cambridge", img:"gate", emo:"🎓", short:"劍橋測驗", title:"Cambridge 英文程度測驗", age:"官方免費 · 25 題，約 15 分鐘", desc:"劍橋大學英語考試中心給 11 歲以上學生的免費線上測驗，比我們自己的程度測驗正式。做完會告訴你大概的程度和適合的考試（Key、Preliminary、First），請把結果畫面拍給爸爸媽媽看。會離開 Kids School。", href:"https://www.cambridgeenglish.org/test-your-english/for-schools/", ext:true, extName:"劍橋" },
       { id:"englesson", img:"library", emo:"📘", short:"英文課", title:"英文課：東西怎麼運作", age:"大孩 · 一天一課，約 35 分鐘", only:"b", desc:"用 Mark Rober、Steve Mould 的科學影片學英文：看影片、讀文章、文法、寫作，學過的單字會照記憶曲線回來複習。影片在課裡播，不算小電視的時間。", href:"english/lessons/" },
       { id:"six", img:"talk", emo:"📻", short:"六分鐘", title:"The Six Minutes", age:"English · 每集約 6 分鐘", hide:"b", desc:"一集一集往下聽的英文廣播劇，可以接著聽，也可以自己選集數。", six:true }
     ], ideas:["📚 每日單字","📖 分級閱讀","✍️ 英文日記"] }
@@ -539,7 +540,7 @@ function fill(){            // (re)draw the sheet of the picked building
     go = btn("tv/?p=m", "▶ 聽故事", n > 1 ? "繼續聽第 " + n + " 集" : "從第 1 集開始") + btn("tv/?p=m&pick=1", "🔢 選集數", "自己挑一集", "alt");
   }
   else if (it.news) go = (kid !== "b" ? tvBtn("m", "🦊 中孩", false, "新聞超小號") : "") + (kid !== "m" ? tvBtn("b", "🚀 大孩", false, "新聞超小號") : "");
-  else if (it.ext) go = btn(it.href, "🚪 出發", "到均一的網站");
+  else if (it.ext) go = btn(it.href, "🚪 出發", it.extName ? "到" + it.extName + "的網站" : "會離開 Kids School");
   else { var easy = kid === "m" && it.mHref; go = btn(easy ? it.mHref : it.href, "🚪 進去", easy ? "簡單版" : "開始探險", "", it.title); }
   sheet.innerHTML = '<button class="x" type="button" aria-label="關閉">✕</button><img class="pic" alt="" src="assets/city/' + it.img + '.webp"><div class="where">' + d.emo + " " + esc(d.name) +
     '</div><h2>' + it.emo + " " + esc(it.title) + '</h2><span class="age">' + esc(it.age) + "</span><p>" + esc(it.desc) + '</p><div class="go" data-d="' + d.id + '">' + go + "</div>";
