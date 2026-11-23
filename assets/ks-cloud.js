@@ -14,7 +14,7 @@
 */
 (function(){
 "use strict";
-var ENDPOINT = "";   // the Apps Script web app URL, ending in /exec
+var ENDPOINT = "https://script.google.com/macros/s/AKfycbzbUk6ynfJh0E9C3XvpAM7OgreDnM_5seXzhU-xWjiCnA0hd1P_vwL_staJz0jHUKsO/exec";   // the Apps Script web app URL, ending in /exec
 var CID = "58307936708-iaq9fqnvidmk0shc2aqdkda01nnrto47.apps.googleusercontent.com";
 var TOK = "ks.idtok", Q = "ks.cloud.queue", ROLE = "ks.cloud.role";
 
