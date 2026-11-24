@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEPT Practice · Kids School</title>
+<meta name="description" content="全民英檢中高級題型練習：聽力、閱讀、寫作、口說，照官方題型自己出的練習題。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Nunito:wght@600;800&display=swap">
+<style>
+/* GEPT 中高級 practice room. Sets live in setN.js (window.GEPT_SETS); this page runs them.
+   Answers, drafts and scores stay in localStorage (ks.gept.<who>); finished sections also go to the
+   family Google Sheet through assets/ks-cloud.js (app "gept"), writing included, so it can be marked later. */
+:root{
+  color-scheme:light;
+  --ink:#1d2a3a; --ink-soft:#52627a; --paper:#fffaf0; --card:#ffffff; --line:#e3d9c3;
+  --sun:#ffc93c; --go:#2f6f8f; --go-dark:#1f4f68; --leaf:#3f9a5a; --bad:#c24a3a;
+  --listen:#c8553d; --read:#d99a2b; --write:#8d7be0; --speak:#3f9a5a;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --en:"Nunito","Noto Sans TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:linear-gradient(#dcebf3,#f1f6f9 300px) no-repeat,#f1f6f9;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;min-height:100vh}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.top a,.top button{font:inherit;color:var(--ink);font-weight:700;text-decoration:none;background:rgba(255,255,255,.92);border:0;border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer}
+.top .who{margin-left:auto;font-size:14px;font-weight:800;color:var(--ink-soft)}
+.card{background:var(--card);border-radius:22px;padding:20px 20px 22px;box-shadow:0 8px 26px rgba(29,42,58,.11);border:2px solid #fff;margin-bottom:16px}
+h1{margin:0 0 4px;font-size:clamp(24px,5vw,32px);font-weight:900;line-height:1.3;text-wrap:balance}
+h2{margin:0 0 8px;font-size:21px;font-weight:900;line-height:1.35;text-wrap:balance}
+h3{margin:0 0 8px;font-size:17px;font-weight:900}
+p{margin:0 0 12px}
+.soft{color:var(--ink-soft)}
+.en{font-family:var(--en)}
+.eyebrow{font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--go);margin-bottom:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-weight:900;font-size:18px;color:#fff;background:var(--go);border:0;border-radius:16px;padding:12px 24px;box-shadow:0 4px 0 var(--go-dark);cursor:pointer;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.small{font-size:15px;padding:8px 14px}
+button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.next{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.secs{display:grid;gap:10px}
+.sec{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer}
+.sec:hover{border-color:var(--ink-soft)}
+.sec .ic{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff}
+.sec .tx{flex:1;min-width:0}
+.sec .tx b{display:block;font-family:var(--en);font-size:16.5px;line-height:1.35}
+.sec .tx span{font-size:13.5px;color:var(--ink-soft)}
+.sec .st{flex:none;font-size:13px;font-weight:800;color:var(--ink-soft);text-align:right}
+.sec .st.ok{color:var(--leaf)}
+.k-listening{background:var(--listen)}.k-reading{background:var(--read)}.k-writing{background:var(--write)}.k-speaking{background:var(--speak)}
+.cloud{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:#eef6fb;border:2px solid #cfe3ef;border-radius:14px;padding:8px 12px;font-size:14.5px;margin:0 0 14px}
+.cloud.ok{background:#eef8f0;border-color:#cde6d3}
+.cloud .gbtn{min-height:32px}
+details.adult{font-size:15px}
+details.adult summary{cursor:pointer;font-weight:800}
+details.adult ul{margin:8px 0 0;padding-left:20px}
+.bar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:800;color:var(--ink-soft);margin-bottom:8px}
+.hint{font-family:var(--en);font-style:italic;color:var(--ink-soft);margin-bottom:12px}
+.passage{font-family:var(--en);font-size:17px;line-height:1.8;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.passage p{margin:0 0 12px}.passage p:last-child{margin:0}
+.passage h4{margin:4px 0 6px;font-size:17.5px}
+.passage b{background:#ffe9a8;border-radius:5px;padding:0 4px}
+.qq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+.qq:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.qn{font-size:13.5px;font-weight:800;color:var(--ink-soft);margin-bottom:4px}
+.q{font-family:var(--en);font-size:18.5px;font-weight:800;line-height:1.5;margin:2px 0 10px}
+.opts{display:grid;gap:8px}
+.opts button{font:inherit;font-family:var(--en);text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:9px 14px;cursor:pointer;color:var(--ink);font-size:17px;line-height:1.45}
+.opts button:not(:disabled):hover{border-color:var(--ink-soft)}
+.opts button.right{border-color:var(--leaf);background:#e8f5ec}
+.opts button.wrong{border-color:var(--bad);background:#fbeae7}
+.opts button:disabled{cursor:default;color:var(--ink)}
+.opts button i{font-style:normal;font-weight:800;color:var(--ink-soft);margin-right:8px}
+.why{margin-top:10px;border-radius:14px;padding:9px 14px;font-size:15.5px;background:#f3f0e8}
+.why.ok{background:#e8f5ec}.why.no{background:#fbeae7}
+.player{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#fff1e8;border:2px solid #f5c3b0;border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.script{font-family:var(--en);background:var(--paper);border:2px dashed var(--line);border-radius:14px;padding:10px 14px;margin-top:14px;font-size:16px}
+.script p{margin:0 0 6px}
+.big{font-size:clamp(34px,8vw,46px);font-weight:900;line-height:1.15;margin:4px 0}
+.miss{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:10px;font-size:15.5px}
+.miss .en{font-weight:800}
+.zh{font-size:18px;line-height:1.9;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:12px}
+textarea{width:100%;min-height:200px;font:17px/1.7 var(--en);color:var(--ink);border:2px solid var(--line);border-radius:14px;padding:12px 14px;resize:vertical;background:#fff}
+.meter{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.meter span{font-size:13.5px;font-weight:800;border-radius:999px;padding:3px 11px;background:#f1ece2;color:var(--ink-soft)}
+.meter span.ok{background:#e6f3e9;color:var(--leaf)}
+.meter span.no{background:#fbeae7;color:var(--bad)}
+.tips{margin:0 0 12px;padding-left:20px;font-size:15px}
+.model{font-family:var(--en);white-space:pre-wrap;background:var(--paper);border:2px dashed var(--line);border-radius:14px;padding:12px 14px;font-size:16.5px;line-height:1.75}
+.mine{font-family:var(--en);white-space:pre-wrap;background:#fff;border:2px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16.5px;line-height:1.75;margin-bottom:12px}
+.check{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:6px}
+.check label{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:3px;flex:none}
+.task{background:#eef8f0;border:2px solid #cde6d3;border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.task .q{margin-bottom:8px}
+.task ol{margin:4px 0 8px;padding-left:22px;font-family:var(--en)}
+.clock{font-family:var(--en);font-size:30px;font-weight:800;min-width:90px}
+.clock.prep{color:var(--read)}.clock.talk{color:var(--bad)}
+audio{width:100%;margin-top:8px}
+.tip{font-size:14.5px;color:var(--ink-soft)}
+@media (max-width:480px){.sec{gap:10px;padding:9px 10px}.sec .ic{width:38px;height:38px;font-size:19px}.q{font-size:17.5px}.opts button{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script src="../../assets/ks-cloud.js"></script>
+<script src="set1.js"></script>
+<script>
+"use strict";
+var app = document.getElementById("app");
+var SETS = window.GEPT_SETS || [];
+var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
+var put = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+function words(t){ var m = String(t || "").trim().match(/[A-Za-z0-9’']+(?:-[A-Za-z0-9’']+)*/g); return m ? m.length : 0; }
+var LETTER = ["A", "B", "C", "D"];
+
+var WHO = { b:"🚀 Big kid", m:"🦊 Middle kid", o:"🙂 Guest" };
+var qk = new URLSearchParams(location.search).get("k");
+var who = WHO[qk] ? qk : (get("ks.who", null) === "m" ? "m" : "b");
+var KEY = "ks.gept." + who;
+var S = get(KEY, null) || {};
+S.done = S.done || {}; S.recs = S.recs || []; S.drafts = S.drafts || {};
+function save(){ put(KEY, S); }
+
+var SEC = {
+  listening:{ ic:"🎧", name:"Listening", zh:"聽力", note:"10 questions · about 12 min · each recording plays once" },
+  reading:{ ic:"📖", name:"Reading", zh:"閱讀", note:"18 questions · about 25 min" },
+  writing:{ ic:"✍️", name:"Writing", zh:"寫作", note:"Translation + essay · 50 min" },
+  speaking:{ ic:"🗣️", name:"Speaking", zh:"口說", note:"Answer, describe, discuss · about 15 min" }
+};
+var ORDER = ["listening", "reading", "writing", "speaking"];
+
+/* ---------------- speech ---------------- */
+var synth = window.speechSynthesis, VOICES = { W:null, M:null };
+function pickVoices(){
+  if (!synth) return;
+  var vs = synth.getVoices().filter(function(v){ return /^en[-_](US|GB)/i.test(v.lang); });
+  var fem = /female|aria|jenny|zira|samantha|libby|sonia|google us english|natural.*(ava|emma|michelle)/i, mal = /male|guy|david|mark|ryan|daniel|davis|google uk english male|natural.*(andrew|brian|christopher|eric)/i;
+  VOICES.W = vs.filter(function(v){ return fem.test(v.name) && !/\bmale\b/i.test(v.name.replace(/female/i, "")); })[0] || vs[0] || null;
+  VOICES.M = vs.filter(function(v){ return mal.test(v.name) && v !== VOICES.W; })[0] || null;
+}
+if (synth){ pickVoices(); synth.onvoiceschanged = pickVoices; }
+// lines: [[speaker, text], ...]; speaker "W"/"M"/"N" (narrator). Calls done() after the last line.
+function play(lines, done){
+  if (!synth){ if (done) done(); return; }
+  synth.cancel();
+  lines.forEach(function(l, i){
+    var u = new SpeechSynthesisUtterance(l[1]); u.lang = "en-US"; u.rate = .95;
+    var v = l[0] === "M" ? VOICES.M : VOICES.W;
+    if (v) u.voice = v;
+    if (l[0] === "M" && !VOICES.M) u.pitch = .7;     // only one voice: make the man sound lower
+    if (l[0] === "N") u.rate = .9;
+    if (i === lines.length - 1 && done) u.onend = done;
+    synth.speak(u);
+  });
+}
+function stopSpeech(){ if (synth) synth.cancel(); }
+
+/* ---------------- cloud (optional; see assets/ks-cloud.js) ---------------- */
+var CL = window.KSCloud || { on:false }, APP = "gept";
+var ROLE_NAME = { m:"🦊 Middle kid", b:"🚀 Big kid", p:"👨‍👩‍👧‍👦 Mum & Dad" };
+function newId(){ return "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function syncLocal(){
+  if (!CL.on) return Promise.resolve([]);
+  var todo = S.recs.filter(function(r){ return !r.cloud; });
+  return CL.save(APP, todo).then(function(ids){
+    var set = {}; (ids || []).forEach(function(i){ set[i] = 1; });
+    S.recs.forEach(function(r){ if (set[r.id]) r.cloud = true; }); save();
+    return ids;
+  });
+}
+function cloudFail(box, e, again){
+  var m = String(e && e.message || "");
+  if (/^token/.test(m)){ again(); return; }
+  box.className = "cloud";
+  box.textContent = /^account/.test(m) ? "☁️ This Google account isn't registered yet, so results are saved on this device only."
+    : "☁️ Can't reach the cloud right now. Results are saved on this device and will be uploaded next time.";
+}
+function askSignIn(box, text, again){
+  box.className = "cloud";
+  box.innerHTML = "<span>" + text + '</span><span class="gbtn"></span>';
+  CL.signInButton(box.querySelector(".gbtn"), function(){ if (app.contains(box)) again(); }).catch(function(){ box.hidden = true; });
+}
+function cloudBox(){
+  var box = app.querySelector("#cloud");
+  if (!CL.on || !box) return;
+  box.hidden = false;
+  if (!CL.signedIn()){ askSignIn(box, "☁️ Sign in so Mum and Dad can see your results and your writing (you can also practise without signing in):", cloudBox); return; }
+  box.className = "cloud"; box.textContent = "☁️ Connecting…";
+  syncLocal().then(function(){
+    if (!app.contains(box)) return;
+    var r = CL.role();
+    box.className = "cloud ok";
+    box.textContent = "☁️ Signed in" + (ROLE_NAME[r] ? " as " + ROLE_NAME[r] : "") + ". Finished sections are saved to the cloud.";
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, cloudBox); });
+}
+function record(rec){
+  rec.id = newId(); rec.ts = Date.now(); rec.who = who;
+  S.recs.push(rec); S.recs = S.recs.slice(-60); save();
+  var box = app.querySelector("#cstat"), again = function(){ shipBox(box, rec); };
+  shipBox(box, rec);
+}
+function shipBox(box, rec){
+  if (!CL.on || !box || !app.contains(box)) return;
+  box.hidden = false;
+  var again = function(){ shipBox(box, rec); };
+  if (!CL.signedIn()){ askSignIn(box, "Saved on this device. Sign in to save it to the cloud too:", again); return; }
+  box.className = "cloud"; box.textContent = "☁️ Saving…";
+  syncLocal().then(function(){
+    if (!app.contains(box)) return;
+    var ok = S.recs.some(function(r){ return r.id === rec.id && r.cloud; });
+    box.className = ok ? "cloud ok" : "cloud";
+    box.textContent = ok ? "☁️ Saved to the cloud. Mum and Dad can see it in the spreadsheet." : "☁️ Not saved to the cloud yet. It will try again next time.";
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, again); });
+}
+
+/* ---------------- home ---------------- */
+var timer = null;
+function stopAll(){ stopSpeech(); if (timer){ clearInterval(timer); timer = null; } stopRec(); }
+function status(set, k){
+  var d = S.done[set.n + "-" + k];
+  if (!d) return '<span class="st">—</span>';
+  if (d.total) return '<span class="st ok">' + d.score + "/" + d.total + "</span>";
+  return '<span class="st ok">✓ done</span>';
+}
+function home(){
+  stopAll(); window.scrollTo(0, 0);
+  var h = '<div class="top"><a href="../../">← Kids School</a><a href="../lessons/?k=' + who + '">📘 Lessons</a><span class="who">' + WHO[who] + '</span></div>';
+  h += '<div class="card"><div class="eyebrow">GEPT HIGH-INTERMEDIATE · 全民英檢中高級</div><h1>Exam Practice Room</h1>' +
+    '<p>Each set follows the real test: <b>Listening</b> and <b>Reading</b> first, then <b>Writing</b> and <b>Speaking</b>. Do one section at a time. It\'s fine to get things wrong; that\'s how you find out what to practise.</p>' +
+    '<div id="cloud" class="cloud" hidden></div></div>';
+  SETS.forEach(function(set){
+    h += '<div class="card"><h2>' + esc(set.title) + '</h2><div class="secs">';
+    ORDER.forEach(function(k){
+      h += '<button class="sec" type="button" data-go="' + set.n + ":" + k + '"><span class="ic k-' + k + '">' + SEC[k].ic + '</span><span class="tx"><b>' + SEC[k].name + " · " + SEC[k].zh + "</b><span>" + SEC[k].note + "</span></span>" + status(set, k) + "</button>";
+    });
+    h += "</div></div>";
+  });
+  h += '<div class="card"><h2>More real practice</h2><p class="tip">The GEPT website has one official sample of every question type, with real recordings. Try it after you finish a set here.</p>' +
+    '<div class="row"><a class="btn small alt" href="https://www.gept.org.tw/2022/geptpracticehi.htm" target="_blank" rel="noopener">Official sample questions ↗</a>' +
+    '<a class="btn small alt" href="https://www.lttc.ntu.edu.tw/tw/vocabulary" target="_blank" rel="noopener">Official word list ↗</a></div></div>';
+  h += '<div class="card"><details class="adult"><summary>給爸爸媽媽的說明</summary><ul>' +
+    '<li>題型、題數比例和時間照全民英檢官網的中高級說明：聽力（問答、對話、談話）、閱讀（詞彙、段落填空、閱讀理解）、寫作（中譯英 40%＋引導寫作 60%）、口說（回答問題、看圖敘述、申述）。</li>' +
+    '<li><b>題目是 Claude 照題型自己出的，不是官方試題</b>，難度沒有校準過。答對幾題不能換算成官方的 120 分量尺分數；正式通過標準是聽讀兩項合計 160 分且單項不低於 72 分，寫作、口說各 80 分。</li>' +
+    '<li>中高級的題材以成人、工作、社會議題為主（官方說明舉的例子是簡報、會議紀錄、報告），寫作要 150–180 字並表達意見。孩子現在是 B1，這是往上跳一級，一開始答錯很多是正常的。</li>' +
+    '<li>聽力用瀏覽器的語音合成念，和真人錄音不同；真正的錄音可以聽官方樣題。</li>' +
+    '<li>寫作的作文和翻譯會整篇存到試算表（項目 gept），想要的話可以請 Claude 照官方 0–5 級分的評分標準批改。口說可以按 🎙 錄下來自己聽，錄音不會上傳。</li></ul></details></div>';
+  app.innerHTML = h;
+  cloudBox();
+}
+app.addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]");
+  if (g){ var p = g.dataset.go.split(":"), set = SETS.filter(function(s){ return String(s.n) === p[0]; })[0]; if (set) RUN[p[1]](set); return; }
+  if (e.target.closest("[data-home]")) home();
+});
+
+/* ---------------- multiple choice (listening + reading) ---------------- */
+function mc(set, kind){
+  stopAll();
+  var blocks = set[kind], bi = 0, t0 = Date.now(), got = 0, total = 0, misses = [];
+  blocks.forEach(function(b){ total += b.qs.length; });
+  var qno = 0;
+  function show(){
+    stopSpeech(); window.scrollTo(0, 0);
+    var b = blocks[bi], start = qno, answered = 0;
+    var h = '<div class="top"><button type="button" data-home>← Exit</button><span class="who">' + SEC[kind].ic + " " + SEC[kind].name + " · " + esc(set.title) + "</span></div>";
+    h += '<div class="card"><div class="bar"><span>' + esc(b.part) + "</span><span>Questions " + (start + 1) + "–" + (start + b.qs.length) + " of " + total + "</span></div>";
+    h += '<div class="hint">' + esc(b.hint) + "</div>";
+    if (kind === "listening") h += '<div class="player"><button class="btn small" type="button" id="playb">▶ Play</button><span class="tip" id="ptip">' + (synth ? "Listen carefully. It plays only once." : "This browser can't speak. Read the script below instead.") + "</span></div>";
+    if (b.text) h += '<div class="passage">' + b.text + "</div>";
+    b.qs.forEach(function(q, i){
+      h += '<div class="qq" data-q="' + i + '"><div class="qn">Question ' + (start + i + 1) + "</div>" + (q.q ? '<div class="q">' + esc(q.q) + "</div>" : "") +
+        '<div class="opts">' + q.o.map(function(o, j){ return '<button type="button" data-o="' + j + '"><i>' + LETTER[j] + "</i>" + esc(o) + "</button>"; }).join("") + '</div><div class="why" hidden></div></div>';
+    });
+    h += '<div id="script" class="script" hidden></div><div class="next"><button class="btn" type="button" id="nx" disabled>' + (bi === blocks.length - 1 ? "See my score" : "Next →") + "</button></div></div>";
+    app.innerHTML = h;
+    qno += b.qs.length;
+
+    var lines = [], showScript = function(){};
+    if (kind === "listening"){
+      (b.play || []).forEach(function(l){ lines.push(l); });
+      b.qs.forEach(function(q, i){ lines.push(["N", (b.qs.length > 1 || b.play ? "Question number " + (start + i + 1) + ". " : "") + q.ask]); });
+      var pb = app.querySelector("#playb");
+      var scriptHtml = (b.play || []).map(function(l){ return "<p><b>" + (l[0] === "M" ? "Man" : l[0] === "W" ? (b.play.length > 1 ? "Woman" : "Speaker") : "") + ":</b> " + esc(l[1]) + "</p>"; }).join("") +
+        b.qs.map(function(q, i){ return "<p><b>Q" + (start + i + 1) + ":</b> " + esc(q.ask) + "</p>"; }).join("");
+      showScript = function(){ var s = app.querySelector("#script"); s.innerHTML = '<h3>Script</h3>' + scriptHtml + (synth ? '<button class="btn small alt" type="button" id="again">🔊 Play again</button>' : ""); s.hidden = false; var a = s.querySelector("#again"); if (a) a.onclick = function(){ play(lines); }; };
+      if (!synth){ pb.hidden = true; showScript(); }
+      pb.onclick = function(){
+        pb.disabled = true; app.querySelector("#ptip").textContent = "🔊 Playing…";
+        play(lines, function(){ if (app.contains(pb)) app.querySelector("#ptip").textContent = "Choose your answers."; });
+      };
+    }
+
+    app.querySelectorAll(".qq").forEach(function(box){
+      var i = +box.dataset.q, q = b.qs[i];
+      box.querySelectorAll("[data-o]").forEach(function(btn){
+        btn.onclick = function(){
+          var j = +btn.dataset.o, ok = j === q.a;
+          box.querySelectorAll("[data-o]").forEach(function(x){ x.disabled = true; if (+x.dataset.o === q.a) x.className = "right"; });
+          if (!ok) btn.className = "wrong";
+          if (ok) got++; else misses.push({ n:start + i + 1, q:q.q || q.ask, right:q.o[q.a], mine:q.o[j], why:q.why });
+          var w = box.querySelector(".why"); w.className = "why " + (ok ? "ok" : "no"); w.innerHTML = "<b>" + (ok ? "✓ Right." : "✗ The answer is " + LETTER[q.a] + ".") + "</b> " + esc(q.why); w.hidden = false;
+          answered++;
+          if (answered === b.qs.length){
+            app.querySelector("#nx").disabled = false;
+            if (kind === "listening") showScript();
+          }
+        };
+      });
+    });
+    app.querySelector("#nx").onclick = function(){ bi++; if (bi < blocks.length) show(); else done(); };
+  }
+  function done(){
+    stopSpeech(); window.scrollTo(0, 0);
+    var min = Math.max(1, Math.round((Date.now() - t0) / 60000));
+    S.done[set.n + "-" + kind] = { score:got, total:total, ts:Date.now() }; save();
+    var h = '<div class="top"><button type="button" data-home>← Practice room</button><span class="who">' + SEC[kind].ic + " " + SEC[kind].name + "</span></div>";
+    h += '<div class="card"><div class="eyebrow">' + esc(set.title) + " · " + SEC[kind].name.toUpperCase() + '</div><div class="big">' + got + " / " + total + '</div><p class="soft">' + min + " min. " +
+      (got / total >= .8 ? "Excellent. This part is ready for the real test." : got / total >= .6 ? "Good. Read the mistakes below: each one is a small thing to learn." : "This level is a big step up from B1, so this is normal. Read every explanation below, then try the official sample.") + '</p><div id="cstat" class="cloud" hidden></div>';
+    if (misses.length){
+      h += "<h3>Learn from these</h3>";
+      misses.forEach(function(m){ h += '<div class="miss"><div class="qn">Question ' + m.n + '</div><div class="en">' + esc(m.q) + '</div><div>✗ You chose: <span class="en">' + esc(m.mine) + '</span><br>✓ Answer: <span class="en">' + esc(m.right) + "</span></div><div class=\"tip\">" + esc(m.why) + "</div></div>"; });
+    }
+    h += '<div class="next"><button class="btn" type="button" data-home>Back to the practice room</button></div></div>';
+    app.innerHTML = h;
+    record({ set:set.n, part:kind, score:got, total:total, min:min, wrong:misses.map(function(m){ return m.n; }),
+      summary:"中高級 " + set.title + " " + SEC[kind].zh + " " + got + "/" + total });
+  }
+  show();
+}
+
+/* ---------------- writing ---------------- */
+function writing(set){
+  stopAll(); window.scrollTo(0, 0);
+  var W = set.writing, dk = set.n + "-w", D = S.drafts[dk] || { t:"", e:"" }, t0 = Date.now();
+  var h = '<div class="top"><button type="button" data-home>← Exit</button><span class="who">✍️ Writing · ' + esc(set.title) + "</span></div>";
+  h += '<div class="card"><div class="bar"><span>Part I · Chinese–English Translation (40%)</span><span id="clk">50:00 for both parts</span></div>' +
+    '<div class="hint">Translate the Chinese passage into an English passage.</div><div class="zh">' + esc(W.translate.zh) + "</div>" +
+    '<details class="adult"><summary>Stuck? Phrase hints</summary><ul class="tips">' + W.translate.tips.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + "</ul></details>" +
+    '<textarea id="tt" spellcheck="false" lang="en" placeholder="Many students…">' + esc(D.t) + '</textarea><div class="meter"><span id="tw"></span></div></div>';
+  h += '<div class="card"><div class="bar"><span>Part II · Guided Writing (60%)</span><span>' + W.essay.min + "–" + W.essay.max + " words</span></div>" +
+    '<div class="task"><div class="en">' + esc(W.essay.prompt) + "</div><ol>" + W.essay.points.map(function(p){ return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>" +
+    '<textarea id="te" spellcheck="false" lang="en" style="min-height:300px" placeholder="Write two paragraphs: one for each point.">' + esc(D.e) + '</textarea><div class="meter"><span id="ew"></span></div>' +
+    '<p class="tip">Spell-check is off, like on paper. Your drafts are kept on this device while you write.</p>' +
+    '<div class="next"><button class="btn" type="button" id="sub">I\'m finished</button></div></div>';
+  app.innerHTML = h;
+  var tt = app.querySelector("#tt"), te = app.querySelector("#te");
+  function meter(){
+    var a = words(tt.value), b = words(te.value);
+    var tw = app.querySelector("#tw"), ew = app.querySelector("#ew");
+    tw.textContent = a + " words"; tw.className = a >= 50 ? "ok" : "";
+    ew.textContent = b + " words · aim " + W.essay.min + "–" + W.essay.max; ew.className = b >= W.essay.min && b <= W.essay.max ? "ok" : b > W.essay.max ? "no" : "";
+    S.drafts[dk] = { t:tt.value, e:te.value }; save();
+  }
+  tt.oninput = te.oninput = meter; meter();
+  var end = Date.now() + 50 * 60000;
+  timer = setInterval(function(){
+    var c = app.querySelector("#clk"); if (!c){ clearInterval(timer); timer = null; return; }
+    var s = Math.round((end - Date.now()) / 1000);
+    c.textContent = s > 0 ? Math.floor(s / 60) + ":" + ("0" + s % 60).slice(-2) + " left" : "Time's up (you can still finish)";
+  }, 1000);
+  app.querySelector("#sub").onclick = function(){
+    var a = words(tt.value), b = words(te.value);
+    if (a < 25 || b < 40){ alertBox("The real test can't score a translation under 25 words or an essay under 40 words. Write a bit more first."); return; }
+    var min = Math.max(1, Math.round((Date.now() - t0) / 60000));
+    writingDone(set, tt.value, te.value, a, b, min);
+  };
+}
+function alertBox(msg){
+  var old = app.querySelector(".alertx"); if (old) old.remove();
+  var d = document.createElement("div"); d.className = "why no alertx"; d.textContent = msg;
+  app.querySelector("#sub").parentNode.before(d);
+}
+function writingDone(set, t, e, a, b, min){
+  if (timer){ clearInterval(timer); timer = null; }
+  window.scrollTo(0, 0);
+  var W = set.writing;
+  S.done[set.n + "-writing"] = { ts:Date.now(), words:b }; save();
+  var checks = ["Part I: every idea in the Chinese is in my English (nothing skipped).", "Part II: I answered BOTH points, one paragraph each.", "I gave reasons and an example, not just my opinion.",
+    "I used linking words (although, however, for example, instead, in my opinion).", "I used different kinds of sentences, not only short simple ones.", "I checked spelling, capital letters, and full stops."];
+  var h = '<div class="top"><button type="button" data-home>← Practice room</button><span class="who">✍️ Writing</span></div>';
+  h += '<div class="card"><div class="eyebrow">' + esc(set.title) + ' · WRITING</div><h2>Now compare and check</h2><p class="soft">' + min + " min · translation " + a + " words · essay " + b + " words" +
+    (b < W.essay.min ? " (a bit short)" : b > W.essay.max ? " (a bit long)" : " ✓") + '</p><div id="cstat" class="cloud" hidden></div>' +
+    "<h3>Check your own work</h3><ul class=\"check\">" + checks.map(function(c){ return '<li><label><input type="checkbox"> <span>' + esc(c) + "</span></label></li>"; }).join("") + "</ul></div>";
+  h += '<div class="card"><h3>Part I · yours</h3><div class="mine">' + esc(t) + '</div><h3>Part I · one good answer</h3><div class="model">' + esc(W.translate.model) + '</div><p class="tip">There are many right translations. Look for ideas you missed and phrases you could borrow.</p></div>';
+  h += '<div class="card"><h3>Part II · yours</h3><div class="mine">' + esc(e) + '</div><h3>Part II · a model essay</h3><div class="model">' + esc(W.essay.model) + '</div><p class="tip">Notice the shape: opinion + reasons in paragraph 1, a practical suggestion with examples in paragraph 2, one closing sentence.</p>' +
+    '<div class="next"><button class="btn" type="button" data-home>Back to the practice room</button></div></div>';
+  app.innerHTML = h;
+  record({ set:set.n, part:"writing", min:min, tWords:a, eWords:b, translation:t, essay:e,
+    summary:"中高級 " + set.title + " 寫作：中譯英 " + a + " 字、作文 " + b + " 字（全文在資料欄）" });
+}
+
+/* ---------------- speaking ---------------- */
+var rec = { r:null, chunks:[], stream:null };
+function stopRec(){ try { if (rec.r && rec.r.state !== "inactive") rec.r.stop(); } catch(e){} if (rec.stream){ rec.stream.getTracks().forEach(function(t){ t.stop(); }); rec.stream = null; } }
+var CAN_REC = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+function recUI(id){ return CAN_REC ? '<div class="row" style="margin-top:8px"><button class="btn small alt" type="button" data-rec="' + id + '">🎙 Record myself</button><span class="tip" id="rs' + id + '"></span></div><div id="ra' + id + '"></div>' : ""; }
+app.addEventListener("click", function(e){
+  var b = e.target.closest("[data-rec]"); if (!b) return;
+  var id = b.dataset.rec, st = app.querySelector("#rs" + id), out = app.querySelector("#ra" + id);
+  if (rec.r && rec.r.state === "recording"){ stopRec(); b.textContent = "🎙 Record again"; return; }
+  navigator.mediaDevices.getUserMedia({ audio:true }).then(function(s){
+    rec.stream = s; rec.chunks = []; rec.r = new MediaRecorder(s);
+    rec.r.ondataavailable = function(ev){ if (ev.data.size) rec.chunks.push(ev.data); };
+    rec.r.onstop = function(){ if (!app.contains(out)) return; var url = URL.createObjectURL(new Blob(rec.chunks, { type:rec.r.mimeType || "audio/webm" })); out.innerHTML = '<audio controls src="' + url + '"></audio>'; st.textContent = "Listen back: did you speak clearly and keep going?"; };
+    rec.r.start(); b.textContent = "⏹ Stop recording"; st.textContent = "Recording… (only on this device)";
+  }).catch(function(){ st.textContent = "The microphone isn't available here. Practise out loud with Mum or Dad instead."; });
+});
+function countdown(el, secs, cls, label, then){
+  if (timer) clearInterval(timer);
+  var end = Date.now() + secs * 1000;
+  el.className = "clock " + cls;
+  function tick(){
+    var s = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    el.textContent = label + " " + Math.floor(s / 60) + ":" + ("0" + s % 60).slice(-2);
+    if (s <= 0){ clearInterval(timer); timer = null; if (then) then(); }
+  }
+  tick(); timer = setInterval(tick, 250);
+}
+function speaking(set){
+  stopAll(); window.scrollTo(0, 0);
+  var P = set.speaking, t0 = Date.now();
+  var h = '<div class="top"><button type="button" data-home>← Exit</button><span class="who">🗣️ Speaking · ' + esc(set.title) + "</span></div>";
+  h += '<div class="card"><div class="bar"><span>Part I · Answering Questions</span></div><div class="hint">You will hear a question. Answer it in the time shown. Keep talking until the time is up.</div>';
+  P.answer.forEach(function(a, i){
+    h += '<div class="task"><div class="qn">Question ' + (i + 1) + " · " + a.s + ' seconds</div><div class="row"><button class="btn small" type="button" data-ask="' + i + '">🔊 Ask me</button><span class="clock" id="c' + i + '"></span></div><div class="q" id="qa' + i + '" hidden>' + esc(a.q) + "</div></div>";
+  });
+  h += '</div><div class="card"><div class="bar"><span>Part II · Picture Description</span><span>' + P.picture.prep + "s to think · " + P.picture.talk + 's to talk</span></div><p>' + esc(P.picture.note) + '</p><div class="task"><ol>' + P.picture.qs.map(function(q){ return "<li>" + esc(q) + "</li>"; }).join("") + '</ol><div class="row"><button class="btn small" type="button" id="pic">Start</button><span class="clock" id="cp"></span></div>' + recUI("p") + "</div></div>";
+  h += '<div class="card"><div class="bar"><span>Part III · Discussion</span><span>' + P.discuss.prep + "s to think · " + P.discuss.talk + 's to talk</span></div><div class="hint">Think about the question, make notes if you like, then give your opinion with reasons.</div><div class="task"><div class="q">' + esc(P.discuss.q) + '</div><div class="row"><button class="btn small" type="button" id="dis">Start</button><span class="clock" id="cd"></span></div>' + recUI("d") + "</div>";
+  h += '<p class="tip">Good answers: give a reason, add an example, and don\'t stop at one sentence. A short pause to think is fine; silence is not.</p><div class="next"><button class="btn" type="button" id="fin">I\'m finished</button></div></div>';
+  app.innerHTML = h;
+  app.querySelectorAll("[data-ask]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.dataset.ask, a = P.answer[i], c = app.querySelector("#c" + i);
+      app.querySelector("#qa" + i).hidden = false;
+      play([["N", a.q]], function(){ if (app.contains(c)) countdown(c, a.s, "talk", "🗣️ Talk", function(){ c.textContent = "✓ Time"; }); });
+    };
+  });
+  function two(btn, clk, task){
+    btn.onclick = function(){
+      btn.disabled = true;
+      countdown(clk, task.prep, "prep", "🤔 Think", function(){ play([["N", "Please begin now."]]); countdown(clk, task.talk, "talk", "🗣️ Talk", function(){ clk.textContent = "✓ Time"; btn.disabled = false; btn.textContent = "Try again"; }); });
+    };
+  }
+  two(app.querySelector("#pic"), app.querySelector("#cp"), P.picture);
+  two(app.querySelector("#dis"), app.querySelector("#cd"), P.discuss);
+  app.querySelector("#fin").onclick = function(){
+    stopAll(); window.scrollTo(0, 0);
+    var min = Math.max(1, Math.round((Date.now() - t0) / 60000));
+    S.done[set.n + "-speaking"] = { ts:Date.now() }; save();
+    app.innerHTML = '<div class="top"><button type="button" data-home>← Practice room</button></div><div class="card"><div class="eyebrow">' + esc(set.title) + ' · SPEAKING</div><h2>Well done for speaking up!</h2><p>In the real test, a teacher listens to your recording and scores how clear, fluent and correct you are. The best practice: answer the same questions again tomorrow and try to talk for the whole time.</p><div id="cstat" class="cloud" hidden></div><div class="next"><button class="btn" type="button" data-home>Back to the practice room</button></div></div>';
+    record({ set:set.n, part:"speaking", min:min, summary:"中高級 " + set.title + " 口說練習完成" });
+  };
+}
+
+var RUN = { listening:function(s){ mc(s, "listening"); }, reading:function(s){ mc(s, "reading"); }, writing:writing, speaking:speaking };
+home();
+</script>
+</body>
+</html>
