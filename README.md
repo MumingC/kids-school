@@ -40,6 +40,10 @@ A small collection of static learning websites I build for my kids.
 - **音樂間**（[`tv/music/`](tv/music/)，`?k=m|b`）：只聽不看——YouTube 播放器縮在角落、用封面蓋住。歌單 `tv/music/songs.json` 由 `Dropbox/Family/kidstube/build_music.py`（來源 `music.json`：頻道、播放清單或搜尋）產生，改完重跑再 commit。孩子在裡面自己挑歌、按 ⭐ 收進自己的歌單（`ks.music.<who>`）；「想聽別的歌」的留言存在裝置，登入時也送到雲端（項目 `music-wish`）。不算小電視時間。
 - **連續故事**（`channels.json` 的 `series`，目前是 GEN-Z Media 的 *The Six Minutes*，205 集）：照集數順序播、播完自動接下一集，不混進隨機的「電視模式」；進度存在 `kt.series`。
 
+### 地圖與搬家（城市改版第一期，2026-11-26）
+
+城鎮（六個區、馬路、河）外面多了一圈野地：草地、森林、丘陵、山、湖、沙灘和海，每個檔案（中孩、大孩、全家）的地形各不相同（`SEED`）。點任何一棟建築，卡片下方有「🏗️ 搬家」：可以蓋的地會亮起來（草地、丘陵、沙灘、預留地；森林、山、水、馬路不行），點一格就搬過去。搬出去的建築腳下有一塊原本那一區顏色的底盤；再按一次搬家可以「搬回原來的區」。位置存在 `ks.city[.m|.b]` 的 `pos`（`{建築 id: [x, y]}`），和 🎨 自訂城市用同一份設定，所以也跟著「存到雲端」一起同步。第二期（還沒做）：雲霧和探索點數；第三期：建築升級和裝飾。
+
 ### 每個孩子自己的首頁
 
 - `mid/`（＝`?k=m`，🦊 中孩）：只顯示中孩的小電視＋「帶小小孩看」、The Six Minutes；二戰與 River City 連到簡單版；核分裂與小小村長顯示為上鎖。
