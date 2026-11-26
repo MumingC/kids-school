@@ -84,6 +84,10 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset
 .btn.alt{background:var(--leaf);box-shadow:0 4px 0 #2b7240}
 .btn.out{background:#9aa9b3;box-shadow:0 4px 0 #73828c}
 .lockmsg{font-weight:700;color:var(--ink-soft)}
+.pts{font:900 14px var(--body);color:var(--ink);background:var(--sun);border:0;border-radius:14px;padding:9px 12px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.ptlist{line-height:1.9}
+.ptlist b{float:right;color:var(--ink)}
+button.btn{border:0;font-family:var(--body);cursor:pointer}
 .mvbtn{display:block;margin:14px auto 0;font:700 14px var(--body);color:var(--ink-soft);background:#efe6d0;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
 .mv .can{fill:rgba(255,201,60,.38);stroke:#fff;stroke-width:2;cursor:pointer}
 .mv .can:hover{fill:rgba(255,201,60,.8)}
@@ -105,6 +109,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset
   <div class="bar">
     <div class="title">🏙️ Kids School 城<small id="greet">想去哪一區？</small></div>
     <div class="who" id="who" hidden></div>
+    <button class="pts" id="pts" type="button" hidden></button>
     <div class="clock"><span id="clock">--:--</span><small id="date"></small></div>
   </div>
   <div class="chips" id="chips" aria-label="直接飛到某一區"></div>
@@ -269,11 +274,19 @@ function cleanCity(ov){            // keep only well-formed, known entries; null
       if (used[x + "," + y]) return; used[x + "," + y] = 1;
       (out.pos = out.pos || {})[id] = [x, y]; n++;
     }); }
+  // seen: centres of the 3 x 3 patches of cloud the kid has cleared with exploration points (one point each)
+  if (Array.isArray(ov.seen)){ var got = {}, seen = [];
+    ov.seen.forEach(function(p){
+      if (!Array.isArray(p) || p.length !== 2 || seen.length >= 600) return;
+      var x = p[0], y = p[1]; if (x !== Math.round(x) || y !== Math.round(y) || x < -20 || x > 80 || y < -20 || y > 60 || got[x + "," + y]) return;
+      got[x + "," + y] = 1; seen.push([x, y]);
+    });
+    if (seen.length){ out.seen = seen; n++; } }
   if (typeof ov.ts === "number" && isFinite(ov.ts) && ov.ts > 0) out.ts = Math.round(ov.ts);   // when it was last changed (cloud sync compares these)
   if (!n && !out.ts) return null;
   out.v = 1; return out;
 }
-function hasCustom(ov){ return !!(ov && (ov.pal || ov.order || ov.d || ov.b || ov.io || ov.pos)); }
+function hasCustom(ov){ return !!(ov && (ov.pal || ov.order || ov.d || ov.b || ov.io || ov.pos || ov.seen)); }
 function lightColour(hex){ var n = parseInt(hex.slice(1), 16); return ((n >> 16) * .299 + (n >> 8 & 255) * .587 + (n & 255) * .114) / 255 > .72; }
 // all districts (hidden ones too, flagged .hidden) with the overrides applied; items carry ._off when hidden
 function customCity(ov){
@@ -324,6 +337,9 @@ var ROWS, X1, Y1, RIVER, GX, GY, PORT, B0, B1, BY0, BY1;
 // Outside the town the land is wild (meadow, forest, hills, mountains, lakes, a beach and the sea);
 // a building can be moved onto any free meadow, hill or sand tile. Each profile gets its own landscape (SEED).
 var WX0, WY0, WX1, WY1, TAKEN, MOVED;
+// A kid's own map starts with the wild land under cloud (FOG); CLEAR holds the tiles already uncovered and SPENT
+// how many exploration points that took. Points come only from finished learning (see earned()).
+var FOG = false, CLEAR = {}, SPENT = 0, GIFT = 3;
 var LOTS = [[0,0],[2,0],[4,0],[0,2],[2,2],[4,2]];
 function layout(){                   // (re)computes the map from DISTRICTS + this device's overrides
   var ov = cleanCity(get(CITY_KEY, null));
@@ -336,6 +352,10 @@ function layout(){                   // (re)computes the map from DISTRICTS + th
   PORT = DISTRICTS.filter(function(d){ return d.id === "geo" && d.oy + BD === Y1; })[0];   // the port needs the waterfront row
   WX0 = -8; WY0 = -7; WX1 = GX + 3; WY1 = GY + 7;
   B0 = iso(WX0, WY1); B1 = iso(WX1, WY0); BY0 = iso(WX0, WY0)[1]; BY1 = iso(WX1, WY1)[1];
+  FOG = kid !== "a"; CLEAR = {}; SPENT = ov && ov.seen ? ov.seen.length : 0;
+  var open = function(p){ for (var a = -1; a <= 1; a++) for (var b = -1; b <= 1; b++) CLEAR[(p[0] + a) + "," + (p[1] + b)] = 1; };
+  if (ov && ov.seen) ov.seen.forEach(open);
+  DISTRICTS.forEach(function(d){ d.items.forEach(function(it){ if (it._pos) open(it._pos); }); });   // a building never ends up under cloud
   // which buildings stand on a tile of their own: only positions that are still free, buildable land count
   TAKEN = {}; MOVED = {};
   TAKEN[(X1 + 4) + "," + (M + 2)] = 1;                       // the "next district" sign
@@ -363,8 +383,14 @@ function wild(x, y){                // the land outside the town
   if (f > .58) return "forest";
   return "grass";
 }
+function inTown(x, y){ return x >= -1 && x < GX && y >= -1 && y < GY; }
+function fog(x, y){ return FOG && !inTown(x, y) && !CLEAR[x + "," + y]; }
+function edge(x, y){                // cloud that touches open land: the next places that can be explored
+  if (!fog(x, y)) return false;
+  return [[1,0],[-1,0],[0,1],[0,-1]].some(function(n){ var a = x + n[0], b = y + n[1]; return a >= WX0 && a < WX1 && b >= WY0 && b < WY1 && !fog(a, b); });
+}
 function canBuild(x, y){            // free land a building may be moved onto
-  if (x < WX0 || x >= WX1 || y < WY0 || y >= WY1 || (TAKEN && TAKEN[x + "," + y])) return false;
+  if (x < WX0 || x >= WX1 || y < WY0 || y >= WY1 || (TAKEN && TAKEN[x + "," + y]) || fog(x, y)) return false;
   if (y === Y1 + 1 && x >= M - 1 && x <= X1) return false;        // the riverside walk: district signs hang over it
   var t = tileType(x, y); return t === "grass" || t === "hill" || t === "sand" || t === "plot";
 }
@@ -420,7 +446,10 @@ function build(){
   var x, y;
   for (y = WY0; y < WY1; y++) for (x = WX0; x < WX1; x++){
     var t = tileType(x, y), odd = Math.abs(x + y) % 2, free = !TAKEN[x + "," + y];
-    if (t === "river" || t === "lake") tile(x, y, odd ? "#7cc4e8" : "#86cbed");
+    if (fog(x, y)){ tile(x, y, odd ? "#f1f5f9" : "#e8eef4", "#dde5ee");
+      if (rnd(x * 2, y) > .45){ var cc = iso(x + .5, y + .5), cw = 44 + rnd(y, x * 5) * 30;
+        el("ellipse", { cx:cc[0] + (rnd(x, y) - .5) * 40, cy:cc[1], rx:cw, ry:cw * .42, fill:"#fff", opacity:.9 }, gGround); } }
+    else if (t === "river" || t === "lake") tile(x, y, odd ? "#7cc4e8" : "#86cbed");
     else if (t === "sea") tile(x, y, odd ? "#5fb0dc" : "#68b7e1");
     else if (t === "sand") tile(x, y, odd ? "#f3e3b5" : "#eedca8");
     else if (t === "hill") tile(x, y, odd ? "#cfd39a" : "#c6cb8f", "#b3b97c");
@@ -441,11 +470,13 @@ function build(){
   for (c = 0; c <= COLS; c++){ a = iso(M - .5 + c * (BW + 1), M - 1); b = iso(M - .5 + c * (BW + 1), Y1 + 1); line(a, b); }
   DISTRICTS.forEach(function(d){
     // buildings the kid moved onto a tile of their own stand there; the rest fill the district's lots
-    var list = items(d).filter(function(it){ var p = MOVED[it.id]; if (!p) return true;
-      things.push({ z:p[0] + p[1], draw:building.bind(null, d, it, p[0], p[1], true) }); return false;
-    }).map(function(it){ return { it:it }; }).concat(d.ideas.map(function(s){ return { idea:s }; }));
+    // Its lot in the district stays empty (marked as a vacant plot), so nothing else slides into its place.
+    var list = items(d).map(function(it){ var p = MOVED[it.id]; if (!p) return { it:it };
+      things.push({ z:p[0] + p[1], draw:building.bind(null, d, it, p[0], p[1], true) }); return { gap:true };
+    }).concat(d.ideas.map(function(s){ return { idea:s }; }));
     LOTS.forEach(function(L, i){
       var x = d.ox + L[0], y = d.oy + L[1], e = list[i];
+      if (e && e.gap){ el("polygon", { points:pts([iso(x + .12, y + .12), iso(x + .88, y + .12), iso(x + .88, y + .88), iso(x + .12, y + .88)]), fill:"#fff", "fill-opacity":.35, stroke:"#fff", "stroke-width":3, "stroke-dasharray":"8 7" }, gGround); return; }
       if (!e) things.push({ z:x + y, draw:deco.bind(null, x, y, d.deco[(i - list.length) % d.deco.length], 0) });
       else things.push({ z:x + y, draw:(e.it ? building : site).bind(null, d, e.it || e.idea, x, y) });
     });
@@ -630,7 +661,7 @@ function fill(){            // (re)draw the sheet of the picked building
 /* ---------- moving a building: pick it, then tap one of the lit tiles ---------- */
 var moving = null, gMove = null, mvBar = document.getElementById("mvbar");
 function saveLayout(change){
-  var ov = cleanCity(get(CITY_KEY, null)) || {}; ov.pos = ov.pos || {}; change(ov.pos); ov.ts = Date.now();
+  var ov = cleanCity(get(CITY_KEY, null)) || {}; ov.pos = ov.pos || {}; change(ov.pos, ov); ov.ts = Date.now();
   ov = cleanCity(ov); if (ov && hasCustom(ov)) set(CITY_KEY, ov); else try { localStorage.removeItem(CITY_KEY); } catch(e){}
   rebuild();
 }
@@ -645,14 +676,54 @@ function startMove(d, it){
   var far = Math.min(.6, Math.max(.32, stage.clientWidth / 1600));      // step back so free land is in view, even on a phone
   if (cam.s > far) fly(cam.x, cam.y, far);
 }
-function endMove(){ moving = null; if (gMove){ gMove.remove(); gMove = null; } mvBar.hidden = true; }
+function endMove(){ moving = null; exploring = false; if (gMove){ gMove.remove(); gMove = null; } mvBar.hidden = true; }
+/* ---------- exploration points: finished learning clears the cloud, one 3 x 3 patch per point ---------- */
+var exploring = false, ptsBtn = document.getElementById("pts");
+function earned(){
+  var keys = function(k){ var d = (get(k, {}) || {}).done; return d && typeof d === "object" ? Object.keys(d).length : 0; };
+  var e = { les:keys("ks.eng.les." + kid) * 2, exam:keys("ks.exam." + kid) * 5, gept:keys("ks.gept." + kid), test:0 };
+  var h = get("ks.eng.test", []); if (Array.isArray(h)) h.forEach(function(r){ if (r && r.who === kid && r.top + 1 > e.test) e.test = r.top + 1; });
+  e.all = GIFT + e.les + e.exam + e.gept + e.test; return e;
+}
+function pointsLeft(){ return Math.max(0, earned().all - SPENT); }
+function showPoints(){ if (!FOG){ ptsBtn.hidden = true; return; } ptsBtn.hidden = false; ptsBtn.textContent = "☁️ 探索點數 " + pointsLeft(); }
+function anyEdge(){ for (var y = WY0; y < WY1; y++) for (var x = WX0; x < WX1; x++) if (edge(x, y)) return true; return false; }
+function pointsSheet(){
+  var e = earned(), left = pointsLeft(), more = anyEdge();
+  closeSheet(); endMove();
+  sheet.innerHTML = '<button class="x" type="button" aria-label="關閉">✕</button><h2>☁️ 探索點數</h2>' +
+    "<p>城外的土地被雲蓋住了。完成學習就會得到探索點數，<strong>一點可以撥開一片雲</strong>，看看下面是草地、森林、山還是湖。撥開的草地、丘陵和沙灘可以蓋房子。</p>" +
+    '<p class="ptlist">📘 英文課：一課 2 點 <b>' + e.les + "</b><br>🧩 題庫：做完一組 5 點（一個部分 1 點） <b>" + e.exam + "</b><br>🎯 中高級練習：一個部分 1 點 <b>" + e.gept +
+    "</b><br>✏️ 程度測驗：過一關 1 點 <b>" + e.test + "</b><br>🎁 見面禮 <b>" + GIFT + "</b><br>已經用掉 <b>" + SPENT + "</b></p>" +
+    '<div class="go">' + (!more ? '<span class="lockmsg">🎉 整張地圖都探索完了！</span>' : left > 0 ? '<button class="btn" type="button" id="goex">🔭 去撥開雲<small>還有 ' + left + " 點</small></button>"
+      : '<span class="lockmsg">點數用完了。去上一課或做一組題目，就會有新的點數。</span>') + "</div>";
+  sheet.querySelector(".x").onclick = closeSheet;
+  var go = sheet.querySelector("#goex"); if (go) go.onclick = function(){ closeSheet(); startExplore(); };
+  sheet.classList.add("open"); hideHint();
+}
+function startExplore(){
+  endMove(); if (pointsLeft() <= 0 || !anyEdge()) return pointsSheet();
+  exploring = true; gMove = el("g", { "class":"mv" }, world);
+  for (var y = WY0; y < WY1; y++) for (var x = WX0; x < WX1; x++) if (edge(x, y))
+    el("polygon", { points:pts([iso(x,y), iso(x+1,y), iso(x+1,y+1), iso(x,y+1)]), "class":"can", "data-x":x, "data-y":y }, gMove);
+  mvBar.innerHTML = "<span>🔭 還有 " + pointsLeft() + " 點<small>點一片亮起來的雲，把它撥開</small></span>" + '<button type="button" data-mv="x">結束</button>';
+  mvBar.hidden = false;
+  var far = Math.min(.5, Math.max(.3, stage.clientWidth / 2200)); if (cam.s > far) fly(cam.x, cam.y, far);
+}
+function reveal(x, y){
+  if (!exploring || pointsLeft() <= 0 || !edge(x, y)) return;
+  saveLayout(function(pos, ov){ (ov.seen = ov.seen || []).push([x, y]); });
+  showPoints();
+  if (pointsLeft() > 0 && anyEdge()) startExplore(); else if (!anyEdge()) pointsSheet();
+}
+ptsBtn.onclick = pointsSheet;
 function placeAt(x, y){
   var it = moving.it; endMove();
   saveLayout(function(pos){ pos[it.id] = [x, y]; });
   var g = world.querySelector('.bld[data-item="' + it.id + '"]'); if (g){ g.classList.add("sel"); var c = iso(x + .5, y + .5); fly(c[0], c[1] - 40, Math.max(cam.s, .7)); setTimeout(function(){ g.classList.remove("sel"); }, 1200); }
 }
 mvBar.addEventListener("click", function(e){
-  var b = e.target.closest("[data-mv]"); if (!b || !moving) return;
+  var b = e.target.closest("[data-mv]"); if (!b || (!moving && !exploring)) return;
   if (b.dataset.mv === "back"){ var it = moving.it; endMove(); saveLayout(function(pos){ delete pos[it.id]; }); }
   else endMove();
 });
@@ -664,16 +735,17 @@ function pick(g){
 function closeSheet(){ picked = null; sheet.classList.remove("open"); world.querySelectorAll(".bld.sel").forEach(function(b){ b.classList.remove("sel"); }); }
 world.addEventListener("click", function(e){ if (moved > 6) return;
   if (moving){ var t = e.target.closest(".can"); if (t) placeAt(+t.dataset.x, +t.dataset.y); return; }
+  if (exploring){ var c = e.target.closest(".can"); if (c) reveal(+c.dataset.x, +c.dataset.y); return; }
   var g = e.target.closest(".bld"); if (g) pick(g); else closeSheet(); });
 world.addEventListener("keydown", function(e){ var g = e.target.closest(".bld"); if (g && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); pick(g); } });
 stage.addEventListener("click", function(e){ if (moved <= 6 && (e.target === stage || e.target.id === "city")) closeSheet(); });
-addEventListener("keydown", function(e){ if (e.key === "Escape"){ if (moving) endMove(); else closeSheet(); } });
+addEventListener("keydown", function(e){ if (e.key === "Escape"){ if (moving || exploring) endMove(); else closeSheet(); } });
 // remember the last subject (per kid)
 sheet.addEventListener("click", function(e){
   var a = e.target.closest ? e.target.closest("a.btn[data-title]") : null;
   if (a) set(LK, { href:a.getAttribute("href"), title:a.dataset.title, island:a.parentNode.dataset.d });
 });
-addEventListener("pageshow", function(){ if (picked) fill(); });   // refresh TV minutes after coming back
+addEventListener("pageshow", function(){ if (picked) fill(); showPoints(); });   // refresh TV minutes and points after coming back
 
 /* ---------- HUD ---------- */
 var chips = document.getElementById("chips");
@@ -778,7 +850,7 @@ function infoSheet(){
 document.getElementById("info").onclick = infoSheet;
 
 // ---- 🎨 customise the city (the editor itself is assets/city-edit.js) ----
-function rebuild(){ picked = null; if (moving) endMove(); fresh(); layout(); build(); renderChips(); apply(); }
+function rebuild(){ picked = null; if (moving || exploring) endMove(); fresh(); layout(); build(); renderChips(); apply(); showPoints(); }
 window.KS_CITY = {
   KEY:CITY_KEY, profile:PROFILE, base:BASE, spr:SPR, palettes:PALETTES, kid:kid, hasCustom:hasCustom,
   clean:cleanCity, model:customCity,
@@ -797,7 +869,7 @@ document.getElementById("cust").onclick = function(){
     sheet.querySelector(".x").onclick = closeSheet; sheet.classList.add("open"); }
 };
 
-fresh(); layout(); build(); renderChips(); home(true); tick(); setInterval(tick, 15000);
+fresh(); layout(); build(); renderChips(); home(true); tick(); setInterval(tick, 15000); showPoints();
 if (QS.get("hash") === "1") infoSheet();
 })();
 </script>
