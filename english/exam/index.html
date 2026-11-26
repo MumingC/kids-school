@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test Centre · Kids School</title>
+<meta name="description" content="劍橋英檢題型的分級練習：B1、B2 的閱讀與 Use of English，照題型自己出的練習題。">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9D%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Test Centre: graded practice sets in Cambridge exam formats. Sets live in <level>-<n>.js (window.EXAM_SETS);
+   this page runs them. Scores stay in localStorage (ks.exam.<who>); finished sets also go to the family
+   Google Sheet through assets/ks-cloud.js (app "exam"). Same look as ../gept/. */
+:root{
+  color-scheme:light;
+  --ink:#1d2a3a; --ink-soft:#52627a; --paper:#fffaf0; --card:#ffffff; --line:#e3d9c3;
+  --sun:#ffc93c; --go:#2f6f8f; --go-dark:#1f4f68; --leaf:#3f9a5a; --bad:#c24a3a;
+  --b1:#d99a2b; --b2:#8d7be0;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --en:"Nunito","Noto Sans TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:linear-gradient(#dcebf3,#f1f6f9 300px) no-repeat,#f1f6f9;color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.65;min-height:100vh}
+[hidden]{display:none!important}
+.wrap{max-width:760px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.top a,.top button{font:inherit;color:var(--ink);font-weight:700;text-decoration:none;background:rgba(255,255,255,.92);border:0;border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer}
+.top .who{margin-left:auto;font-size:14px;font-weight:800;color:var(--ink-soft)}
+.card{background:var(--card);border-radius:22px;padding:20px 20px 22px;box-shadow:0 8px 26px rgba(29,42,58,.11);border:2px solid #fff;margin-bottom:16px;min-width:0}
+h1{margin:0 0 4px;font-size:clamp(24px,5vw,32px);font-weight:900;line-height:1.3;text-wrap:balance}
+h2{margin:0 0 8px;font-size:21px;font-weight:900;line-height:1.35;text-wrap:balance}
+h3{margin:0 0 8px;font-size:17px;font-weight:900}
+p{margin:0 0 12px}
+.soft{color:var(--ink-soft)}
+.en{font-family:var(--en)}
+.eyebrow{font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--go);margin-bottom:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-weight:900;font-size:18px;color:#fff;background:var(--go);border:0;border-radius:16px;padding:12px 24px;box-shadow:0 4px 0 var(--go-dark);cursor:pointer;text-decoration:none}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.small{font-size:15px;padding:8px 14px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.next{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;align-items:center}
+.next .tip{margin-right:auto}
+.secs{display:grid;gap:10px}
+.sec{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer}
+.sec:hover{border-color:var(--ink-soft)}
+.sec .ic{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--en);font-size:17px;font-weight:800;color:#fff}
+.sec .tx{flex:1;min-width:0}
+.sec .tx b{display:block;font-family:var(--en);font-size:16.5px;line-height:1.35}
+.sec .tx span{font-size:13.5px;color:var(--ink-soft)}
+.sec .st{flex:none;font-size:13px;font-weight:800;color:var(--ink-soft);text-align:right}
+.sec .st.ok{color:var(--leaf)}
+.l-B1{background:var(--b1)}.l-B2{background:var(--b2)}
+.cloud{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;background:#eef6fb;border:2px solid #cfe3ef;border-radius:14px;padding:8px 12px;font-size:14.5px;margin:0 0 14px}
+.cloud.ok{background:#eef8f0;border-color:#cde6d3}
+.cloud .gbtn{min-height:32px}
+details.adult{font-size:15px}
+details.adult summary{cursor:pointer;font-weight:800}
+details.adult ul{margin:8px 0 0;padding-left:20px}
+.bar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:800;color:var(--ink-soft);margin-bottom:8px}
+.hint{font-family:var(--en);font-style:italic;color:var(--ink-soft);margin-bottom:12px}
+.passage{font-family:var(--en);font-size:17px;line-height:1.8;background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px;overflow-wrap:anywhere}
+.passage p{margin:0 0 12px}.passage p:last-child{margin:0}
+.passage h4{margin:4px 0 6px;font-size:17.5px}
+.passage b{background:#ffe9a8;border-radius:5px;padding:0 4px}
+.stim{font-family:var(--en);font-size:16.5px;line-height:1.6;background:#fff;border:2px solid var(--ink-soft);border-radius:10px;padding:10px 14px;margin-bottom:10px;overflow-wrap:anywhere}
+.stim p{margin:0 0 6px}.stim p:last-child{margin:0}
+.stim h4{margin:0 0 4px;font-size:16px;letter-spacing:.04em}
+.qq{border-top:2px dashed var(--line);padding-top:12px;margin-top:12px}
+.qq:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.qn{font-size:13.5px;font-weight:800;color:var(--ink-soft);margin-bottom:4px}
+.q{font-family:var(--en);font-size:18.5px;font-weight:800;line-height:1.5;margin:2px 0 10px;overflow-wrap:anywhere}
+.lead{font-family:var(--en);font-size:17.5px;line-height:1.5;margin:2px 0 6px}
+.key{display:inline-block;font-family:var(--en);font-weight:800;letter-spacing:.06em;background:#ffe9a8;border-radius:6px;padding:1px 9px;margin:0 0 8px}
+.opts{display:grid;gap:8px}
+.opts.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts button{font:inherit;font-family:var(--en);text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:9px 14px;cursor:pointer;color:var(--ink);font-size:17px;line-height:1.45;min-width:0;overflow-wrap:anywhere}
+.opts button:not(:disabled):hover{border-color:var(--ink-soft)}
+.opts button.sel{border-color:var(--go);background:#e6f1f6}
+.opts button.right{border-color:var(--leaf);background:#e8f5ec}
+.opts button.wrong{border-color:var(--bad);background:#fbeae7}
+.opts button:disabled{cursor:default;color:var(--ink)}
+.opts button i{font-style:normal;font-weight:800;color:var(--ink-soft);margin-right:8px}
+.ans{width:100%;max-width:420px;font:800 18px/1.4 var(--en);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:9px 12px;background:#fff}
+.ans.right{border-color:var(--leaf);background:#e8f5ec}
+.ans.wrong{border-color:var(--bad);background:#fbeae7}
+.ans:disabled{color:var(--ink);opacity:1;-webkit-text-fill-color:var(--ink)}
+.why{margin-top:10px;border-radius:14px;padding:9px 14px;font-size:15.5px;background:#f3f0e8}
+.why.ok{background:#e8f5ec}.why.no{background:#fbeae7}
+.big{font-size:clamp(34px,8vw,46px);font-weight:900;line-height:1.15;margin:4px 0}
+.parts{display:grid;gap:6px;margin:0 0 14px}
+.parts div{display:flex;justify-content:space-between;gap:10px;font-size:15.5px;background:var(--paper);border:2px solid var(--line);border-radius:12px;padding:6px 12px}
+.parts b{font-family:var(--en)}
+.miss{background:var(--paper);border:2px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:10px;font-size:15.5px;overflow-wrap:anywhere}
+.miss .en{font-weight:800}
+.tip{font-size:14.5px;color:var(--ink-soft)}
+@media (max-width:480px){.sec{gap:10px;padding:9px 10px}.sec .ic{width:38px;height:38px;font-size:15px}.q{font-size:17.5px}.opts button{font-size:16px}.card{padding:16px 14px 18px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script src="../../assets/ks-cloud.js"></script>
+<!-- one script tag per set; each pushes itself onto window.EXAM_SETS -->
+<script src="b1-1.js"></script>
+<script src="b2-1.js"></script>
+<script>
+"use strict";
+var app = document.getElementById("app");
+var SETS = window.EXAM_SETS || [];
+var get = function(k, d){ try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } };
+var put = function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+var LETTER = ["A", "B", "C", "D", "E", "F", "G", "H"];
+// Typed answers: ignore case, extra spaces, curly/straight quote differences and a full stop at the end.
+function norm(s){
+  s = String(s == null ? "" : s);
+  if (s.normalize) s = s.normalize("NFKC");
+  return s.replace(/[‘’ʼ`´]/g, "'").replace(/[“”]/g, '"').toLowerCase().replace(/\s+/g, " ").trim().replace(/[.,;:!?]+$/, "").trim();
+}
+
+var WHO = { b:"🚀 Big kid", m:"🦊 Middle kid" };
+var qk = new URLSearchParams(location.search).get("k");
+var who = WHO[qk] ? qk : (get("ks.who", null) === "m" ? "m" : "b");
+var KEY = "ks.exam." + who;
+var S = get(KEY, null) || {};
+S.done = S.done || {}; S.recs = S.recs || [];
+function save(){ put(KEY, S); }
+
+var LEVELS = [
+  { id:"B1", name:"B1 · Preliminary level", note:"The level of Cambridge B1 Preliminary (PET) and GEPT Intermediate." },
+  { id:"B2", name:"B2 · First level", note:"The level of Cambridge B2 First (FCE) and GEPT High-Intermediate." }
+];
+
+/* ---------------- cloud (optional; see assets/ks-cloud.js) ---------------- */
+var CL = window.KSCloud || { on:false }, APP = "exam";
+var ROLE_NAME = { m:"🦊 Middle kid", b:"🚀 Big kid", p:"👨‍👩‍👧‍👦 Mum & Dad" };
+function newId(){ return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function syncLocal(){
+  if (!CL.on) return Promise.resolve([]);
+  var todo = S.recs.filter(function(r){ return !r.cloud; });
+  return CL.save(APP, todo).then(function(ids){
+    var set = {}; (ids || []).forEach(function(i){ set[i] = 1; });
+    S.recs.forEach(function(r){ if (set[r.id]) r.cloud = true; }); save();
+    return ids;
+  });
+}
+function cloudFail(box, e, again){
+  var m = String(e && e.message || "");
+  if (/^token/.test(m)){ again(); return; }
+  box.className = "cloud";
+  box.textContent = /^account/.test(m) ? "☁️ This Google account isn't registered yet, so results are saved on this device only."
+    : "☁️ Can't reach the cloud right now. Results are saved on this device and will be uploaded next time.";
+}
+function askSignIn(box, text, again){
+  box.className = "cloud";
+  box.innerHTML = "<span>" + text + '</span><span class="gbtn"></span>';
+  CL.signInButton(box.querySelector(".gbtn"), function(){ if (app.contains(box)) again(); }).catch(function(){ box.hidden = true; });
+}
+function cloudBox(){
+  var box = app.querySelector("#cloud");
+  if (!CL.on || !box) return;
+  box.hidden = false;
+  if (!CL.signedIn()){ askSignIn(box, "☁️ Sign in so Mum and Dad can see your scores (you can also practise without signing in):", cloudBox); return; }
+  box.className = "cloud"; box.textContent = "☁️ Connecting…";
+  syncLocal().then(function(){
+    if (!app.contains(box)) return;
+    var r = CL.role();
+    box.className = "cloud ok";
+    box.textContent = "☁️ Signed in" + (ROLE_NAME[r] ? " as " + ROLE_NAME[r] : "") + ". Finished sets are saved to the cloud.";
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, cloudBox); });
+}
+function record(rec){
+  rec.id = newId(); rec.ts = Date.now(); rec.who = who;
+  S.recs.push(rec); S.recs = S.recs.slice(-60); save();
+  shipBox(app.querySelector("#cstat"), rec);
+}
+function shipBox(box, rec){
+  if (!CL.on || !box || !app.contains(box)) return;
+  box.hidden = false;
+  var again = function(){ shipBox(box, rec); };
+  if (!CL.signedIn()){ askSignIn(box, "Saved on this device. Sign in to save it to the cloud too:", again); return; }
+  box.className = "cloud"; box.textContent = "☁️ Saving…";
+  syncLocal().then(function(){
+    if (!app.contains(box)) return;
+    var ok = S.recs.some(function(r){ return r.id === rec.id && r.cloud; });
+    box.className = ok ? "cloud ok" : "cloud";
+    box.textContent = ok ? "☁️ Saved to the cloud. Mum and Dad can see it in the spreadsheet." : "☁️ Not saved to the cloud yet. It will try again next time.";
+  }).catch(function(e){ if (app.contains(box)) cloudFail(box, e, again); });
+}
+
+/* ---------------- home ---------------- */
+var timer = null;
+function stopAll(){ if (timer){ clearInterval(timer); timer = null; } }
+function count(set){ var n = 0; set.parts.forEach(function(p){ n += p.items.length; }); return n; }
+function status(set){
+  var d = S.done[set.id];
+  if (!d) return '<span class="st">—</span>';
+  return '<span class="st ok">Best ' + d.best + "/" + d.total + (d.tries > 1 ? "<br>" + d.tries + " tries" : "") + "</span>";
+}
+function home(){
+  stopAll(); window.scrollTo(0, 0);
+  var h = '<div class="top"><a href="../../">← Kids School</a><a href="../gept/?k=' + who + '">🎯 GEPT room</a><span class="who">' + WHO[who] + '</span></div>';
+  h += '<div class="card"><div class="eyebrow">CAMBRIDGE-STYLE PRACTICE · 劍橋題型分級練習</div><h1>Test Centre</h1>' +
+    "<p>Pick a level and work through a whole set. You answer one part, check it, read the explanations, then go on. At the end you see your score for every part. You can take a set again as often as you like.</p>" +
+    '<div id="cloud" class="cloud" hidden></div></div>';
+  LEVELS.forEach(function(L){
+    var list = SETS.filter(function(s){ return s.level === L.id; });
+    if (!list.length) return;
+    h += '<div class="card"><h2>' + esc(L.name) + '</h2><p class="tip">' + esc(L.note) + '</p><div class="secs">';
+    list.forEach(function(set){
+      h += '<button class="sec" type="button" data-go="' + esc(set.id) + '"><span class="ic l-' + esc(set.level) + '">' + esc(set.level) + '</span><span class="tx"><b>' + esc(set.title) + " · " + esc(set.skill) + "</b><span>" + esc(set.about) + "</span></span>" + status(set) + "</button>";
+    });
+    h += "</div></div>";
+  });
+  h += '<div class="card"><h2>Real exam papers</h2><p class="tip">Cambridge puts free sample papers on its website, with listening recordings and answer keys. They are the real thing, so save them for a proper mock test.</p>' +
+    '<div class="row"><a class="btn small alt" href="https://www.cambridgeenglish.org/exams-and-tests/qualifications/preliminary/preparation/" target="_blank" rel="noopener">B1 Preliminary samples ↗</a>' +
+    '<a class="btn small alt" href="https://www.cambridgeenglish.org/exams-and-tests/qualifications/first/preparation/" target="_blank" rel="noopener">B2 First samples ↗</a></div></div>';
+  h += '<div class="card"><details class="adult"><summary>給爸爸媽媽的說明</summary><ul>' +
+    "<li>題型照劍橋英檢：B1 是 B1 Preliminary for Schools（PET）的閱讀題型；B2 是 B2 First for Schools（FCE）的 Reading and Use of English 題型（選擇式克漏字、填空式克漏字、構詞、關鍵字改寫句子、長文閱讀）。</li>" +
+    "<li><b>文章和題目都是 Claude 照題型自己寫的，不是官方試題</b>，難度沒有校準過。答對幾題不能換算成劍橋的量尺分數，也不能當成通過或沒通過的依據，只能看孩子自己前後的進步。</li>" +
+    "<li>每一部分作答完按「Check my answers」才對答案，每題都有簡單的英文解釋。同一份可以重做，首頁會留最高分和做過幾次。</li>" +
+    "<li>填空題不分大小寫，多打空白或句點也算對；有不只一個正確答案的題目，已經把想得到的都列進去。如果孩子覺得自己的答案也對卻被判錯，請告訴 Claude 來補。</li>" +
+    "<li>登入後，每次做完會存到試算表（項目 exam），資料欄裡有每一題孩子填的答案。要測真正的程度，請用上面連結的官方樣卷。</li></ul></details></div>";
+  app.innerHTML = h;
+  cloudBox();
+}
+app.addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]");
+  if (g){ var set = SETS.filter(function(s){ return s.id === g.dataset.go; })[0]; if (set) run(set); return; }
+  if (e.target.closest("[data-home]")) home();
+});
+
+/* ---------------- run a set: one screen per part ---------------- */
+function run(set){
+  stopAll();
+  var total = count(set), pi = 0, qno = 0, t0 = Date.now(), got = 0, misses = [], answers = [], partScores = [];
+  function clock(){
+    var s = Math.floor((Date.now() - t0) / 1000);
+    return "⏱ " + Math.floor(s / 60) + ":" + ("0" + s % 60).slice(-2);
+  }
+  timer = setInterval(function(){ var c = app.querySelector("#clk"); if (c) c.textContent = clock(); }, 1000);
+
+  function show(){
+    window.scrollTo(0, 0);
+    var P = set.parts[pi], start = qno, last = pi === set.parts.length - 1;
+    var mine = P.items.map(function(){ return null; });
+    var h = '<div class="top"><button type="button" data-home>← Exit</button><span class="who">' + esc(set.title) + " · " + esc(set.skill) + "</span></div>";
+    h += '<div class="card"><div class="bar"><span>' + esc(P.name) + " of " + set.parts.length + " · Questions " + (start + 1) + "–" + (start + P.items.length) + " of " + total + '</span><span id="clk">' + clock() + "</span></div>";
+    h += '<div class="hint">' + esc(P.hint) + "</div>";
+    if (P.text) h += '<div class="passage">' + P.text + "</div>";
+    P.items.forEach(function(it, i){
+      h += '<div class="qq" data-q="' + i + '"><div class="qn">Question ' + (start + i + 1) + "</div>";
+      if (it.stim) h += '<div class="stim">' + it.stim + "</div>";
+      if (it.lead) h += '<div class="lead">' + esc(it.lead) + '</div><div><span class="key">' + esc(it.key) + "</span></div>";
+      if (it.q) h += '<div class="q">' + esc(it.q) + (it.stem ? ' &nbsp;<span class="key">' + esc(it.stem) + "</span>" : "") + "</div>";
+      if (it.t === "type"){
+        h += '<input class="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" lang="en" aria-label="Answer for question ' + (start + i + 1) + '" placeholder="' + (it.lead ? "the missing words" : "one word") + '">';
+      } else {
+        var short = it.o.every(function(o){ return o.length <= 14; });
+        h += '<div class="opts' + (short ? " grid" : "") + '">' + it.o.map(function(o, j){ return '<button type="button" data-o="' + j + '"><i>' + LETTER[j] + "</i>" + esc(o) + "</button>"; }).join("") + "</div>";
+      }
+      h += '<div class="why" hidden></div></div>';
+    });
+    h += '<div class="next"><span class="tip" id="left"></span><button class="btn" type="button" id="chk" disabled>Check my answers</button><button class="btn" type="button" id="nx" hidden>' + (last ? "See my score" : "Next part →") + "</button></div></div>";
+    app.innerHTML = h;
+    qno += P.items.length;
+
+    var chk = app.querySelector("#chk"), nx = app.querySelector("#nx"), left = app.querySelector("#left");
+    function ready(){
+      var n = mine.filter(function(v){ return v == null || v === ""; }).length;
+      chk.disabled = n > 0;
+      left.textContent = n > 0 ? n + (n === 1 ? " question" : " questions") + " still to answer" : "";
+    }
+    app.querySelectorAll(".qq").forEach(function(box){
+      var i = +box.dataset.q, inp = box.querySelector(".ans");
+      if (inp){
+        inp.oninput = function(){ mine[i] = inp.value.trim() ? inp.value : null; ready(); };
+        inp.onkeydown = function(e){
+          if (e.key !== "Enter") return;
+          var all = Array.prototype.slice.call(app.querySelectorAll(".ans")), k = all.indexOf(inp);
+          if (all[k + 1]) all[k + 1].focus(); else if (!chk.disabled) chk.focus();
+        };
+      }
+      box.querySelectorAll("[data-o]").forEach(function(btn){
+        btn.onclick = function(){
+          mine[i] = +btn.dataset.o;
+          box.querySelectorAll("[data-o]").forEach(function(x){ x.className = x === btn ? "sel" : ""; });
+          ready();
+        };
+      });
+    });
+    ready();
+
+    chk.onclick = function(){
+      var pg = 0;
+      P.items.forEach(function(it, i){
+        var box = app.querySelector('.qq[data-q="' + i + '"]'), w = box.querySelector(".why"), ok, right, shown;
+        if (it.t === "type"){
+          var inp = box.querySelector(".ans"), v = norm(mine[i]);
+          ok = it.a.some(function(a){ return norm(a) === v; });
+          inp.disabled = true; inp.className = "ans " + (ok ? "right" : "wrong");
+          right = it.a[0] + (it.a.length > 1 ? " (also: " + it.a.slice(1).join(", ") + ")" : ""); shown = String(mine[i]).trim();
+        } else {
+          ok = mine[i] === it.a;
+          box.querySelectorAll("[data-o]").forEach(function(x){
+            var j = +x.dataset.o; x.disabled = true;
+            x.className = j === it.a ? "right" : (j === mine[i] ? "wrong" : "");
+          });
+          right = LETTER[it.a] + " " + it.o[it.a]; shown = LETTER[mine[i]] + " " + it.o[mine[i]];
+        }
+        if (ok) pg++;
+        else misses.push({ n:start + i + 1, part:P.name, q:it.lead ? it.lead + " → " + it.q : (it.q || P.title) + (it.stem ? " (" + it.stem + ")" : ""), right:right, mine:shown, why:it.why });
+        answers.push({ n:start + i + 1, a:it.t === "type" ? String(mine[i]).trim() : LETTER[mine[i]], ok:ok ? 1 : 0 });
+        w.className = "why " + (ok ? "ok" : "no");
+        w.innerHTML = "<b>" + (ok ? "✓ Right." : "✗ The answer is " + esc(right) + ".") + "</b> " + esc(it.why);
+        w.hidden = false;
+      });
+      got += pg; partScores.push({ name:P.name, title:P.title, score:pg, total:P.items.length });
+      chk.hidden = true; nx.hidden = false;
+      left.textContent = P.name + ": " + pg + " / " + P.items.length;
+      var first = app.querySelector(".why.no"); if (first) first.parentNode.scrollIntoView({ block:"center" });
+    };
+    nx.onclick = function(){ pi++; if (pi < set.parts.length) show(); else done(); };
+  }
+
+  function done(){
+    stopAll(); window.scrollTo(0, 0);
+    var min = Math.max(1, Math.round((Date.now() - t0) / 60000)), old = S.done[set.id] || { best:0, tries:0 };
+    S.done[set.id] = { score:got, total:total, best:Math.max(old.best || 0, got), tries:(old.tries || 0) + 1, ts:Date.now() }; save();
+    var r = got / total;
+    var h = '<div class="top"><button type="button" data-home>← Test Centre</button><span class="who">' + esc(set.title) + "</span></div>";
+    h += '<div class="card"><div class="eyebrow">' + esc(set.title).toUpperCase() + " · " + esc(set.skill).toUpperCase() + '</div><div class="big">' + got + " / " + total + '</div><p class="soft">' + min + " min. " +
+      (r >= .85 ? "Excellent. You are comfortable at this level; try the next one up, or a real sample paper."
+        : r >= .6 ? "Good work. Look at which part was weakest and read those explanations again."
+        : "This set was hard for you today, and that's useful to know. Read every explanation below, then try again in a few days.") + '</p><div id="cstat" class="cloud" hidden></div>';
+    h += '<h3>Score for each part</h3><div class="parts">' + partScores.map(function(p){ return "<div><span><b>" + esc(p.name) + "</b> · " + esc(p.title) + "</span><b>" + p.score + " / " + p.total + "</b></div>"; }).join("") + "</div>";
+    if (misses.length){
+      h += "<h3>Learn from these</h3>";
+      misses.forEach(function(m){
+        h += '<div class="miss"><div class="qn">' + esc(m.part) + " · Question " + m.n + '</div><div class="en">' + esc(m.q) + '</div><div>✗ You answered: <span class="en">' + esc(m.mine) + '</span><br>✓ Answer: <span class="en">' + esc(m.right) + '</span></div><div class="tip">' + esc(m.why) + "</div></div>";
+      });
+    } else h += "<p>No mistakes at all. 🎉</p>";
+    h += '<div class="next"><button class="btn alt" type="button" data-go="' + esc(set.id) + '">Try this set again</button><button class="btn" type="button" data-home>Back to the Test Centre</button></div></div>';
+    app.innerHTML = h;
+    record({ set:set.id, level:set.level, score:got, total:total, min:min, parts:partScores.map(function(p){ return { name:p.name, score:p.score, total:p.total }; }),
+      answers:answers, wrong:misses.map(function(m){ return m.n; }),
+      summary:set.title + " " + set.skill + " " + got + "/" + total + "（" + min + " 分鐘）" });
+  }
+  show();
+}
+
+home();
+</script>
+</body>
+</html>

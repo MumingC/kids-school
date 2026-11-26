@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>音樂間</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+<!--
+  Music room: YouTube songs with the picture covered, so it is for listening, not watching.
+  Songs come from songs.json, built by Family/kidstube/build_music.py from the sources in music.json
+  (parents choose the sources; the kid chooses songs inside them and keeps her own list).
+  ?k=m|b picks the kid (fallback ks.who). Per-kid data: localStorage ks.music.<who> = { fav:[ids], wish:[..] }.
+  Wishes ("I want a song that is not here") also go to the family sheet as app "music-wish" when signed in.
+  The YouTube player stays in the page (covered, not hidden: hidden players stop on some phones);
+  "跳廣告" uncovers it for a few seconds so YouTube's own Skip button can be pressed.
+-->
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f6f2fb; --surface: #ffffff; --line: #e6def2; --text: #2a2433; --text-2: #6b6378;
+  --accent: #8a5cf5; --accent-2: #ff8a3d; --good: #3fae6b; --shadow: 0 2px 10px rgba(50,30,90,.08);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.45 "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+.hidden { display: none !important; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0 8px; }
+.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.top h1 { margin: 0; font-size: 24px; flex: 1; min-width: 0; }
+.top a, .chip { text-decoration: none; color: inherit; background: var(--surface); box-shadow: var(--shadow); border-radius: 999px; padding: 8px 14px; font-size: 15px; white-space: nowrap; }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 4px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 9px 16px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow); font-size: 16px; white-space: nowrap; }
+.tab.on { background: var(--accent); color: #fff; }
+.find { display: flex; gap: 8px; padding: 8px 0 0; }
+.find input { flex: 1; min-width: 0; font: inherit; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); }
+.find button { padding: 10px 14px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); white-space: nowrap; }
+
+.list { padding: 8px 0 190px; display: flex; flex-direction: column; gap: 8px; }
+.song { display: flex; align-items: center; gap: 10px; background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 6px 6px 6px 12px; border: 2px solid transparent; }
+.song.now { border-color: var(--accent); background: #f1eaff; }
+.song .go { flex: 1; min-width: 0; text-align: left; padding: 8px 0; display: flex; align-items: center; gap: 10px; }
+.song .emo { font-size: 26px; flex: none; }
+.song .tt { min-width: 0; }
+.song b { display: block; font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.song small { color: var(--text-2); font-size: 13px; }
+.song .fav { flex: none; width: 48px; height: 48px; border-radius: 50%; font-size: 24px; filter: grayscale(1); opacity: .45; }
+.song .fav.on { filter: none; opacity: 1; }
+.empty { text-align: center; color: var(--text-2); padding: 40px 16px; }
+.more { align-self: center; padding: 12px 22px; border-radius: 999px; background: var(--surface); box-shadow: var(--shadow); }
+
+/* player bar */
+#bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; background: #231a3a; color: #fff;
+  padding: 10px max(12px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+.barin { max-width: 860px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+#box { position: relative; flex: none; width: 160px; height: 90px; border-radius: 12px; overflow: hidden; background: #000; }
+#box iframe, #yt { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+#cover { position: absolute; inset: 0; z-index: 2; background: linear-gradient(135deg, #8a5cf5, #ff8a3d); display: flex; align-items: center; justify-content: center; font-size: 44px; }
+#cover.spin span { animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px) rotate(8deg); } }
+@media (prefers-reduced-motion: reduce) { #cover.spin span { animation: none; } }
+#box.peek { width: min(300px, 62vw); height: calc(min(300px, 62vw) * 9 / 16); }
+#box.peek #cover { display: none; }
+.side { flex: 1; min-width: 0; }
+#now { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#nowSrc { font-size: 13px; opacity: .75; }
+.btns { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
+.btns button { color: #fff; background: rgba(255,255,255,.16); border-radius: 12px; min-width: 46px; height: 42px; padding: 0 10px; font-size: 18px; }
+.btns button.main { background: var(--accent); min-width: 58px; }
+.btns button.on { background: var(--accent-2); }
+.btns button.txt { font-size: 14px; }
+.seek { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.seek input { flex: 1; min-width: 0; height: 24px; accent-color: var(--accent-2); }
+.seek span { font-size: 12px; opacity: .8; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { #box { width: 96px; height: 54px; } #cover { font-size: 28px; } .barin { align-items: flex-start; flex-wrap: wrap; }
+  #box.peek { width: 100%; height: calc((100vw - 24px) * 9 / 16); } }
+
+/* who picker, wish dialog */
+.screen { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 16px; text-align: center; }
+.screen h2 { margin: 0; font-size: 28px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.btn { padding: 16px 28px; border-radius: 20px; background: var(--accent); color: #fff; font-size: 20px; font-weight: 600; }
+.btn.alt { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.dlg { position: fixed; inset: 0; z-index: 40; background: rgba(30,20,50,.5); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.dlg .panel { background: var(--surface); border-radius: 22px; padding: 20px; width: min(460px, 100%); }
+.dlg h3 { margin: 0 0 6px; }
+.dlg p { margin: 0 0 10px; color: var(--text-2); font-size: 14px; }
+.dlg textarea { width: 100%; min-height: 90px; font: inherit; padding: 10px; border-radius: 12px; border: 2px solid var(--line); }
+.dlg ul { margin: 10px 0 0; padding-left: 20px; color: var(--text-2); font-size: 14px; text-align: left; }
+</style>
+</head>
+<body>
+
+<section class="screen hidden" id="pick">
+  <div style="font-size:84px;line-height:1">🎵</div>
+  <h2>誰要聽音樂？</h2>
+  <div class="row"><button class="btn" data-who="m">🦊 中孩</button><button class="btn" data-who="b">🚀 大孩</button></div>
+</section>
+
+<div id="app" class="hidden">
+<header><div class="wrap">
+  <div class="top">
+    <h1>🎵 音樂間</h1>
+    <span class="chip" id="who"></span>
+    <a href="../../" id="home">🏠 回城市</a>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="find">
+    <input id="q" type="search" placeholder="找歌名…" autocomplete="off" aria-label="找歌名">
+    <button id="wishBtn">🙋 想聽別的歌</button>
+  </div>
+</div></header>
+
+<main class="wrap"><div class="list" id="list"></div></main>
+
+<div id="bar">
+  <div class="barin">
+    <div id="box"><div id="yt"></div><div id="cover"><span id="coverEmo">🎵</span></div></div>
+    <div class="side">
+      <div id="now">選一首歌開始聽</div>
+      <div id="nowSrc">按 ⭐ 可以收進「我的歌單」</div>
+      <div class="btns">
+        <button id="prev" aria-label="上一首">⏮</button>
+        <button id="pp" class="main" aria-label="播放或暫停">▶</button>
+        <button id="next" aria-label="下一首">⏭</button>
+        <button id="shuf" aria-label="隨機播放">🔀</button>
+        <button id="adBtn" class="txt">跳廣告</button>
+      </div>
+      <div class="seek"><input type="range" id="seek" min="0" max="1000" value="0" aria-label="播放位置"><span id="tm">0:00 / 0:00</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="dlg hidden" id="wishDlg"><div class="panel">
+  <h3>🙋 想聽別的歌</h3>
+  <p>寫下歌名或歌手，爸爸媽媽看到後會幫你加進來。</p>
+  <textarea id="wishIn" maxlength="200" placeholder="例如：Golden（K-Pop Demon Hunters）"></textarea>
+  <div class="row" style="margin-top:12px;justify-content:flex-start"><button class="btn" id="wishOk">送出</button><button class="btn alt" id="wishX">關掉</button></div>
+  <ul id="wishList"></ul>
+</div></div>
+
+<script src="../../assets/ks-cloud.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const show = (el, on = true) => el.classList.toggle("hidden", !on);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mmss = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+const NAMES = { m: "🦊 中孩", b: "🚀 大孩" };
+const ls = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+let who = new URLSearchParams(location.search).get("k");
+if (!NAMES[who]) { const w = ls.get("ks.who", null); who = NAMES[w] ? w : null; }
+let DATA = { sources: [], songs: [] }, SRC = {}, tab = "all", shown = 60;
+let queue = [], qi = -1, cur = null, shuffle = false;
+let ytp = null, ytReady = false, tick = null, seeking = false, adTimer = null;
+
+const KEY = () => "ks.music." + who;
+const mine = () => { const d = ls.get(KEY(), {}); d.fav = d.fav || []; d.wish = d.wish || []; return d; };
+const favSet = () => new Set(mine().fav);
+
+// ---------- list ----------
+function tabsHtml() {
+  const groups = [...new Set(DATA.sources.map(s => s.group))];
+  const t = [["all", "全部"], ["fav", "⭐ 我的歌單"]].concat(groups.map(g => ["g:" + g, g]));
+  $("tabs").innerHTML = t.map(([k, n]) => `<button class="tab${k === tab ? " on" : ""}" data-tab="${esc(k)}">${esc(n)}</button>`).join("")
+    + (tab.startsWith("g:") || tab.startsWith("s:") ? DATA.sources.filter(s => "g:" + s.group === tab || ("s:" + s.name === tab) || (tab.startsWith("s:") && SRC[tab.slice(2)] && s.group === SRC[tab.slice(2)].group))
+        .map(s => `<button class="tab${"s:" + s.name === tab ? " on" : ""}" data-tab="${esc("s:" + s.name)}">${s.emo} ${esc(s.name)}</button>`).join("") : "");
+}
+function current() {
+  const q = $("q").value.trim().toLowerCase().normalize("NFKC"), f = favSet();
+  let L = DATA.songs;
+  if (tab === "fav") { const order = mine().fav; L = order.map(id => L.find(s => s.id === id)).filter(Boolean); }
+  else if (tab.startsWith("g:")) L = L.filter(s => SRC[s.s] && SRC[s.s].group === tab.slice(2));
+  else if (tab.startsWith("s:")) L = L.filter(s => s.s === tab.slice(2));
+  if (q) L = L.filter(s => (s.t + " " + s.s).toLowerCase().normalize("NFKC").includes(q));
+  return L;
+}
+function render() {
+  tabsHtml();
+  const L = current(), f = favSet();
+  if (!L.length) { $("list").innerHTML = `<div class="empty">${tab === "fav" ? "還沒有收藏。<br>在喜歡的歌旁邊按 ⭐，就會出現在這裡。" : "找不到歌。換個字試試，或按「想聽別的歌」告訴爸爸媽媽。"}</div>`; return; }
+  $("list").innerHTML = L.slice(0, shown).map(s => `<div class="song${cur && cur.id === s.id ? " now" : ""}" data-id="${s.id}">
+      <button class="go" data-play="${s.id}"><span class="emo">${(SRC[s.s] || {}).emo || "🎵"}</span><span class="tt"><b>${esc(s.t)}</b><small>${esc(s.s)} · ${mmss(s.d)}</small></span></button>
+      <button class="fav${f.has(s.id) ? " on" : ""}" data-fav="${s.id}" aria-label="收藏">⭐</button></div>`).join("")
+    + (L.length > shown ? `<button class="more" id="more">再看 ${Math.min(60, L.length - shown)} 首</button>` : "");
+}
+$("tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; shown = 60; render(); window.scrollTo(0, 0); };
+$("q").oninput = () => { shown = 60; render(); };
+$("list").onclick = e => {
+  const f = e.target.closest("[data-fav]"), p = e.target.closest("[data-play]");
+  if (e.target.id === "more") { shown += 60; render(); return; }
+  if (f) { const d = mine(), i = d.fav.indexOf(f.dataset.fav); if (i >= 0) d.fav.splice(i, 1); else d.fav.push(f.dataset.fav); ls.set(KEY(), d);
+    if (tab === "fav") render(); else f.classList.toggle("on", i < 0); return; }
+  if (p) { queue = current().map(s => s.id); qi = queue.indexOf(p.dataset.play); playId(p.dataset.play); }
+};
+
+// ---------- player ----------
+function loadYT() {
+  if (window.YT && YT.Player) return Promise.resolve();
+  return new Promise(res => { window.onYouTubeIframeAPIReady = res; const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s); });
+}
+async function playId(id) {
+  const s = DATA.songs.find(x => x.id === id); if (!s) return;
+  cur = s; $("now").textContent = s.t; $("nowSrc").textContent = s.s; $("coverEmo").textContent = (SRC[s.s] || {}).emo || "🎵";
+  $("seek").value = 0; $("tm").textContent = "0:00 / " + mmss(s.d); peek(false);
+  document.querySelectorAll(".song.now").forEach(el => el.classList.remove("now"));
+  const row = document.querySelector(`.song[data-id="${id}"]`); if (row) row.classList.add("now");
+  await loadYT();
+  if (ytp && ytReady) { ytp.loadVideoById(id); return; }
+  if (ytp) return;   // still loading: onReady plays whatever `cur` is by then
+  ytp = new YT.Player("yt", {
+    host: "https://www.youtube-nocookie.com", videoId: id,
+    playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1, iv_load_policy: 3, fs: 0, disablekb: 1, origin: location.origin },
+    events: {
+      onReady: e => { ytReady = true; if (cur && cur.id !== id) e.target.loadVideoById(cur.id); else e.target.playVideo(); },
+      onStateChange: onState,
+      onError: () => step(1),          // a song that cannot be embedded any more: just go on
+    },
+  });
+}
+function onState(e) {
+  clearInterval(tick); tick = null;
+  const playing = e.data === YT.PlayerState.PLAYING;
+  $("pp").textContent = playing || e.data === YT.PlayerState.BUFFERING ? "⏸" : "▶";
+  $("cover").classList.toggle("spin", playing);
+  if (playing) tick = setInterval(() => { try { const d = ytp.getDuration(), t = ytp.getCurrentTime(); if (d) pos(t, d); } catch {} }, 1000);
+  else if (e.data === YT.PlayerState.ENDED) step(1);
+}
+function pos(t, d) { if (!seeking) $("seek").value = Math.round(1000 * t / d); $("tm").textContent = mmss(t) + " / " + mmss(d); }
+function step(dir) {
+  if (!queue.length) { queue = current().map(s => s.id); qi = -1; }
+  if (!queue.length) return;
+  if (shuffle && dir > 0 && queue.length > 1) { let n; do { n = Math.floor(Math.random() * queue.length); } while (n === qi); qi = n; }
+  else qi = (qi + dir + queue.length) % queue.length;
+  playId(queue[qi]);
+}
+function peek(on) {            // uncover the picture for a few seconds, only to press YouTube's "Skip"
+  clearInterval(adTimer); adTimer = null;
+  $("box").classList.toggle("peek", !!on); $("adBtn").classList.toggle("on", !!on);
+  if (!on) { $("adBtn").textContent = "跳廣告"; return; }
+  let left = 12; $("adBtn").textContent = "關閉 " + left;
+  adTimer = setInterval(() => { left--; if (left <= 0) peek(false); else $("adBtn").textContent = "關閉 " + left; }, 1000);
+}
+$("pp").onclick = () => {
+  if (!cur) return step(1);
+  if (!ytp || !ytReady) return;
+  if (ytp.getPlayerState() === YT.PlayerState.PLAYING) ytp.pauseVideo(); else ytp.playVideo();
+};
+$("next").onclick = () => step(1);
+$("prev").onclick = () => { try { if (ytp && ytReady && ytp.getCurrentTime() > 5) return ytp.seekTo(0, true); } catch {} step(-1); };
+$("shuf").onclick = () => { shuffle = !shuffle; $("shuf").classList.toggle("on", shuffle); };
+$("adBtn").onclick = () => peek(!$("box").classList.contains("peek"));
+$("seek").addEventListener("input", () => { seeking = true; });
+$("seek").addEventListener("change", () => { try { const d = ytp.getDuration(); if (d) ytp.seekTo(d * $("seek").value / 1000, true); } catch {} seeking = false; });
+
+// ---------- wishes ----------
+function wishList() { $("wishList").innerHTML = mine().wish.slice(-5).reverse().map(w => `<li>${esc(w.t)}（${esc(w.d)}）</li>`).join(""); }
+$("wishBtn").onclick = () => { $("wishIn").value = ""; wishList(); show($("wishDlg")); setTimeout(() => $("wishIn").focus(), 50); };
+$("wishX").onclick = () => show($("wishDlg"), false);
+$("wishOk").onclick = () => {
+  const t = $("wishIn").value.trim(); if (!t) return;
+  const d = mine(), day = new Date().toLocaleDateString("sv"), rec = { id: "wish-" + who + "-" + Date.now(), t, d: day };
+  d.wish.push(rec); d.wish = d.wish.slice(-30); ls.set(KEY(), d);
+  try { window.KSCloud && KSCloud.on && KSCloud.save("music-wish", [{ id: rec.id, who, summary: "想聽：" + t, text: t, date: day }]); } catch {}
+  $("wishIn").value = ""; wishList();
+};
+
+// ---------- start ----------
+async function start() {
+  show($("pick"), false); show($("app"));
+  $("who").textContent = NAMES[who]; $("home").href = "../../?k=" + who;
+  try { const r = await fetch("songs.json", { cache: "no-cache" }); DATA = await r.json(); } catch { DATA = { sources: [], songs: [] }; }
+  DATA.sources.forEach(s => SRC[s.name] = s);
+  if (mine().fav.length) tab = "fav";
+  render();
+}
+$("pick").onclick = e => { const b = e.target.closest("[data-who]"); if (!b) return; who = b.dataset.who; start(); };
+if (who) start(); else show($("pick"));
+</script>
+</body>
+</html>

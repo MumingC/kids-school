@@ -18,6 +18,7 @@ A small collection of static learning websites I build for my kids.
 | 09 | [`trip-planner/`](trip-planner/) | 旅行規劃師 · Trip Planner | 8 站學會規劃旅行：問大家的願望、把地方放上地圖、算時間與開放時間、比較交通方式、算全家預算、看天氣收行李、想備案，最後一站用「一日行程模擬器」排出全家的淡水一日遊（自動算路程、花費、每個人的開心度與體力，可以「試跑」抽天氣和狀況，也能印成一頁）。簡單／挑戰兩種難度（`?lv=easy`）。票價與時間是 2026 年查的大約數字，寫在檔案開頭的 `PLACES`、`TRV` 裡。 |
 | 10 | [`english/test/`](english/test/) | 英文程度小測驗 · English Level Check | 10–30 分鐘、最多四關（A1／A2／B1／B2，大約對應國小基礎、全民英檢初級、中級、中高級），每關字彙 8、文法 5、閱讀 3、聽力 4 題，答對 65% 過關才進下一關；聽力用瀏覽器的英文語音朗讀。題目是自己出的，不是英檢考古題；題庫在檔案開頭的 `BANDS`（每題第一個選項是正確答案，顯示時會打亂）。結果與寫作只存在那台裝置，測驗首頁可看以前的紀錄。首頁的「英語小鎮」區。 |
 | 11 | [`english/lessons/`](english/lessons/) | 英文課 · English Lessons | 大孩的英文課（B1 往 B2），一天一課約 35 分鐘：影片 → 閱讀 → 影片 → 文法 → 寫作，兩週一個單元。影片用家庭小電視片單裡的頻道（Mark Rober、Steve Mould），在頁面裡播、不算小電視時間，題目照影片字幕出；閱讀和文法是自己寫的。學過的單字照 1、2、4、7、14、30 天回來複習。內容在 `unitN.js`（`window.UNITS`，每題第一個選項是正確答案）。進度存在裝置（`ks.eng.les.<who>`），登入後完成紀錄和作文存到雲端（項目 `eng-lesson`）。 |
+| 12 | [`english/exam/`](english/exam/) | 英文題庫 · Test Centre | 給喜歡做題目的孩子（中孩、大孩，`?k=m` 或 `?k=b`）：照劍橋 B1 Preliminary、B2 First 題型自己出的閱讀與 Use of English 題組（選擇、克漏字、字形變化、句子改寫），每部分做完立刻對答案看解析，最後有各部分得分和錯題整理。題組放 `b1-N.js`、`b2-N.js`（`window.EXAM_SETS`），加一組只要多一個 script 標籤。題目不是官方試題、沒有校準，分數不能換算成官方成績。進度存在裝置（`ks.exam.<who>`），登入後存到雲端（項目 `exam`）。 |
 
 ## Kids TV 家庭小電視（`tv/`）
 
@@ -35,6 +36,8 @@ A small collection of static learning websites I build for my kids.
 
 - 片單 `tv/videos.json` 由 `Dropbox/Family/kidstube/build.py`（頻道清單 `channels.json`）以 yt-dlp 產生，不在 repo 內。改清單後重跑 `python build.py`，再 commit `tv/videos.json`。
 - 限時、PIN、隱藏影片都存在各裝置的 `localStorage`（key 前綴 `kt.`）。
+- 播放時 YouTube 自己的控制列是蓋住的，所以下面有我們自己的一排：倒退／快轉 10 秒、拖進度、速度（1×–2×）、「跳廣告」（把遮罩右下開一個窗 12 秒，讓孩子按 YouTube 的「略過」）。
+- **音樂間**（[`tv/music/`](tv/music/)，`?k=m|b`）：只聽不看——YouTube 播放器縮在角落、用封面蓋住。歌單 `tv/music/songs.json` 由 `Dropbox/Family/kidstube/build_music.py`（來源 `music.json`：頻道、播放清單或搜尋）產生，改完重跑再 commit。孩子在裡面自己挑歌、按 ⭐ 收進自己的歌單（`ks.music.<who>`）；「想聽別的歌」的留言存在裝置，登入時也送到雲端（項目 `music-wish`）。不算小電視時間。
 - **連續故事**（`channels.json` 的 `series`，目前是 GEN-Z Media 的 *The Six Minutes*，205 集）：照集數順序播、播完自動接下一集，不混進隨機的「電視模式」；進度存在 `kt.series`。
 
 ### 每個孩子自己的首頁

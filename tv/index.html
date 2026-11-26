@@ -84,8 +84,16 @@ body.big-tiles .tile .meta .t { font-size: 14px; }
 #shield { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; }
 #shield .big { font-size: 110px; color: #fff; opacity: 0; transition: opacity .25s; text-shadow: 0 2px 20px rgba(0,0,0,.6); pointer-events: none; }
 #shield.paused .big { opacity: .9; }
-.pbar { height: 8px; background: #333; }
-.pbar i { display: block; height: 100%; width: 0; background: var(--accent); }
+/* our own controls: the shield hides YouTube's, so seeking, speed and "skip ad" live here */
+.ctl { display: flex; align-items: center; gap: 8px; padding: 8px max(10px, env(safe-area-inset-right, 0px)) 8px max(10px, env(safe-area-inset-left, 0px)); background: #111; color: #fff; flex-wrap: wrap; }
+.ctl button { color: #fff; background: rgba(255,255,255,.16); border-radius: 12px; padding: 10px 12px; font-size: 16px; min-width: 52px; }
+.ctl button.on { background: var(--accent); }
+.ctl input[type=range] { flex: 1; min-width: 120px; height: 28px; accent-color: var(--accent); }
+.ctl .tm { font-size: 14px; font-variant-numeric: tabular-nums; opacity: .85; min-width: 86px; text-align: center; }
+/* "skip ad": for a few seconds, open a window in the shield over YouTube's own Skip button (right side, above the logo) */
+#shield.adhole { clip-path: polygon(0 0, 100% 0, 100% 40%, 50% 40%, 50% calc(100% - 52px), 100% calc(100% - 52px), 100% 100%, 0 100%); }
+.adtip { position: absolute; z-index: 3; left: 50%; top: 40%; right: 0; bottom: 52px; border: 3px dashed rgba(255,255,255,.8); border-radius: 12px; pointer-events: none; display: flex; align-items: flex-start; justify-content: center; }
+.adtip span { background: rgba(0,0,0,.7); color: #fff; font-size: 15px; padding: 6px 10px; border-radius: 0 0 10px 10px; }
 .close { position: absolute; z-index: 3; top: 14px; left: 14px; width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.9); font-size: 30px; }
 .tvtag { position: absolute; z-index: 3; top: 22px; right: 18px; color: #fff; background: rgba(58,155,220,.85); padding: 6px 12px; border-radius: 10px; font-size: 15px; }
 .skip { position: absolute; z-index: 3; bottom: 26px; right: 18px; color: #fff; background: rgba(255,255,255,.2); padding: 12px 18px; border-radius: 14px; font-size: 17px; }
@@ -140,8 +148,16 @@ body.big-tiles .tile .meta .t { font-size: 14px; }
     <button class="close" id="closeBtn" aria-label="關閉">✕</button>
     <span class="tvtag hidden" id="tvTag">電視模式</span>
     <button class="skip hidden" id="skipBtn">下一部 ⏭</button>
+    <div class="adtip hidden" id="adTip"><span>在這個框框裡按 YouTube 的「略過」</span></div>
   </div>
-  <div class="pbar"><i id="pbar"></i></div>
+  <div class="ctl">
+    <button id="back10" aria-label="倒退 10 秒">⏪ 10</button>
+    <input type="range" id="seek" min="0" max="1000" value="0" aria-label="播放位置">
+    <span class="tm" id="tm">0:00 / 0:00</span>
+    <button id="fwd10" aria-label="快轉 10 秒">10 ⏩</button>
+    <button id="rateBtn" aria-label="播放速度">1×</button>
+    <button id="adBtn">跳廣告</button>
+  </div>
 </section>
 
 <section class="screen hidden" id="doneScreen">
@@ -332,7 +348,7 @@ async function play(v) {
   if (!v) return;
   if (leftSec(prof.key) <= 0) return lock();
   current = v; show($("player")); show($("tvTag"), tv); show($("skipBtn"), tv);
-  $("shield").classList.remove("paused"); $("pbar").style.width = "0";
+  $("shield").classList.remove("paused"); $("seek").value = 0; $("tm").textContent = "0:00 / 0:00"; adHole(false);
   try { const el = $("player"); (el.requestFullscreen || el.webkitRequestFullscreen || (() => {})).call(el); } catch {}
   await loadYT();
   if (ytp && ytReady) { ytp.loadVideoById(v.id); return; }
@@ -340,7 +356,7 @@ async function play(v) {
     host: "https://www.youtube-nocookie.com", videoId: v.id,
     playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3, fs: 0, disablekb: 1, cc_load_policy: 0, origin: location.origin },
     events: {
-      onReady: e => { ytReady = true; e.target.playVideo(); },
+      onReady: e => { ytReady = true; e.target.playVideo(); setRate(rate); },
       onStateChange: onState,
       onError: () => { if (tv) play(nextTV()); else closePlayer(); },
     },
@@ -350,11 +366,12 @@ function onState(e) {
   clearInterval(tick); tick = null;
   if (e.data === YT.PlayerState.PLAYING) {
     $("shield").classList.remove("paused");
+    try { if (ytp.getPlaybackRate() !== rate) ytp.setPlaybackRate(rate); } catch {}   // a new video starts at 1x again
     let last = Date.now();
     tick = setInterval(() => {
       const now = Date.now(), dt = Math.round((now - last) / 1000); if (dt < 1) return; last = now;
       addUsed(prof.key, dt);
-      try { const d = ytp.getDuration(), t = ytp.getCurrentTime(); if (d) $("pbar").style.width = (100 * t / d) + "%";
+      try { const d = ytp.getDuration(), t = ytp.getCurrentTime(); if (d) showPos(t, d);
         if (d && t > d * 0.8) markSeen(current.id); } catch {}
       if (leftSec(prof.key) <= 0) { try { ytp.pauseVideo(); } catch {} lock(); }
     }, 1000);
@@ -373,7 +390,27 @@ function togglePause() {
   const st = ytp.getPlayerState();
   if (st === YT.PlayerState.PLAYING) ytp.pauseVideo(); else ytp.playVideo();
 }
+// ---------- seek / speed / skip ad ----------
+let seeking = false, rate = 1, adTimer = null;
+const mmss = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+function showPos(t, d) { if (!seeking) $("seek").value = Math.round(1000 * t / d); $("tm").textContent = mmss(t) + " / " + mmss(d); }
+function jump(sec) { if (!ytp || !ytReady) return; try { const d = ytp.getDuration(), t = Math.min(Math.max(0, ytp.getCurrentTime() + sec), Math.max(0, d - 1)); ytp.seekTo(t, true); if (d) showPos(t, d); } catch {} }
+function setRate(r) { rate = r; $("rateBtn").textContent = r + "×"; $("rateBtn").classList.toggle("on", r !== 1); try { ytp && ytReady && ytp.setPlaybackRate(r); } catch {} }
+function adHole(on) {
+  clearInterval(adTimer); adTimer = null;
+  $("shield").classList.toggle("adhole", !!on); show($("adTip"), !!on); $("adBtn").classList.toggle("on", !!on);
+  if (!on) { $("adBtn").textContent = "跳廣告"; return; }
+  let left = 12; $("adBtn").textContent = "關閉 " + left;
+  adTimer = setInterval(() => { left--; if (left <= 0) adHole(false); else $("adBtn").textContent = "關閉 " + left; }, 1000);
+}
+$("seek").addEventListener("input", () => { seeking = true; try { const d = ytp.getDuration(); if (d) $("tm").textContent = mmss(d * $("seek").value / 1000) + " / " + mmss(d); } catch {} });
+$("seek").addEventListener("change", () => { try { const d = ytp.getDuration(); if (d) ytp.seekTo(d * $("seek").value / 1000, true); } catch {} seeking = false; });
+$("back10").onclick = () => jump(-10);
+$("fwd10").onclick = () => jump(10);
+$("rateBtn").onclick = () => { const R = [1, 1.25, 1.5, 2, 0.75]; setRate(R[(R.indexOf(rate) + 1) % R.length]); };
+$("adBtn").onclick = () => adHole(!$("shield").classList.contains("adhole"));
 function hidePlayer() {
+  adHole(false);
   clearInterval(tick); tick = null;
   try { ytp && ytp.stopVideo(); } catch {}
   show($("player"), false);
@@ -386,7 +423,10 @@ $("skipBtn").onclick = () => play(nextTV());
 $("doneBack").onclick = () => { show($("doneScreen"), false); closePlayer(); };
 document.addEventListener("keydown", e => {
   if ($("player").classList.contains("hidden")) return;
+  if (e.target && e.target.id === "seek") return;
   if (e.key === " " || e.key === "Enter") { e.preventDefault(); togglePause(); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); jump(-10); }
+  if (e.key === "ArrowRight") { e.preventDefault(); jump(10); }
   if (e.key === "Escape" || e.key === "Backspace") { e.preventDefault(); closePlayer(); }
 });
 
